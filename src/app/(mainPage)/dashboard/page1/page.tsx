@@ -27,7 +27,7 @@ const Page = () => {
     const [hovered, setHovered] = useState<Barangay | null>(null);
 
     return (
-        <div className="flex items-center justify-center w-full h-[100%] bg-base-200">
+        <div className="flex items-center justify-center w-full h-[100%] bg-[#0F1120]">
             <div className="relative w-[1000px] h-[100%]">
                 {barangays.map((b, i) => (
                     <div
