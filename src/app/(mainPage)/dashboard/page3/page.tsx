@@ -1,8 +1,12 @@
 'use client'
 
 import React, { useState } from "react";
+import useReportStore from "@/utils/zustand/ReportStore";
 
 const ReportForm = () => {
+
+    const { addReports } = useReportStore()
+
     const [crime, setCrime] = useState("");
     const [description, setDescription] = useState("");
     const [barangay, setBarangay] = useState("");
@@ -71,19 +75,21 @@ const ReportForm = () => {
         ],
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log({
+        let report = {
             complainantName,
             contactNumber,
             address,
             crime,
             description,
             barangay,
+            time,
             date,
             suspectName,
             witnessName,
-        });
+        };
+        await addReports(report)
         alert("Report submitted successfully!");
     };
 
