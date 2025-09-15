@@ -5,6 +5,9 @@ interface reportStore {
     getReports: () => Promise<any>;
     addReports: (report: any) => Promise<any>;
 
+    //Change Report status
+    changeReportStatus: (id: any, status: any) => Promise<any>;
+
 }
 
 const useReportStore = create<reportStore>((set, get) => ({
@@ -23,7 +26,7 @@ const useReportStore = create<reportStore>((set, get) => ({
                 return { error: true };
             }
 
-            console.log(data)
+            set({ reports: data?.reports })
 
             return data;
         } catch (err) {
@@ -44,9 +47,27 @@ const useReportStore = create<reportStore>((set, get) => ({
             if (!res.ok) {
                 return { error: true };
             }
+            return data;
+        } catch (err) {
+            console.error(err)
+        }
+    },
 
-            console.log(data)
+    //Change Report status
+    changeReportStatus: async (id, status) => {
+        try {
+            const res = await fetch(`/api/report/changeStatus`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id, status })
+            });
+            const data = await res.json();
 
+            if (!res.ok) {
+                return { error: true };
+            }
             return data;
         } catch (err) {
             console.error(err)

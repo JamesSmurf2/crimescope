@@ -32,6 +32,7 @@ export const POST = async (req: NextRequest) => {
             time,
             suspectName,
             witnessName,
+            status, // <-- include status if provided
         } = body;
 
         const report = await ReportsModel.create({
@@ -45,6 +46,7 @@ export const POST = async (req: NextRequest) => {
             time,
             suspectName,
             witnessName,
+            status: status || "Pending", // default to Pending
         });
 
         return NextResponse.json({ message: 'Report submitted successfully', report }, { status: 201 });

@@ -9,11 +9,17 @@ const ReportSchema = new mongoose.Schema({
     description: { type: String, required: true },
     barangay: { type: String, required: true },
 
-    date: { type: String, required: true },  // Or use Date type
+    date: { type: String, required: true },  
     time: { type: String, required: true },
 
     suspectName: { type: String, default: "" },
     witnessName: { type: String, default: "" },
+
+    status: {
+        type: String,
+        enum: ["Pending", "Unsolved", "Solved"], 
+        default: "Pending"
+    },
 
     createdAt: { type: Date, default: Date.now }
 });
