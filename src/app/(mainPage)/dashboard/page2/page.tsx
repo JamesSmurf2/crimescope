@@ -159,6 +159,53 @@ const ReportsPage = () => {
         });
     }
 
+    // ✅ Print case details
+    function handlePrint() {
+        if (!selectedReport) return;
+
+        const printContent = `
+            <html>
+                <head>
+                    <title>Case Report - ${selectedReport._id}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { text-align: center; }
+                        .section { margin-bottom: 15px; }
+                        .label { font-weight: bold; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                        td, th { border: 1px solid #333; padding: 8px; text-align: left; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Case Report</h1>
+                    <div class="section">
+                        <p><span class="label">Report ID:</span> ${selectedReport._id}</p>
+                        <p><span class="label">Status:</span> ${selectedReport.status || "Pending"}</p>
+                        <p><span class="label">Complainant:</span> ${selectedReport.complainantName}</p>
+                        <p><span class="label">Contact:</span> ${selectedReport.contactNumber}</p>
+                        <p><span class="label">Address:</span> ${selectedReport.address}</p>
+                        <p><span class="label">Barangay:</span> ${selectedReport.barangay}</p>
+                    </div>
+                    <div class="section">
+                        <p><span class="label">Crime:</span> ${selectedReport.crime}</p>
+                        <p><span class="label">Date & Time:</span> ${selectedReport.date} at ${selectedReport.time}</p>
+                        <p><span class="label">Description:</span> ${selectedReport.description}</p>
+                    </div>
+                    <div class="section">
+                        <p><span class="label">Suspect:</span> ${selectedReport.suspectName || "N/A"}</p>
+                        <p><span class="label">Witness:</span> ${selectedReport.witnessName || "N/A"}</p>
+                        <p><span class="label">Created At:</span> ${new Date(selectedReport.createdAt).toLocaleString()}</p>
+                    </div>
+                </body>
+            </html>
+        `;
+
+        const newWindow = window.open("", "_blank", "width=800,height=600");
+        newWindow?.document.write(printContent);
+        newWindow?.document.close();
+        newWindow?.print();
+    }
+
     return (
         <div className="flex items-center justify-center w-full min-h-screen bg-[#0F1120] text-white p-6">
             <div className="w-full max-w-[1200px] space-y-6">
@@ -291,7 +338,6 @@ const ReportsPage = () => {
                                     filteredReports.map((report, idx) => {
                                         let statusText = report.status || "Pending";
 
-                                        const allCrimes = [...crimes.serious, ...crimes.moderate, ...crimes.minor];
                                         let crimeColor = "text-white";
                                         if (crimes.serious.includes(report.crime)) crimeColor = "text-red-400";
                                         else if (crimes.moderate.includes(report.crime)) crimeColor = "text-yellow-400";
@@ -314,9 +360,7 @@ const ReportsPage = () => {
                                                                     r._id === report._id ? { ...r, status: newStatus } : r
                                                                 )
                                                             );
-
                                                             changeReportStatus(report?._id, e.target.value)
-
                                                         }}
                                                         className="bg-[#2A2C3E] text-sm px-2 py-1 rounded-lg border border-gray-600 cursor-pointer"
                                                     >
@@ -359,11 +403,11 @@ const ReportsPage = () => {
                                 <div>
                                     <p className="font-semibold text-gray-300">Status</p>
                                     <span
-                                        className={`px-2 py-1 rounded-lg text-xs font-semibold ${selectedReport.status === "Resolved"
+                                        className={`px-2 py-1 rounded-lg text-xs font-semibold ${selectedReport.status === "Solved"
                                             ? "bg-green-600 text-white"
-                                            : selectedReport.status === "Ongoing"
-                                                ? "bg-yellow-500 text-black"
-                                                : "bg-gray-500 text-white"
+                                            : selectedReport.status === "Unsolved"
+                                                ? "bg-red-600 text-white"
+                                                : "bg-yellow-500 text-black"
                                             }`}
                                     >
                                         {selectedReport.status || "Pending"}
@@ -412,7 +456,33 @@ const ReportsPage = () => {
                             {/* Divider */}
                             <div className="my-4 border-t border-gray-600"></div>
 
-                            {/* Extra Details */}
+                            {/* Coordinates + Map */}
+                            <h3 className="text-lg font-semibold mb-2">Location</h3>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p className="font-semibold text-gray-300">Latitude</p>
+                                    <p className="text-gray-400">{selectedReport.location?.coordinates?.[1]}</p>
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-gray-300">Longitude</p>
+                                    <p className="text-gray-400">{selectedReport.location?.coordinates?.[0]}</p>
+                                </div>
+                                <div className="col-span-2">
+                                    <iframe
+                                        width="100%"
+                                        height="250"
+                                        loading="lazy"
+                                        allowFullScreen
+                                        src={`https://www.google.com/maps?q=${selectedReport.location?.coordinates?.[1]},${selectedReport.location?.coordinates?.[0]}&hl=es;z=14&output=embed`}
+                                        className="rounded-lg"
+                                    ></iframe>
+                                </div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="my-4 border-t border-gray-600"></div>
+
+                            {/* Extra Info */}
                             <h3 className="text-lg font-semibold mb-2">Additional Information</h3>
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
@@ -423,7 +493,7 @@ const ReportsPage = () => {
                                     <p className="font-semibold text-gray-300">Witness</p>
                                     <p className="text-gray-400">{selectedReport.witnessName || "N/A"}</p>
                                 </div>
-                                <div className="col-span-2">
+                                <div>
                                     <p className="font-semibold text-gray-300">Created At</p>
                                     <p className="text-gray-400">
                                         {new Date(selectedReport.createdAt).toLocaleString()}
@@ -431,20 +501,26 @@ const ReportsPage = () => {
                                 </div>
                             </div>
 
-                            {/* Footer */}
-                            <div className="mt-6 flex justify-end">
+                            {/* Actions */}
+                            <div className="flex justify-end mt-6 gap-3">
                                 <button
                                     onClick={() => setSelectedReport(null)}
-                                    className="px-5 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-sm font-medium cursor-pointer"
+                                    className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-sm cursor-pointer"
                                 >
                                     Close
+                                </button>
+                                <button
+                                    onClick={handlePrint}
+                                    className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm cursor-pointer"
+                                >
+                                    🖨 Print a Copy
                                 </button>
                             </div>
                         </div>
                     </div>
                 )}
-            </div >
-        </div >
+            </div>
+        </div>
     );
 };
 

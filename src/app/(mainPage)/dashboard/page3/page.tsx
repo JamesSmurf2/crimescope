@@ -2,10 +2,34 @@
 
 import React, { useState } from "react";
 import useReportStore from "@/utils/zustand/ReportStore";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+
+// ✅ Custom marker (fixes broken default icon in Next.js)
+const customIcon = new L.Icon({
+    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+});
+
+// ✅ Component that handles map clicks
+function LocationMarker({ setCoords }: { setCoords: (coords: [number, number]) => void }) {
+    const [position, setPosition] = React.useState<[number, number] | null>(null);
+
+    useMapEvents({
+        click(e) {
+            const { lat, lng } = e.latlng;
+            setPosition([lat, lng]);
+            setCoords([lat, lng]);
+            alert(`Coordinates selected: ${lat}, ${lng}`);
+        },
+    });
+
+    return position ? <Marker position={position} icon={customIcon} /> : null;
+}
 
 const ReportForm = () => {
-
-    const { addReports } = useReportStore()
+    const { addReports } = useReportStore();
 
     const [crime, setCrime] = useState("");
     const [description, setDescription] = useState("");
@@ -17,67 +41,25 @@ const ReportForm = () => {
     const [address, setAddress] = useState("");
     const [suspectName, setSuspectName] = useState("");
     const [witnessName, setWitnessName] = useState("");
+    const [coords, setCoords] = useState<[number, number] | null>(null);
 
     const barangays = [
-        "Almanza Dos",
-        "Almanza Uno",
-        "B.F. CAA International Village",
-        "Aldana",
-        "Manuyo Dos",
-        "Manuyo Uno",
-        "Pamplona Dos",
-        "Pamplona Tres",
-        "Pamplona Uno",
-        "Pilar",
-        "Pulang Lupa Dos",
-        "Pulang Lupa Uno",
-        "Talon Dos",
-        "Talon Kuatro",
-        "Talon Singko",
-        "Talon Tres",
-        "Talon Uno",
-        "Zapote"
+        "Almanza Dos", "Almanza Uno", "B.F. CAA International Village", "Aldana",
+        "Manuyo Dos", "Manuyo Uno", "Pamplona Dos", "Pamplona Tres", "Pamplona Uno",
+        "Pilar", "Pulang Lupa Dos", "Pulang Lupa Uno", "Talon Dos", "Talon Kuatro",
+        "Talon Singko", "Talon Tres", "Talon Uno", "Zapote"
     ];
 
     const crimes = {
-        serious: [
-            "Theft / Robbery",
-            "Physical Assault",
-            "Domestic Violence",
-            "Illegal Drugs",
-            "Sexual Harassment",
-            "Murder / Homicide",
-            "Human Trafficking",
-            "Kidnapping",
-            "Fraud / Scam",
-        ],
-        moderate: [
-            "Vandalism",
-            "Trespassing",
-            "Illegal Gambling",
-            "Public Disturbance / Fighting",
-            "Threats / Verbal Harassment",
-            "Cybercrime / Online Harassment",
-            "Stalking",
-            "Animal Cruelty",
-        ],
-        minor: [
-            "Noise Complaint",
-            "Curfew Violation",
-            "Littering / Illegal Dumping",
-            "Drinking in Public",
-            "Smoking in Prohibited Areas",
-            "Jaywalking",
-            "Loitering",
-            "Minor Traffic Violation",
-            "Unleashed Pets / Stray Animals",
-            "Illegal Parking",
-        ],
+        serious: ["Theft / Robbery", "Physical Assault", "Domestic Violence", "Illegal Drugs", "Sexual Harassment", "Murder / Homicide", "Human Trafficking", "Kidnapping", "Fraud / Scam"],
+        moderate: ["Vandalism", "Trespassing", "Illegal Gambling", "Public Disturbance / Fighting", "Threats / Verbal Harassment", "Cybercrime / Online Harassment", "Stalking", "Animal Cruelty"],
+        minor: ["Noise Complaint", "Curfew Violation", "Littering / Illegal Dumping", "Drinking in Public", "Smoking in Prohibited Areas", "Jaywalking", "Loitering", "Minor Traffic Violation", "Unleashed Pets / Stray Animals", "Illegal Parking"]
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        let report = {
+
+        let report: any = {
             complainantName,
             contactNumber,
             address,
@@ -89,7 +71,16 @@ const ReportForm = () => {
             suspectName,
             witnessName,
         };
-        await addReports(report)
+
+        // ✅ Add coordinates if selected
+        if (coords) {
+            report.location = {
+                type: "Point",
+                coordinates: [coords[1], coords[0]], // [lng, lat]
+            };
+        }
+
+        await addReports(report);
         alert("Report submitted successfully!");
     };
 
@@ -118,7 +109,6 @@ const ReportForm = () => {
                             value={contactNumber}
                             onChange={(e) => {
                                 const value = e.target.value;
-                                // only allow numbers & max 11 chars
                                 if (/^\d{0,11}$/.test(value)) {
                                     setContactNumber(value);
                                 }
@@ -154,35 +144,22 @@ const ReportForm = () => {
                             required
                         >
                             <option value="">Select a crime</option>
-
-                            {/* Serious Crimes */}
                             <optgroup label="🚨 Serious Crimes">
                                 {crimes.serious.map((c, idx) => (
-                                    <option key={idx} value={c} className="text-red-500">
-                                        {c}
-                                    </option>
+                                    <option key={idx} value={c} className="text-red-500">{c}</option>
                                 ))}
                             </optgroup>
-
-                            {/* Moderate Offenses */}
                             <optgroup label="⚖️ Moderate Offenses">
                                 {crimes.moderate.map((c, idx) => (
-                                    <option key={idx} value={c} className="text-yellow-400">
-                                        {c}
-                                    </option>
+                                    <option key={idx} value={c} className="text-yellow-500">{c}</option>
                                 ))}
                             </optgroup>
-
-                            {/* Minor Violations */}
                             <optgroup label="📝 Minor Violations">
                                 {crimes.minor.map((c, idx) => (
-                                    <option key={idx} value={c} className="text-green-400">
-                                        {c}
-                                    </option>
+                                    <option key={idx} value={c} className="text-green-500">{c}</option>
                                 ))}
                             </optgroup>
-
-                            <option value="Other" className="text-gray-300">Other</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
 
@@ -210,15 +187,12 @@ const ReportForm = () => {
                         >
                             <option value="">Select a barangay</option>
                             {barangays.map((b, idx) => (
-                                <option key={idx} value={b}>
-                                    {b}
-                                </option>
+                                <option key={idx} value={b}>{b}</option>
                             ))}
                         </select>
                     </div>
 
                     {/* Date & Time */}
-                    {/* Date */}
                     <div>
                         <label className="block mb-2 text-sm font-medium">Date of Incident</label>
                         <input
@@ -229,8 +203,6 @@ const ReportForm = () => {
                             required
                         />
                     </div>
-
-                    {/* Time */}
                     <div>
                         <label className="block mb-2 text-sm font-medium">Time of Incident</label>
                         <input
@@ -242,8 +214,7 @@ const ReportForm = () => {
                         />
                     </div>
 
-
-                    {/* Suspect / Witness Info */}
+                    {/* Suspect / Witness */}
                     <div>
                         <label className="block mb-2 text-sm font-medium">Suspect Name (if known)</label>
                         <input
@@ -263,6 +234,29 @@ const ReportForm = () => {
                             className="w-full p-3 rounded-lg bg-[#2A2C3F] text-white focus:outline-none"
                             placeholder="Name of witness"
                         />
+                    </div>
+
+                    {/* 📍 Map Section */}
+                    <div className="mt-8">
+                        <h2 className="text-lg font-semibold mb-2">Select Incident Location</h2>
+                        <div className="h-[400px] w-full rounded-lg overflow-hidden">
+                            <MapContainer
+                                center={[14.45, 120.98]} // 📍 Las Piñas
+                                zoom={13}
+                                style={{ height: "100%", width: "100%" }}
+                            >
+                                <TileLayer
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                    attribution="&copy; OpenStreetMap contributors"
+                                />
+                                <LocationMarker setCoords={setCoords} />
+                            </MapContainer>
+                        </div>
+                        {coords && (
+                            <p className="mt-2 text-sm text-green-400">
+                                Selected Location: {coords[0].toFixed(5)}, {coords[1].toFixed(5)}
+                            </p>
+                        )}
                     </div>
 
                     {/* Submit */}

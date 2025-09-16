@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import ReportsModel from '@/utils/models/Reports.model';
-import { connectDb } from '@/utils/utility/ConnectDb';
+import { NextRequest, NextResponse } from "next/server";
+import ReportsModel from "@/utils/models/Reports.model";
+import { connectDb } from "@/utils/utility/ConnectDb";
 
 export const GET = async (req: NextRequest) => {
     try {
@@ -10,8 +10,8 @@ export const GET = async (req: NextRequest) => {
 
         return NextResponse.json({ reports }, { status: 200 });
     } catch (error) {
-        console.error('Error fetching reports:', error);
-        return NextResponse.json({ error: 'Failed to fetch reports' }, { status: 500 });
+        console.error("Error fetching reports:", error);
+        return NextResponse.json({ error: "Failed to fetch reports" }, { status: 500 });
     }
 };
 
@@ -32,7 +32,8 @@ export const POST = async (req: NextRequest) => {
             time,
             suspectName,
             witnessName,
-            status, // <-- include status if provided
+            status, // optional
+            location, // ✅ expect coordinates from frontend
         } = body;
 
         const report = await ReportsModel.create({
@@ -46,12 +47,19 @@ export const POST = async (req: NextRequest) => {
             time,
             suspectName,
             witnessName,
-            status: status || "Pending", // default to Pending
+            status: status || "Pending",
+            location: location || undefined, // ✅ store GeoJSON { type: "Point", coordinates: [lng, lat] }
         });
 
-        return NextResponse.json({ message: 'Report submitted successfully', report }, { status: 201 });
+        return NextResponse.json(
+            { message: "Report submitted successfully", report },
+            { status: 201 }
+        );
     } catch (error) {
-        console.error('Error submitting report:', error);
-        return NextResponse.json({ error: 'Something went wrong.' }, { status: 500 });
+        console.error("Error submitting report:", error);
+        return NextResponse.json(
+            { error: "Something went wrong." },
+            { status: 500 }
+        );
     }
 };

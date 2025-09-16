@@ -1,5 +1,6 @@
 import React from "react";
 import Sidebar from "./Sidebar";
+import "leaflet/dist/leaflet.css";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (

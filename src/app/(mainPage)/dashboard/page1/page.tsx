@@ -125,16 +125,14 @@ const Page = () => {
     const [hovered, setHovered] = useState<Barangay | null>(null);
 
     useEffect(() => {
-        getReports(); // fetch reports on load
+        getReports();
     }, [getReports]);
 
-    // Count crimes by barangay
     const getCrimeCount = (barangayName: string) => {
-        const reportList = reports || []; // safely access array
+        const reportList = reports || [];
         return reportList.filter((r: any) => r.barangay === barangayName).length;
     };
 
-    // Get the most common crimes in a barangay
     const getCommonCrimes = (barangayName: string) => {
         const reportList = reports || [];
         const crimes = reportList.filter((r: any) => r.barangay === barangayName);
@@ -146,14 +144,24 @@ const Page = () => {
             crimeCount[r.crime] = (crimeCount[r.crime] || 0) + 1;
         });
 
-        // sort by frequency
         const sorted = Object.entries(crimeCount).sort((a, b) => b[1] - a[1]);
-        return sorted[0][0]; // return most common crime
+        return sorted[0][0];
     };
 
     return (
-        <div className="flex items-center justify-center w-full h-[100%] bg-[#0F1120]">
-            <div className="relative w-[1000px] h-[100%]">
+        <div className="flex flex-col items-center w-full h-[130vh] bg-gradient-to-br from-[#0F1120] to-[#1C1E2D] text-white">
+            {/* Header */}
+            <header className="w-full py-8 text-center border-b border-white/10 mb-6">
+                <h1 className="text-4xl font-bold tracking-wide text-red-400 drop-shadow-lg">
+                    Las Piñas Crime Map
+                </h1>
+                <p className="mt-2 text-gray-400 text-lg">
+                    Hover over a barangay to view crime statistics and details
+                </p>
+            </header>
+
+            {/* Map Container */}
+            <div className="relative w-[1000px] h-[105vh] bg-[#0F1120] rounded-xl shadow-xl  border border-white/10">
                 {barangays.map((b, i) => (
                     <div
                         key={i}
@@ -164,16 +172,15 @@ const Page = () => {
                         <img
                             src={b.img}
                             alt={b.name}
-                            className="cursor-pointer hover:scale-105 transition"
+                            className="cursor-pointer scale-[0.9] hover:scale-95 transition-transform duration-300"
                         />
 
-                        {/* Tooltip Card */}
                         {hovered?.name === b.name && (
                             <div className="absolute left-full top-0 ml-5 w-80 p-6 rounded-2xl shadow-2xl
-      bg-gradient-to-br from-[#1E2130]/95 to-[#2A2E42]/95 backdrop-blur-xl border border-white/10 z-50
-      animate-fadeIn transform transition-all duration-300 ease-in-out">
+                bg-gradient-to-br from-[#1E2130]/95 to-[#2A2E42]/95 backdrop-blur-xl 
+                border border-white/10 z-50 animate-fadeIn">
 
-                                {/* Header */}
+                                {/* Barangay name */}
                                 <div className="flex items-center justify-between">
                                     <h3 className="font-semibold text-xl text-white tracking-wide">
                                         {b.name}
@@ -183,7 +190,7 @@ const Page = () => {
                                     </span>
                                 </div>
 
-                                {/* Crime Description */}
+                                {/* Description */}
                                 <p className="text-base text-gray-300 mt-3 leading-relaxed">
                                     {b.crimes}
                                 </p>
@@ -192,20 +199,28 @@ const Page = () => {
                                 <div className="mt-5 space-y-3 text-base">
                                     <div className="flex items-center justify-between">
                                         <span className="text-gray-400">📊 Reported Crimes</span>
-                                        <span className="text-white font-semibold">{getCrimeCount(b.name)}</span>
+                                        <span className="text-white font-semibold">
+                                            {getCrimeCount(b.name)}
+                                        </span>
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <span className="text-gray-400">🔎 Common Crime</span>
-                                        <span className="text-white font-semibold">{getCommonCrimes(b.name)}</span>
+                                        <span className="text-white font-semibold">
+                                            {getCommonCrimes(b.name)}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         )}
-
-
-
                     </div>
                 ))}
+            </div>
+
+
+            {/* Baranggay here news or information */}
+
+            <div>
+
             </div>
         </div>
     );

@@ -17,6 +17,9 @@ const Sidebar = () => {
           <Link href="/dashboard/page2">
             <SidebarItem label="Reports" active={pathname === '/dashboard/page2'} />
           </Link>
+          <Link href="/dashboard/page4">
+            <SidebarItem label="Analytics" active={pathname === '/dashboard/page4'} />
+          </Link>
           <Link href="/dashboard/page3">
             <SidebarItem label="Make a report" active={pathname === '/dashboard/page3'} />
           </Link>
