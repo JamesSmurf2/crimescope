@@ -1,32 +1,12 @@
-'use client'
+
+"use client";
 
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
 import useReportStore from "@/utils/zustand/ReportStore";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import L from "leaflet";
 
-// ✅ Custom marker (fixes broken default icon in Next.js)
-const customIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-});
-
-// ✅ Component that handles map clicks
-function LocationMarker({ setCoords }: { setCoords: (coords: [number, number]) => void }) {
-    const [position, setPosition] = React.useState<[number, number] | null>(null);
-
-    useMapEvents({
-        click(e) {
-            const { lat, lng } = e.latlng;
-            setPosition([lat, lng]);
-            setCoords([lat, lng]);
-            alert(`Coordinates selected: ${lat}, ${lng}`);
-        },
-    });
-
-    return position ? <Marker position={position} icon={customIcon} /> : null;
-}
+// ✅ Dynamically import CrimeMap to disable SSR
+const CrimeMap = dynamic(() => import("@/components/reusable/CrimeMap"), { ssr: false });
 
 const ReportForm = () => {
     const { addReports } = useReportStore();
@@ -72,7 +52,6 @@ const ReportForm = () => {
             witnessName,
         };
 
-        // ✅ Add coordinates if selected
         if (coords) {
             report.location = {
                 type: "Point",
@@ -235,22 +214,11 @@ const ReportForm = () => {
                             placeholder="Name of witness"
                         />
                     </div>
-
                     {/* 📍 Map Section */}
                     <div className="mt-8">
                         <h2 className="text-lg font-semibold mb-2">Select Incident Location</h2>
                         <div className="h-[400px] w-full rounded-lg overflow-hidden">
-                            <MapContainer
-                                center={[14.45, 120.98]} // 📍 Las Piñas
-                                zoom={13}
-                                style={{ height: "100%", width: "100%" }}
-                            >
-                                <TileLayer
-                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                    attribution="&copy; OpenStreetMap contributors"
-                                />
-                                <LocationMarker setCoords={setCoords} />
-                            </MapContainer>
+                            <CrimeMap setCoords={setCoords} />
                         </div>
                         {coords && (
                             <p className="mt-2 text-sm text-green-400">
@@ -259,7 +227,6 @@ const ReportForm = () => {
                         )}
                     </div>
 
-                    {/* Submit */}
                     <button
                         type="submit"
                         className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium"
@@ -273,3 +240,4 @@ const ReportForm = () => {
 };
 
 export default ReportForm;
+
