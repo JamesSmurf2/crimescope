@@ -83,6 +83,28 @@ const AnalyticsPage = () => {
     }, {});
     const dayData = Object.entries(dayCounts).map(([name, value]) => ({ name, value }));
 
+    // ----- NEW: Predictions -----
+    // Simple forecast: use average of last 7 days
+    const last7 = lineData.slice(-7);
+    const avgLast7 = last7.reduce((sum, d) => sum + d.count, 0) / (last7.length || 1);
+    const forecastData = Array.from({ length: 7 }).map((_, i) => ({
+        date: `Day +${i + 1}`,
+        predicted: Math.round(avgLast7 + Math.random() * 2 - 1), // small variation
+    }));
+
+    // Crime vs Status correlation
+    const crimeStatusCounts: Record<string, { Solved: number; Unsolved: number; Pending: number }> = {};
+    reports.forEach(r => {
+        if (!crimeStatusCounts[r.crime]) {
+            crimeStatusCounts[r.crime] = { Solved: 0, Unsolved: 0, Pending: 0 };
+        }
+        crimeStatusCounts[r.crime][r.status as keyof typeof crimeStatusCounts[string]]++;
+    });
+    const crimeStatusData = Object.entries(crimeStatusCounts).map(([crime, counts]) => ({
+        crime,
+        ...counts,
+    }));
+
     // Quick Stats
     const totalReports = reports.length;
     const topCrime = crimeData.sort((a, b) => b.value - a.value)[0]?.name || "N/A";
@@ -182,6 +204,37 @@ const AnalyticsPage = () => {
                             <YAxis />
                             <Tooltip />
                             <Bar dataKey="value" fill="#EF4444" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* 🔮 Forecast Next 7 Days */}
+                <div className="bg-[#1C1E2E] p-4 rounded-lg shadow col-span-1 md:col-span-2">
+                    <h2 className="text-sm font-semibold mb-2">Predicted Reports (Next 7 Days)</h2>
+                    <ResponsiveContainer width="100%" height={250}>
+                        <LineChart data={forecastData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="date" />
+                            <YAxis allowDecimals={false} />
+                            <Tooltip />
+                            <Line type="monotone" dataKey="predicted" stroke="#8B5CF6" strokeWidth={2} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* 🔗 Crime vs Status Correlation */}
+                <div className="bg-[#1C1E2E] p-4 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-3">
+                    <h2 className="text-sm font-semibold mb-2">Crime vs Case Status</h2>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={crimeStatusData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="crime" interval={0} angle={-30} textAnchor="end" height={60} />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="Solved" fill="#22C55E" />
+                            <Bar dataKey="Unsolved" fill="#EF4444" />
+                            <Bar dataKey="Pending" fill="#FACC15" />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
