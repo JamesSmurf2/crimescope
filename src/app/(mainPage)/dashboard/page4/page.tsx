@@ -62,19 +62,34 @@ const AnalyticsPage = () => {
     }, {});
     const lineData = Object.entries(aggregated).map(([date, count]) => ({ date, count }));
 
-    // ----- NEW: Time & Day Insights -----
+    // ----- Time Insights -----
     const timeBuckets = { Morning: 0, Afternoon: 0, Evening: 0, Night: 0 };
+    const hourCounts: Record<string, number> = {};
+    const crimeTimeCounts: Record<string, Record<string, number>> = {};
+
     reports.forEach((r) => {
         if (r.time) {
             const [hourStr] = r.time.split(":");
             const hour = parseInt(hourStr, 10);
+
+            // bucket classification
             if (hour >= 5 && hour < 12) timeBuckets.Morning++;
             else if (hour >= 12 && hour < 17) timeBuckets.Afternoon++;
             else if (hour >= 17 && hour < 21) timeBuckets.Evening++;
             else timeBuckets.Night++;
+
+            // count by exact hour
+            const label = new Date(0, 0, 0, hour).toLocaleTimeString("en-US", { hour: "numeric", hour12: true });
+            hourCounts[label] = (hourCounts[label] || 0) + 1;
+
+            // count per crime per hour
+            if (!crimeTimeCounts[r.crime]) crimeTimeCounts[r.crime] = {};
+            crimeTimeCounts[r.crime][label] = (crimeTimeCounts[r.crime][label] || 0) + 1;
         }
     });
+
     const timeData = Object.entries(timeBuckets).map(([name, value]) => ({ name, value }));
+    const hourData = Object.entries(hourCounts).map(([hour, value]) => ({ hour, value }));
 
     const dayCounts = reports.reduce<Record<string, number>>((acc, r) => {
         const day = new Date(r.date).toLocaleDateString("en-US", { weekday: "long" });
@@ -83,13 +98,12 @@ const AnalyticsPage = () => {
     }, {});
     const dayData = Object.entries(dayCounts).map(([name, value]) => ({ name, value }));
 
-    // ----- NEW: Predictions -----
-    // Simple forecast: use average of last 7 days
+    // ----- Predictions -----
     const last7 = lineData.slice(-7);
     const avgLast7 = last7.reduce((sum, d) => sum + d.count, 0) / (last7.length || 1);
     const forecastData = Array.from({ length: 7 }).map((_, i) => ({
         date: `Day +${i + 1}`,
-        predicted: Math.round(avgLast7 + Math.random() * 2 - 1), // small variation
+        predicted: Math.round(avgLast7 + Math.random() * 2 - 1),
     }));
 
     // Crime vs Status correlation
@@ -109,7 +123,13 @@ const AnalyticsPage = () => {
     const totalReports = reports.length;
     const topCrime = crimeData.sort((a, b) => b.value - a.value)[0]?.name || "N/A";
     const topBarangay = barangayData.sort((a, b) => b.value - a.value)[0]?.name || "N/A";
-    const peakTime = timeData.sort((a, b) => b.value - a.value)[0]?.name || "N/A";
+    const peakHour = hourData.sort((a, b) => b.value - a.value)[0]?.hour || "N/A";
+
+    // Crime-specific peak times
+    const crimePeakTimes = Object.entries(crimeTimeCounts).map(([crime, hours]) => {
+        const sorted = Object.entries(hours).sort((a, b) => b[1] - a[1]);
+        return { crime, peakHour: sorted[0]?.[0] || "N/A", count: sorted[0]?.[1] || 0 };
+    });
 
     // ----- UI -----
     return (
@@ -132,7 +152,7 @@ const AnalyticsPage = () => {
                 </div>
                 <div className="bg-[#1C1E2E] p-4 rounded-lg text-center">
                     <p className="text-gray-400 text-sm">Peak Time</p>
-                    <p className="text-lg font-semibold">{peakTime}</p>
+                    <p className="text-lg font-semibold">{peakHour}</p>
                 </div>
             </div>
 
@@ -168,7 +188,7 @@ const AnalyticsPage = () => {
 
                 {/* Time of Day */}
                 <div className="bg-[#1C1E2E] p-4 rounded-lg shadow">
-                    <h2 className="text-sm font-semibold mb-2">Crimes by Time of Day</h2>
+                    <h2 className="text-sm font-semibold mb-2">Crimes by Time of Day (Buckets)</h2>
                     <ResponsiveContainer width="100%" height={220}>
                         <BarChart data={timeData}>
                             <CartesianGrid strokeDasharray="3 3" />
@@ -176,6 +196,20 @@ const AnalyticsPage = () => {
                             <YAxis />
                             <Tooltip />
                             <Bar dataKey="value" fill="#10B981" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* Crimes per Hour */}
+                <div className="bg-[#1C1E2E] p-4 rounded-lg shadow">
+                    <h2 className="text-sm font-semibold mb-2">Crimes by Hour</h2>
+                    <ResponsiveContainer width="100%" height={220}>
+                        <BarChart data={hourData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="hour" interval={0} angle={-30} textAnchor="end" height={60} />
+                            <YAxis />
+                            <Tooltip />
+                            <Bar dataKey="value" fill="#3B82F6" />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
@@ -237,6 +271,18 @@ const AnalyticsPage = () => {
                             <Bar dataKey="Pending" fill="#FACC15" />
                         </BarChart>
                     </ResponsiveContainer>
+                </div>
+
+                {/* ⏰ Crime-specific Peak Times */}
+                <div className="bg-[#1C1E2E] p-4 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-3">
+                    <h2 className="text-sm font-semibold mb-2">Crime-specific Peak Times</h2>
+                    <ul className="text-sm space-y-1">
+                        {crimePeakTimes.map((c, idx) => (
+                            <li key={idx}>
+                                <span className="font-semibold text-gray-200">{c.crime}</span> → {c.peakHour} ({c.count} cases)
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             </div>
         </div>
