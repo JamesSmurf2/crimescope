@@ -131,6 +131,96 @@ const AnalyticsPage = () => {
         return { crime, peakHour: sorted[0]?.[0] || "N/A", count: sorted[0]?.[1] || 0 };
     });
 
+    // --- Top 5 Crimes by Hour ---
+    const crimeHourData: Record<string, Record<string, number>> = {};
+    reports.forEach(r => {
+        if (r.time) {
+            const [hourStr] = r.time.split(":");
+            const hour = parseInt(hourStr, 10);
+            const label = new Date(0, 0, 0, hour).toLocaleTimeString("en-US", { hour: "numeric", hour12: true });
+
+            if (!crimeHourData[label]) crimeHourData[label] = {};
+            crimeHourData[label][r.crime] = (crimeHourData[label][r.crime] || 0) + 1;
+        }
+    });
+
+    const topCrimesByHour = Object.entries(crimeHourData).map(([hour, crimes]) => {
+        const sorted = Object.entries(crimes).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        return { hour, crimes: sorted };
+    });
+
+    // ----- Day of Week Analysis -----
+    const weekdayCounts = reports.reduce<Record<string, number>>((acc, r) => {
+        const weekday = new Date(r.date).toLocaleDateString("en-US", { weekday: "long" });
+        acc[weekday] = (acc[weekday] || 0) + 1;
+        return acc;
+    }, {});
+    const weekdayData = Object.entries(weekdayCounts).map(([day, value]) => ({ day, value }));
+
+    // ----- Top 3 Crimes per Barangay -----
+    const barangayCrimeBreakdown: Record<string, Record<string, number>> = {};
+    reports.forEach(r => {
+        if (!barangayCrimeBreakdown[r.barangay]) barangayCrimeBreakdown[r.barangay] = {};
+        barangayCrimeBreakdown[r.barangay][r.crime] = (barangayCrimeBreakdown[r.barangay][r.crime] || 0) + 1;
+    });
+    const topCrimesPerBarangay = Object.entries(barangayCrimeBreakdown).map(([barangay, crimes]) => {
+        const sorted = Object.entries(crimes).sort((a, b) => b[1] - a[1]).slice(0, 3);
+        return { barangay, topCrimes: sorted };
+    });
+
+    // ----- Repeat Crimes in Last 7 Days -----
+    const last7Reports = reports.filter(r => {
+        const diffDays = (Date.now() - new Date(r.date).getTime()) / (1000 * 60 * 60 * 24);
+        return diffDays <= 7;
+    });
+    const recentCrimeCounts: Record<string, Record<string, number>> = {};
+    last7Reports.forEach(r => {
+        if (!recentCrimeCounts[r.barangay]) recentCrimeCounts[r.barangay] = {};
+        recentCrimeCounts[r.barangay][r.crime] = (recentCrimeCounts[r.barangay][r.crime] || 0) + 1;
+    });
+    const repeatCrimes = Object.entries(recentCrimeCounts).map(([barangay, crimes]) => {
+        const repeats = Object.entries(crimes).filter(([_, count]) => count > 1);
+        return { barangay, repeats };
+    }).filter(b => b.repeats.length > 0);
+
+    // ----- Avg Resolution Time (if resolvedAt exists) -----
+    const resolutionTimes: Record<string, number[]> = {};
+    reports.forEach(r => {
+        if (r.status === "Solved" && r.resolvedAt) {
+            const diff = (new Date(r.resolvedAt).getTime() - new Date(r.date).getTime()) / (1000 * 60 * 60 * 24);
+            if (!resolutionTimes[r.crime]) resolutionTimes[r.crime] = [];
+            resolutionTimes[r.crime].push(diff);
+        }
+    });
+    const avgResolution = Object.entries(resolutionTimes).map(([crime, times]) => ({
+        crime,
+        avgDays: (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1),
+    }));
+
+    // ----- Crime Growth (Month-over-Month) -----
+    const monthCrimeCounts: Record<string, Record<string, number>> = {};
+    reports.forEach(r => {
+        const month = new Date(r.date).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+        if (!monthCrimeCounts[month]) monthCrimeCounts[month] = {};
+        monthCrimeCounts[month][r.crime] = (monthCrimeCounts[month][r.crime] || 0) + 1;
+    });
+    const months = Object.keys(monthCrimeCounts).sort();
+    const lastTwo = months.slice(-2);
+    let crimeGrowth: { crime: string; change: number }[] = [];
+    if (lastTwo.length === 2) {
+        const [prev, curr] = lastTwo;
+        const prevCrimes = monthCrimeCounts[prev];
+        const currCrimes = monthCrimeCounts[curr];
+        crimeGrowth = Object.keys({ ...prevCrimes, ...currCrimes }).map(crime => {
+            const prevVal = prevCrimes[crime] || 0;
+            const currVal = currCrimes[crime] || 0;
+            const change = prevVal === 0 ? (currVal > 0 ? 100 : 0) : ((currVal - prevVal) / prevVal) * 100;
+            return { crime, change: Math.round(change) };
+        });
+    }
+
+
+
     // ----- UI -----
     return (
         <div className="min-h-screen bg-[#0F1120] text-white p-4">
@@ -284,6 +374,87 @@ const AnalyticsPage = () => {
                         ))}
                     </ul>
                 </div>
+
+                {/* ⏱️ Top 5 Crimes per Hour */}
+                <div className="bg-[#1C1E2E] p-4 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-3">
+                    <h2 className="text-sm font-semibold mb-2">Top 5 Crimes per Hour</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        {topCrimesByHour.map((h, idx) => (
+                            <div key={idx}>
+                                <p className="font-semibold text-gray-300">{h.hour}</p>
+                                <ul className="pl-2 list-disc">
+                                    {h.crimes.map(([crime, count], i) => (
+                                        <li key={i}>{crime} ({count})</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* 📆 Crimes by Day of Week */}
+                <div className="bg-[#1C1E2E] p-4 rounded-lg shadow">
+                    <h2 className="text-sm font-semibold mb-2">Crimes by Day of Week</h2>
+                    <ResponsiveContainer width="100%" height={220}>
+                        <BarChart data={weekdayData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="day" />
+                            <YAxis />
+                            <Tooltip />
+                            <Bar dataKey="value" fill="#14B8A6" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* 🏘 Top Crimes per Barangay */}
+                <div className="bg-[#1C1E2E] p-4 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-3">
+                    <h2 className="text-sm font-semibold mb-2">Top Crimes per Barangay</h2>
+                    <ul className="text-sm space-y-2">
+                        {topCrimesPerBarangay.map((b, idx) => (
+                            <li key={idx}>
+                                <span className="font-semibold">{b.barangay}:</span>{" "}
+                                {b.topCrimes.map(([crime, count]) => `${crime} (${count})`).join(", ")}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* 🔁 Repeat Crimes in Last 7 Days */}
+                <div className="bg-[#1C1E2E] p-4 rounded-lg shadow">
+                    <h2 className="text-sm font-semibold mb-2">Repeat Crimes (Last 7 Days)</h2>
+                    <ul className="text-sm space-y-2">
+                        {repeatCrimes.map((b, idx) => (
+                            <li key={idx}>
+                                <span className="font-semibold">{b.barangay}:</span>{" "}
+                                {b.repeats.map(([crime, count]) => `${crime} (${count})`).join(", ")}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* ⏳ Avg Resolution Time */}
+                <div className="bg-[#1C1E2E] p-4 rounded-lg shadow">
+                    <h2 className="text-sm font-semibold mb-2">Avg Resolution Time</h2>
+                    <ul className="text-sm space-y-1">
+                        {avgResolution.map((c, idx) => (
+                            <li key={idx}>{c.crime} → {c.avgDays} days</li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* 📈 Crime Growth (MoM) */}
+                <div className="bg-[#1C1E2E] p-4 rounded-lg shadow">
+                    <h2 className="text-sm font-semibold mb-2">Crime Growth (Month-over-Month)</h2>
+                    <ul className="text-sm space-y-1">
+                        {crimeGrowth.map((c, idx) => (
+                            <li key={idx}>
+                                {c.crime} → {c.change > 0 ? `↑ ${c.change}%` : c.change < 0 ? `↓ ${Math.abs(c.change)}%` : "No change"}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+
             </div>
         </div>
     );
