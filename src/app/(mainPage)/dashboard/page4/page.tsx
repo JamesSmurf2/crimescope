@@ -164,8 +164,9 @@ const AnalyticsPage = () => {
         barangayCrimeBreakdown[r.barangay][r.crime] = (barangayCrimeBreakdown[r.barangay][r.crime] || 0) + 1;
     });
     const topCrimesPerBarangay = Object.entries(barangayCrimeBreakdown).map(([barangay, crimes]) => {
+        const total = Object.values(crimes).reduce((a, b) => a + b, 0);
         const sorted = Object.entries(crimes).sort((a, b) => b[1] - a[1]).slice(0, 3);
-        return { barangay, topCrimes: sorted };
+        return { barangay, count: total, topCrimes: sorted };
     });
 
     // ----- Repeat Crimes in Last 7 Days -----
@@ -308,13 +309,20 @@ const AnalyticsPage = () => {
                 <div className="bg-[#1C1E2E] p-4 rounded-lg shadow col-span-1 md:col-span-2">
                     <h2 className="text-sm font-semibold mb-2">Crimes per Barangay</h2>
                     <ResponsiveContainer width="100%" height={250}>
-                        <BarChart data={barangayData}>
+                        <BarChart width={600} height={300} data={topCrimesPerBarangay}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" hide />
+                            <XAxis
+                                dataKey="barangay"
+                                tick={{ fontSize: 10, fill: "#ccc" }}
+                                interval={0}
+                                angle={-30}
+                                textAnchor="end"
+                            />
                             <YAxis />
                             <Tooltip />
-                            <Bar dataKey="value" fill="#F59E0B" />
+                            <Bar dataKey="count" fill="#f59e0b" />
                         </BarChart>
+
                     </ResponsiveContainer>
                 </div>
 
@@ -412,12 +420,18 @@ const AnalyticsPage = () => {
                     <ul className="text-sm space-y-2">
                         {topCrimesPerBarangay.map((b, idx) => (
                             <li key={idx}>
-                                <span className="font-semibold">{b.barangay}:</span>{" "}
-                                {b.topCrimes.map(([crime, count]) => `${crime} (${count})`).join(", ")}
+                                <span className="font-semibold text-blue-400">{b.barangay}</span>{" "}
+                                <span className="text-gray-300">—</span>{" "}
+                                {b.topCrimes.map(([crime, count]) => (
+                                    <span key={crime} className="mr-2">
+                                        {crime} <span className="text-gray-400">({count})</span>
+                                    </span>
+                                ))}
                             </li>
                         ))}
                     </ul>
                 </div>
+
 
                 {/* 🔁 Repeat Crimes in Last 7 Days */}
                 <div className="bg-[#1C1E2E] p-4 rounded-lg shadow">

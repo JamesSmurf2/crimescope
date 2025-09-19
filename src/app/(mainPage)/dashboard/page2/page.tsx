@@ -361,6 +361,8 @@ const ReportsPage = () => {
                                                                 )
                                                             );
                                                             changeReportStatus(report?._id, e.target.value)
+
+                                                            console.log(report?._id)
                                                         }}
                                                         className="bg-[#2A2C3E] text-sm px-2 py-1 rounded-lg border border-gray-600 cursor-pointer"
                                                     >

@@ -17,7 +17,7 @@ export const POST = async (req: NextRequest) => {
             );
         }
 
-        const existing = await ReportsModel.findById(id);
+        const existing = await ReportsModel.findOne({ _id: id });
 
         if (!existing) {
             return NextResponse.json(
