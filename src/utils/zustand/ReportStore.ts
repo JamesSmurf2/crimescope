@@ -14,7 +14,7 @@ const useReportStore = create<reportStore>((set, get) => ({
     reports: [],
     getReports: async () => {
         try {
-            const res = await fetch(`/api/report`, {
+            const res = await fetch(`/api/report/getReport`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -35,7 +35,7 @@ const useReportStore = create<reportStore>((set, get) => ({
     },
     addReports: async (report) => {
         try {
-            const res = await fetch(`/api/report`, {
+            const res = await fetch(`/api/report/addReport`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

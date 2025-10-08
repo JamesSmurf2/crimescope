@@ -21,6 +21,9 @@ export default function Home() {
           <Link href="/dashboard/page1">
             <Button text="Start Viewing" />
           </Link>
+          <Link href="/login">
+            <Button text="Admin Login" />
+          </Link>
         </div>
       </div>
     </div>

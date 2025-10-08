@@ -2,9 +2,17 @@ import { NextResponse } from "next/server";
 import { connectDb } from "@/utils/utility/ConnectDb";
 import { NextRequest } from "next/server";
 import ReportsModel from "@/utils/models/Reports.model";
+import { getAuthenticatedUser } from "@/utils/utility/verifyUser";
 
 export const POST = async (req: NextRequest) => {
     try {
+
+        const user = await getAuthenticatedUser()
+
+        if (user?.role !== 'admin') {
+            return NextResponse.json("You are not Authorized", { status: 401 })
+        }
+
         await connectDb();
 
         const body = await req.json();

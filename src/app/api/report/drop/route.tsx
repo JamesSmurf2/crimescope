@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 import { connectDb } from "@/utils/utility/ConnectDb";
 import ReportsModel from "@/utils/models/Reports.model";
+import { getAuthenticatedUser } from "@/utils/utility/verifyUser";
 
 // DELETE all reports
 export const GET = async () => {
     try {
+        const user = await getAuthenticatedUser()
+
+        if (user?.role !== 'admin') {
+            return NextResponse.json("You are not Authorized", { status: 401 })
+        }
+
         await connectDb();
 
         const result = await ReportsModel.deleteMany({}); // remove all docs
