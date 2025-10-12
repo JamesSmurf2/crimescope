@@ -18,9 +18,6 @@ export default function Home() {
         <div className="text-white"></div>
 
         <div className="pt-[50px] flex gap-[25px]">
-          <Link href="/dashboard/page1">
-            <Button text="Start Viewing" />
-          </Link>
           <Link href="/login">
             <Button text="Admin Login" />
           </Link>

@@ -207,7 +207,7 @@ const ReportsPage = () => {
     }
 
     return (
-        <div className="flex items-center justify-center w-full min-h-screen bg-[#0F1120] text-white p-6">
+        <div className="relative min-h-screen flex flex-col items-center justify-start bg-[#0F1120] text-white p-6 overflow-x-hidden">
             <div className="w-full max-w-[1200px] space-y-6">
                 {/* Header Section */}
                 <div className="flex justify-between items-center">

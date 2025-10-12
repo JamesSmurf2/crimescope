@@ -4,9 +4,9 @@ import "leaflet/dist/leaflet.css";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex min-h-screen">
+    <div className="h-[100vh] overflow-x-hidden">
       <Sidebar />
-      <main className="flex-1 bg-[#0F1120] text-white ml-64">
+      <main className='w-[100%]'>
         {children}
       </main>
     </div>

@@ -149,7 +149,7 @@ const Page = () => {
     };
 
     return (
-        <div className="flex flex-col items-center w-full h-[130vh] bg-gradient-to-br from-[#0F1120] to-[#1C1E2D] text-white">
+        <div className="overflow-x-hidden w-[100vw] ">
             {/* Header */}
             <header className="w-full py-8 text-center border-b border-white/10 mb-6">
                 <h1 className="text-4xl font-bold tracking-wide text-red-400 drop-shadow-lg">
@@ -161,59 +161,58 @@ const Page = () => {
             </header>
 
             {/* Map Container */}
-            <div className="relative w-[1000px] h-[105vh] bg-[#0F1120] rounded-xl shadow-xl  border border-white/10">
-                {barangays.map((b, i) => (
-                    <div
-                        key={i}
-                        className={b.style}
-                        onMouseEnter={() => setHovered(b)}
-                        onMouseLeave={() => setHovered(null)}
-                    >
-                        <img
-                            src={b.img}
-                            alt={b.name}
-                            className="cursor-pointer scale-[0.9] hover:scale-95 transition-transform duration-300"
-                        />
+            <div className='w-[100%] h-[100%] flex items-center justify-center'>
+                <div className="relative w-[1000px] h-[105vh] bg-[#0F1120] rounded-xl shadow-xl  border border-white/10 ">
+                    {barangays.map((b, i) => (
+                        <div
+                            key={i}
+                            className={b.style}
+                            onMouseEnter={() => setHovered(b)}
+                            onMouseLeave={() => setHovered(null)}
+                        >
+                            <img
+                                src={b.img}
+                                alt={b.name}
+                                className="cursor-pointer scale-[0.9] hover:scale-95 transition-transform duration-300"
+                            />
 
-                        {hovered?.name === b.name && (
-                            <div className="absolute left-full top-0 ml-5 w-80 p-6 rounded-2xl shadow-2xl
+                            {hovered?.name === b.name && (
+                                <div className="absolute left-full top-0 ml-5 w-80 p-6 rounded-2xl shadow-2xl
                 bg-gradient-to-br from-[#1E2130]/95 to-[#2A2E42]/95 backdrop-blur-xl 
                 border border-white/10 z-50 animate-fadeIn">
 
-                                {/* Barangay name */}
-                                <div className="flex items-center justify-between">
-                                    <h3 className="font-semibold text-xl text-white tracking-wide">
-                                        {b.name}
-                                    </h3>
-                                    <span className="px-3 py-1 text-sm rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                                        {getCrimeCount(b.name)} cases
-                                    </span>
-                                </div>
-
-                                {/* Description */}
-                                <p className="text-base text-gray-300 mt-3 leading-relaxed">
-                                    {b.crimes}
-                                </p>
-
-                                {/* Stats */}
-                                <div className="mt-5 space-y-3 text-base">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-gray-400">📊 Reported Crimes</span>
-                                        <span className="text-white font-semibold">
-                                            {getCrimeCount(b.name)}
+                                        <h3 className="font-semibold text-xl text-white tracking-wide">
+                                            {b.name}
+                                        </h3>
+                                        <span className="px-3 py-1 text-sm rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                                            {getCrimeCount(b.name)} cases
                                         </span>
                                     </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-gray-400">🔎 Common Crime</span>
-                                        <span className="text-white font-semibold">
-                                            {getCommonCrimes(b.name)}
-                                        </span>
+
+                                    <p className="text-base text-gray-300 mt-3 leading-relaxed">
+                                        {b.crimes}
+                                    </p>
+
+                                    <div className="mt-5 space-y-3 text-base">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-gray-400">📊 Reported Crimes</span>
+                                            <span className="text-white font-semibold">
+                                                {getCrimeCount(b.name)}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-gray-400">🔎 Common Crime</span>
+                                            <span className="text-white font-semibold">
+                                                {getCommonCrimes(b.name)}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
-                    </div>
-                ))}
+                            )}
+                        </div>
+                    ))}
+                </div>
             </div>
 
 
