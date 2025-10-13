@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import ReportsModel from "@/utils/models/Reports.model";
+import Report from "@/utils/models/Reports.model";
 import { connectDb } from "@/utils/utility/ConnectDb";
 
 export const POST = async (req: NextRequest) => {
@@ -9,44 +9,86 @@ export const POST = async (req: NextRequest) => {
         const body = await req.json();
 
         const {
-            complainantName,
-            contactNumber,
-            address,
-            crime,
-            description,
+            blotterNo,
+            dateEncoded,
             barangay,
-            date,
-            time,
-            suspectName,
-            witnessName,
-            status, // optional
-            location, // ✅ expect coordinates from frontend
+            street,
+            typeOfPlace,
+            dateReported,
+            timeReported,
+            dateCommitted,
+            timeCommitted,
+            modeOfReporting,
+            stageOfFelony,
+            offense,
+            victim,
+            suspect,
+            suspectMotive,
+            narrative,
+            status,
+            location, // ✅ should be { lat, lng }
         } = body;
 
-        const report = await ReportsModel.create({
-            complainantName,
-            contactNumber,
-            address,
-            crime,
-            description,
+        // ✅ Validate required data
+        if (!barangay || !offense || !victim || !suspect || !location) {
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        }
+
+        // ✅ Convert to GeoJSON (lng, lat order)
+        const geoLocation = {
+            type: "Point",
+            coordinates: [location.lng, location.lat],
+        };
+
+        const report = await Report.create({
+            blotterNo,
+            dateEncoded,
             barangay,
-            date,
-            time,
-            suspectName,
-            witnessName,
-            status: status || "Pending",
-            location: location || undefined, // ✅ store GeoJSON { type: "Point", coordinates: [lng, lat] }
+            street,
+            typeOfPlace,
+            dateReported,
+            timeReported,
+            dateCommitted,
+            timeCommitted,
+            modeOfReporting,
+            stageOfFelony,
+            offense,
+            victim,
+            suspect,
+            suspectMotive,
+            narrative,
+            status: status || "Solved",
+            location: geoLocation, // ✅ use GeoJSON
         });
+        // For test
+        // const report = {
+        //     blotterNo,
+        //     dateEncoded,
+        //     barangay,
+        //     street,
+        //     typeOfPlace,
+        //     dateReported,
+        //     timeReported,
+        //     dateCommitted,
+        //     timeCommitted,
+        //     modeOfReporting,
+        //     stageOfFelony,
+        //     offense,
+        //     victim,
+        //     suspect,
+        //     suspectMotive,
+        //     narrative,
+        //     status: status || "Solved",
+        //     location,
+        // };
+        // console.log(report)
 
         return NextResponse.json(
-            { message: "Report submitted successfully", report },
+            { message: "Crime report submitted successfully", report },
             { status: 201 }
         );
     } catch (error) {
-        console.error("Error submitting report:", error);
-        return NextResponse.json(
-            { error: "Something went wrong." },
-            { status: 500 }
-        );
+        console.error("❌ Error submitting report:", error);
+        return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
     }
 };

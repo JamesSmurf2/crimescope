@@ -1,72 +1,63 @@
-// import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-// const ReportSchema = new mongoose.Schema({
-//     complainantName: { type: String, required: true },
-//     contactNumber: { type: String, required: true },
-//     address: { type: String, required: true },
-
-//     crime: { type: String, required: true },
-//     description: { type: String, required: true },
-//     barangay: { type: String, required: true },
-
-//     date: { type: String, required: true },  
-//     time: { type: String, required: true },
-
-//     suspectName: { type: String, default: "" },
-//     witnessName: { type: String, default: "" },
-
-//     status: {
-//         type: String,
-//         enum: ["Pending", "Unsolved", "Solved"], 
-//         default: "Pending"
-//     },
-
-//     createdAt: { type: Date, default: Date.now }
-// });
-
-// export default mongoose.models.Report || mongoose.model('Report', ReportSchema);
-
-
-import mongoose from 'mongoose';
-
-const ReportSchema = new mongoose.Schema({
-    complainantName: { type: String, required: true },
-    contactNumber: { type: String, required: true },
-    address: { type: String, required: true },
-
-    crime: { type: String, required: true },
-    description: { type: String, required: true },
-    barangay: { type: String, required: true },
-
-    date: { type: String, required: true },
-    time: { type: String, required: true },
-
-    suspectName: { type: String, default: "" },
-    witnessName: { type: String, default: "" },
-
-    // ✅ GeoJSON Location field
-    location: {
-        type: {
-            type: String,
-            enum: ["Point"],
-            default: "Point",
-        },
-        coordinates: {
-            type: [Number], // [longitude, latitude]
-            default: undefined,
-        },
-    },
-
-    status: {
-        type: String,
-        enum: ["Pending", "Unsolved", "Solved"],
-        default: "Pending",
-    },
-
-    createdAt: { type: Date, default: Date.now },
+const victimSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    age: { type: String, required: true },
+    gender: { type: String, required: true },
+    harmed: { type: String, required: true },
+    nationality: { type: String, required: true },
+    occupation: { type: String, required: true },
 });
 
-// ✅ Add 2dsphere index for geospatial queries
-ReportSchema.index({ location: "2dsphere" });
+const suspectSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    age: { type: String, required: true },
+    gender: { type: String, required: true },
+    status: { type: String, required: true },
+    nationality: { type: String, required: true },
+    occupation: { type: String, required: true },
+});
 
-export default mongoose.models.Report || mongoose.model("Report", ReportSchema);
+// ✅ FIXED LOCATION SCHEMA
+const locationSchema = new mongoose.Schema({
+    type: {
+        type: String,
+        enum: ["Point"],
+        required: true,
+    },
+    coordinates: {
+        type: [Number], // [lng, lat]
+        required: true,
+    },
+});
+locationSchema.index({ coordinates: "2dsphere" });
+
+// ✅ MAIN SCHEMA
+const ReportSchema = new mongoose.Schema(
+    {
+        blotterNo: { type: String, required: true, unique: true },
+        dateEncoded: { type: String, required: true },
+        barangay: { type: String, required: true },
+        street: { type: String, required: true },
+        typeOfPlace: { type: String, required: true },
+        dateReported: { type: String, required: true },
+        timeReported: { type: String, required: true },
+        dateCommitted: { type: String, required: true },
+        timeCommitted: { type: String, required: true },
+        modeOfReporting: { type: String },
+        stageOfFelony: { type: String },
+        offense: { type: String, required: true },
+        victim: { type: victimSchema, required: true },
+        suspect: { type: suspectSchema, required: true },
+        suspectMotive: { type: String },
+        narrative: { type: String },
+        status: { type: String, enum: ["Solved", "Cleared", "Unsolved"], default: "Solved" },
+        location: { type: locationSchema, required: true },
+    },
+    { timestamps: true }
+);
+
+const Report =
+    mongoose.models.Report || mongoose.model("Report", ReportSchema);
+
+export default Report;

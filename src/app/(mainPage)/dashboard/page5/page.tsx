@@ -1,524 +1,245 @@
+//Ito yung old code for the forms
+
+
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
+import React, { useState } from "react";
+import dynamic from "next/dynamic";
+import useReportStore from "@/utils/zustand/ReportStore";
 
-// Fix marker icon issue in Leaflet (important for Next.js)
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
+// ✅ Dynamically import CrimeMap to disable SSR
+const CrimeMap = dynamic(() => import("@/components/reusable/CrimeMap"), { ssr: false });
 
-L.Icon.Default.mergeOptions({
-    iconUrl: markerIcon.src ?? markerIcon,
-    iconRetinaUrl: markerIcon2x.src ?? markerIcon2x,
-    shadowUrl: markerShadow.src ?? markerShadow,
-});
+const ReportForm = () => {
+    const { addReports } = useReportStore();
 
-// -------------------- Types --------------------
-type VictimInfo = {
-    name: string;
-    age: string;
-    gender: string;
-    harmed: string;
-    nationality: string;
-    occupation: string;
-};
+    const [crime, setCrime] = useState("");
+    const [description, setDescription] = useState("");
+    const [barangay, setBarangay] = useState("");
+    const [date, setDate] = useState("");
+    const [time, setTime] = useState("");
+    const [complainantName, setComplainantName] = useState("");
+    const [contactNumber, setContactNumber] = useState("");
+    const [address, setAddress] = useState("");
+    const [suspectName, setSuspectName] = useState("");
+    const [witnessName, setWitnessName] = useState("");
+    const [coords, setCoords] = useState<[number, number] | null>(null);
 
-type SuspectInfo = {
-    name: string;
-    age: string;
-    gender: string;
-    status: string;
-    nationality: string;
-    occupation: string;
-};
+    const barangays = [
+        "Almanza Dos", "Almanza Uno", "B.F. CAA International Village", "Aldana",
+        "Manuyo Dos", "Manuyo Uno", "Pamplona Dos", "Pamplona Tres", "Pamplona Uno",
+        "Pilar", "Pulang Lupa Dos", "Pulang Lupa Uno", "Talon Dos", "Talon Kuatro",
+        "Talon Singko", "Talon Tres", "Talon Uno", "Zapote"
+    ];
 
-type CrimeForm = {
-    blotterNo: string;
-    dateEncoded: string;
-    barangay: string;
-    street: string;
-    typeOfPlace: string;
-    dateReported: string;
-    timeReported: string;
-    dateCommitted: string;
-    timeCommitted: string;
-    modeOfReporting: string;
-    stageOfFelony: string;
-    offense: string;
-    victim: VictimInfo;
-    suspect: SuspectInfo;
-    suspectMotive: string;
-    narrative: string;
-    status: string;
-    location: { lat: number; lng: number } | null;
-};
-
-// -------------------- Barangays --------------------
-const barangays = [
-    "Almanza Dos",
-    "Almanza Uno",
-    "Daniel Fajardo",
-    "Elias Aldana",
-    "Ilaya",
-    "Manuyo Uno",
-    "Manuyo Dos",
-    "Pamplona Uno",
-    "Pamplona Dos",
-    "Pamplona Tres",
-    "Pilar",
-    "Pulang Lupa Uno",
-    "Pulang Lupa Dos",
-    "Talon Uno",
-    "Talon Dos",
-    "Talon Tres",
-    "Talon Cuatro",
-    "Talon Singko",
-    "Zapote",
-];
-
-// -------------------- Offense Hierarchy --------------------
-const offenseCategories = [
-    {
-        label: "Index Crimes",
-        color: "text-red-500 font-semibold",
-        offenses: [
-            "Murder",
-            "Homicide",
-            "Rape",
-            "Physical Injury",
-            "Robbery",
-            "Theft",
-            "Carnapping",
-            "Cattle Rustling",
-        ],
-    },
-    {
-        label: "Non-Index Crimes",
-        color: "text-yellow-500 font-semibold",
-        offenses: [
-            "Drug Offense",
-            "Illegal Firearms",
-            "Child Abuse",
-            "Cybercrime",
-            "Estafa",
-            "Direct Assault",
-            "Violence Against Women & Children (VAWC)",
-            "Illegal Logging",
-        ],
-    },
-    {
-        label: "Traffic Violations",
-        color: "text-blue-500 font-semibold",
-        offenses: [
-            "Reckless Driving",
-            "Illegal Parking",
-            "Overspeeding",
-            "Driving Without License",
-            "Road Accident",
-        ],
-    },
-    {
-        label: "Ordinance Violations",
-        color: "text-gray-500 font-semibold",
-        offenses: [
-            "Curfew Violation",
-            "Public Disturbance",
-            "Littering",
-            "Noise Complaint",
-            "Illegal Vending",
-            "Drinking in Public",
-            "Unjust Vexation",
-            "Threats",
-            "Malicious Mischief",
-        ],
-    },
-];
-
-// -------------------- Map Click Handler --------------------
-function LocationSelector({
-    setForm,
-}: {
-    setForm: React.Dispatch<React.SetStateAction<CrimeForm>>;
-}) {
-    useMapEvents({
-        click(e) {
-            setForm((prev) => ({
-                ...prev,
-                location: { lat: e.latlng.lat, lng: e.latlng.lng },
-            }));
-        },
-    });
-    return null;
-}
-
-// -------------------- Main Component --------------------
-const CrimeReportForm = () => {
-    const [form, setForm] = useState<CrimeForm>({
-        blotterNo: "",
-        dateEncoded: new Date().toLocaleString(),
-        barangay: "",
-        street: "",
-        typeOfPlace: "",
-        dateReported: "",
-        timeReported: "",
-        dateCommitted: "",
-        timeCommitted: "",
-        modeOfReporting: "",
-        stageOfFelony: "",
-        offense: "",
-        victim: {
-            name: "",
-            age: "",
-            gender: "",
-            harmed: "",
-            nationality: "",
-            occupation: "",
-        },
-        suspect: {
-            name: "",
-            age: "",
-            gender: "",
-            status: "",
-            nationality: "",
-            occupation: "",
-        },
-        suspectMotive: "",
-        narrative: "",
-        status: "Solved",
-        // Default to Las Piñas City center
-        location: { lat: 14.4445, lng: 120.9939 },
-    });
-
-    // Auto-generate Blotter Number
-    useEffect(() => {
-        const year = new Date().getFullYear();
-        const random = Math.floor(Math.random() * 9000) + 1000;
-        setForm((prev) => ({ ...prev, blotterNo: `BLTR-${year}-${random}` }));
-    }, []);
-
-    // Handlers
-    const handleChange = (
-        e: React.ChangeEvent<
-            HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-        >
-    ) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
+    const crimes = {
+        serious: ["Theft / Robbery", "Physical Assault", "Domestic Violence", "Illegal Drugs", "Sexual Harassment", "Murder / Homicide", "Human Trafficking", "Kidnapping", "Fraud / Scam"],
+        moderate: ["Vandalism", "Trespassing", "Illegal Gambling", "Public Disturbance / Fighting", "Threats / Verbal Harassment", "Cybercrime / Online Harassment", "Stalking", "Animal Cruelty"],
+        minor: ["Noise Complaint", "Curfew Violation", "Littering / Illegal Dumping", "Drinking in Public", "Smoking in Prohibited Areas", "Jaywalking", "Loitering", "Minor Traffic Violation", "Unleashed Pets / Stray Animals", "Illegal Parking"]
     };
 
-    const handleNestedChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-        category: "victim" | "suspect"
-    ) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({
-            ...prev,
-            [category]: { ...prev[category], [name]: value },
-        }));
-    };
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-    const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        const parsed = parseFloat(value);
+        let report: any = {
+            complainantName,
+            contactNumber,
+            address,
+            crime,
+            description,
+            barangay,
+            time,
+            date,
+            suspectName,
+            witnessName,
+        };
 
-        setForm((prev) => ({
-            ...prev,
-            location: {
-                ...(prev.location ?? { lat: 0, lng: 0 }),
-                [name]: parsed,
-            },
-        }));
+        if (coords) {
+            report.location = {
+                type: "Point",
+                coordinates: [coords[1], coords[0]], // [lng, lat]
+            };
+        }
+
+        await addReports(report);
+        alert("Report submitted successfully!");
     };
 
     return (
-        <div className="p-4 sm:p-6 max-w-6xl mx-auto text-white">
-            <h1 className="text-3xl font-bold mb-6 text-center">
-                Barangay Crime Report Form
-            </h1>
+        <div className="flex items-center justify-center min-h-screen bg-[#0F1120] text-white p-6">
+            <div className="w-full max-w-2xl bg-[#1C1E2E] p-6 rounded-2xl shadow-lg">
+                <h1 className="text-2xl font-bold mb-6">Crime Report Form</h1>
 
-            <form className="grid gap-6">
-                {/* Basic Info */}
-                <div className="grid md:grid-cols-2 gap-4">
-                    <input
-                        name="blotterNo"
-                        value={form.blotterNo}
-                        readOnly
-                        placeholder="Blotter No"
-                        className="input input-bordered w-full text-black bg-white"
-                    />
-                    <select
-                        name="barangay"
-                        value={form.barangay}
-                        onChange={handleChange}
-                        className="select select-bordered w-full text-black bg-white"
-                    >
-                        <option value="">Select Barangay</option>
-                        {barangays.map((b) => (
-                            <option key={b} value={b}>
-                                {b}
-                            </option>
-                        ))}
-                    </select>
-                    <input
-                        name="street"
-                        value={form.street}
-                        onChange={handleChange}
-                        placeholder="Street"
-                        className="input input-bordered w-full text-black bg-white"
-                    />
-                    <select
-                        name="typeOfPlace"
-                        value={form.typeOfPlace}
-                        onChange={handleChange}
-                        className="select select-bordered w-full text-black bg-white"
-                    >
-                        <option value="">Select Type of Place</option>
-                        <option value="Along the Street">Along the Street</option>
-                        <option value="Residential (House/Condo)">
-                            Residential (House/Condo)
-                        </option>
-                        <option value="Commercial/Business Establishment">
-                            Commercial/Business Establishment
-                        </option>
-                    </select>
-                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Complainant Info */}
+                    <div>
+                        <label className="block mb-2 text-sm font-medium">Complainant Name</label>
+                        <input
+                            type="text"
+                            value={complainantName}
+                            onChange={(e) => setComplainantName(e.target.value)}
+                            className="w-full p-3 rounded-lg bg-[#2A2C3F] text-white focus:outline-none"
+                            placeholder="Full name"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-2 text-sm font-medium">Contact Number</label>
+                        <input
+                            type="tel"
+                            value={contactNumber}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (/^\d{0,11}$/.test(value)) {
+                                    setContactNumber(value);
+                                }
+                            }}
+                            maxLength={11}
+                            className="w-full p-3 rounded-lg bg-[#2A2C3F] text-white focus:outline-none"
+                            placeholder="09XXXXXXXXX"
+                            required
+                        />
+                        {contactNumber.length > 0 && contactNumber.length !== 11 && (
+                            <p className="text-red-400 text-xs mt-1">Contact number must be exactly 11 digits</p>
+                        )}
+                    </div>
+                    <div>
+                        <label className="block mb-2 text-sm font-medium">Address</label>
+                        <input
+                            type="text"
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                            className="w-full p-3 rounded-lg bg-[#2A2C3F] text-white focus:outline-none"
+                            placeholder="House No. / Street / Barangay"
+                            required
+                        />
+                    </div>
 
-                {/* Offense */}
-                <div>
-                    <label className="font-semibold mb-1 block">Select Offense</label>
-                    <select
-                        name="offense"
-                        value={form.offense}
-                        onChange={handleChange}
-                        className="select select-bordered w-full text-black bg-white"
-                    >
-                        <option value="">Select an offense</option>
-                        {offenseCategories.map((group) => (
-                            <optgroup
-                                key={group.label}
-                                label={group.label}
-                                className={group.color}
-                            >
-                                {group.offenses.map((off) => (
-                                    <option key={off}>{off}</option>
+                    {/* Crime Type */}
+                    <div>
+                        <label className="block mb-2 text-sm font-medium">Crime Type</label>
+                        <select
+                            value={crime}
+                            onChange={(e) => setCrime(e.target.value)}
+                            className="w-full p-3 rounded-lg bg-[#2A2C3F] text-white focus:outline-none"
+                            required
+                        >
+                            <option value="">Select a crime</option>
+                            <optgroup label="🚨 Serious Crimes">
+                                {crimes.serious.map((c, idx) => (
+                                    <option key={idx} value={c} className="text-red-500">{c}</option>
                                 ))}
                             </optgroup>
-                        ))}
-                    </select>
-                </div>
-
-                {/* Victim */}
-                <div>
-                    <h2 className="font-bold mt-6">Victim Information</h2>
-                    <div className="grid md:grid-cols-6 gap-4">
-                        <input
-                            name="name"
-                            placeholder="Full Name"
-                            value={form.victim.name}
-                            onChange={(e) => handleNestedChange(e, "victim")}
-                            className="input input-bordered text-black bg-white w-full"
-                        />
-                        <input
-                            name="age"
-                            placeholder="Age"
-                            value={form.victim.age}
-                            onChange={(e) => handleNestedChange(e, "victim")}
-                            className="input input-bordered text-black bg-white w-full"
-                        />
-                        <select
-                            name="gender"
-                            value={form.victim.gender}
-                            onChange={(e) => handleNestedChange(e, "victim")}
-                            className="select select-bordered text-black bg-white w-full"
-                        >
-                            <option value="">Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
+                            <optgroup label="⚖️ Moderate Offenses">
+                                {crimes.moderate.map((c, idx) => (
+                                    <option key={idx} value={c} className="text-yellow-500">{c}</option>
+                                ))}
+                            </optgroup>
+                            <optgroup label="📝 Minor Violations">
+                                {crimes.minor.map((c, idx) => (
+                                    <option key={idx} value={c} className="text-green-500">{c}</option>
+                                ))}
+                            </optgroup>
+                            <option value="Other">Other</option>
                         </select>
-                        <select
-                            name="harmed"
-                            value={form.victim.harmed}
-                            onChange={(e) => handleNestedChange(e, "victim")}
-                            className="select select-bordered text-black bg-white w-full"
-                        >
-                            <option value="">Harmed / Unharmed</option>
-                            <option value="Harmed">Harmed</option>
-                            <option value="Unharmed">Unharmed</option>
-                        </select>
-                        <input
-                            name="nationality"
-                            placeholder="Nationality"
-                            value={form.victim.nationality}
-                            onChange={(e) => handleNestedChange(e, "victim")}
-                            className="input input-bordered text-black bg-white w-full"
-                        />
-                        <input
-                            name="occupation"
-                            placeholder="Occupation"
-                            value={form.victim.occupation}
-                            onChange={(e) => handleNestedChange(e, "victim")}
-                            className="input input-bordered text-black bg-white w-full"
-                        />
                     </div>
-                </div>
 
-                {/* Suspect */}
-                <div>
-                    <h2 className="font-bold mt-6">Suspect Information</h2>
-                    <div className="grid md:grid-cols-6 gap-4">
-                        <input
-                            name="name"
-                            placeholder="Full Name"
-                            value={form.suspect.name}
-                            onChange={(e) => handleNestedChange(e, "suspect")}
-                            className="input input-bordered text-black bg-white w-full"
-                        /> 
-                        <input
-                            name="age"
-                            placeholder="Age"
-                            value={form.suspect.age}
-                            onChange={(e) => handleNestedChange(e, "suspect")}
-                            className="input input-bordered text-black bg-white w-full"
-                        />
-                        <select
-                            name="gender"
-                            value={form.suspect.gender}
-                            onChange={(e) => handleNestedChange(e, "suspect")}
-                            className="select select-bordered text-black bg-white w-full"
-                        >
-                            <option value="">Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                        <select
-                            name="status"
-                            value={form.suspect.status}
-                            onChange={(e) => handleNestedChange(e, "suspect")}
-                            className="select select-bordered text-black bg-white w-full"
-                        >
-                            <option value="">Status</option>
-                            <option value="Arrested">Arrested</option>
-                            <option value="Detained">Detained</option>
-                            <option value="At Large">At Large</option>
-                        </select>
-                        <input
-                            name="nationality"
-                            placeholder="Nationality"
-                            value={form.suspect.nationality}
-                            onChange={(e) => handleNestedChange(e, "suspect")}
-                            className="input input-bordered text-black bg-white w-full"
-                        />
-                        <input
-                            name="occupation"
-                            placeholder="Occupation"
-                            value={form.suspect.occupation}
-                            onChange={(e) => handleNestedChange(e, "suspect")}
-                            className="input input-bordered text-black bg-white w-full"
-                        />
-                    </div>
-                </div>
-
-                {/* Motive & Narrative */}
-                <div>
-                    <label className="font-semibold mb-1 block">Suspect Motive</label>
-                    <input
-                        name="suspectMotive"
-                        placeholder="Enter suspect motive"
-                        value={form.suspectMotive}
-                        onChange={handleChange}
-                        className="input input-bordered w-full text-black bg-white"
-                    />
-                </div>
-
-                <div>
-                    <label className="font-semibold mb-1 block">
-                        Narrative / Incident Description
-                    </label>
-                    <textarea
-                        name="narrative"
-                        placeholder="Write a brief description of the incident..."
-                        value={form.narrative}
-                        onChange={handleChange}
-                        className="textarea textarea-bordered w-full h-32 text-black bg-white"
-                    />
-                </div>
-
-                {/* Case Status */}
-                <div>
-                    <label className="font-semibold mb-1 block">Case Status</label>
-                    <select
-                        name="status"
-                        value={form.status}
-                        onChange={handleChange}
-                        className="select select-bordered w-full text-black bg-white"
-                    >
-                        <option value="Solved">Solved</option>
-                        <option value="Cleared">Cleared</option>
-                        <option value="Unsolved">Unsolved</option>
-                    </select>
-                </div>
-
-                {/* Coordinates + Map Section */}
-                <div>
-                    <h2 className="font-bold mt-6">Enter Coordinates</h2>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                        <input
-                            name="lat"
-                            type="number"
-                            placeholder="Latitude"
-                            value={form.location?.lat ?? ""}
-                            onChange={handleLocationChange}
-                            className="input input-bordered text-black bg-white"
-                        />
-                        <input
-                            name="lng"
-                            type="number"
-                            placeholder="Longitude"
-                            value={form.location?.lng ?? ""}
-                            onChange={handleLocationChange}
-                            className="input input-bordered text-black bg-white"
+                    {/* Description */}
+                    <div>
+                        <label className="block mb-2 text-sm font-medium">Description</label>
+                        <textarea
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            rows={4}
+                            className="w-full p-3 rounded-lg bg-[#2A2C3F] text-white focus:outline-none resize-none"
+                            placeholder="Describe the incident..."
+                            required
                         />
                     </div>
 
-                    {/* Leaflet Map */}
-                    <MapContainer
-                        center={[form.location?.lat ?? 14.4445, form.location?.lng ?? 120.9939]}
-                        zoom={13}
-                        style={{
-                            height: "400px",
-                            width: "100%",
-                            borderRadius: "12px",
-                            overflow: "hidden",
-                        }}
-                    >
-                        <TileLayer
-                            attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    {/* Barangay */}
+                    <div>
+                        <label className="block mb-2 text-sm font-medium">Barangay</label>
+                        <select
+                            value={barangay}
+                            onChange={(e) => setBarangay(e.target.value)}
+                            className="w-full p-3 rounded-lg bg-[#2A2C3F] text-white focus:outline-none"
+                            required
+                        >
+                            <option value="">Select a barangay</option>
+                            {barangays.map((b, idx) => (
+                                <option key={idx} value={b}>{b}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Date & Time */}
+                    <div>
+                        <label className="block mb-2 text-sm font-medium">Date of Incident</label>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="w-full p-3 rounded-lg bg-[#2A2C3F] text-white focus:outline-none"
+                            required
                         />
-                        {form.location && (
-                            <Marker position={[form.location.lat, form.location.lng]} />
+                    </div>
+                    <div>
+                        <label className="block mb-2 text-sm font-medium">Time of Incident</label>
+                        <input
+                            type="time"
+                            value={time}
+                            onChange={(e) => setTime(e.target.value)}
+                            className="w-full p-3 rounded-lg bg-[#2A2C3F] text-white focus:outline-none"
+                            required
+                        />
+                    </div>
+
+                    {/* Suspect / Witness */}
+                    <div>
+                        <label className="block mb-2 text-sm font-medium">Suspect Name (if known)</label>
+                        <input
+                            type="text"
+                            value={suspectName}
+                            onChange={(e) => setSuspectName(e.target.value)}
+                            className="w-full p-3 rounded-lg bg-[#2A2C3F] text-white focus:outline-none"
+                            placeholder="Name of suspect"
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-2 text-sm font-medium">Witness Name (if any)</label>
+                        <input
+                            type="text"
+                            value={witnessName}
+                            onChange={(e) => setWitnessName(e.target.value)}
+                            className="w-full p-3 rounded-lg bg-[#2A2C3F] text-white focus:outline-none"
+                            placeholder="Name of witness"
+                        />
+                    </div>
+                    {/* 📍 Map Section */}
+                    <div className="mt-8">
+                        <h2 className="text-lg font-semibold mb-2">Select Incident Location</h2>
+                        <div className="h-[400px] w-full rounded-lg overflow-hidden">
+                            <CrimeMap setCoords={setCoords} />
+                        </div>
+                        {coords && (
+                            <p className="mt-2 text-sm text-green-400">
+                                Selected Location: {coords[0].toFixed(5)}, {coords[1].toFixed(5)}
+                            </p>
                         )}
-                        <LocationSelector setForm={setForm} />
-                    </MapContainer>
-                    <p className="mt-2 text-sm text-gray-300">
-                        📍 Click anywhere on the map to set the crime location (Las Piñas area).
-                    </p>
-                </div>
+                    </div>
 
-                {/* Submit */}
-                <button
-                    type="button"
-                    onClick={() => console.log(form)}
-                    className="btn btn-primary w-full mt-4"
-                >
-                    Submit Report
-                </button>
-            </form>
+                    <button
+                        type="submit"
+                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium"
+                    >
+                        Submit Report
+                    </button>
+                </form>
+            </div>
         </div>
     );
 };
 
-export default CrimeReportForm;
+export default ReportForm;
+

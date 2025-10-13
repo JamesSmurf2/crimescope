@@ -3,31 +3,94 @@
 import React, { useState, useEffect } from "react";
 import useReportStore from "@/utils/zustand/ReportStore";
 
-// 🗺️ React Leaflet imports
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
 
-// ✅ Fix default marker icon for React Leaflet (no import errors)
-const DefaultIcon = new L.Icon({
-    iconUrl:
-        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-    shadowUrl:
-        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-});
 
-L.Marker.prototype.options.icon = DefaultIcon;
+
+
+
 
 
 const ReportsPage = () => {
-    const { changeReportStatus } = useReportStore();
 
+
+    // -------------------- Data Lists --------------------
+    const barangays = [
+        "Almanza Dos", "Almanza Uno", "B.F. CAA International Village", "Aldana",
+        "Manuyo Dos", "Manuyo Uno", "Pamplona Dos", "Pamplona Tres",
+        "Pamplona Uno", "Pilar", "Pulang Lupa Dos", "Pulang Lupa Uno",
+        "Talon Dos", "Talon Kuatro", "Talon Singko", "Talon Tres",
+        "Talon Uno", "Zapote",
+    ];
+
+    const offenseCategories = [
+        {
+            label: "🚨 Index Crimes",
+            color: "text-red-400 font-semibold",
+            offenses: [
+                "Murder",
+                "Homicide",
+                "Rape",
+                "Physical Injury",
+                "Robbery",
+                "Theft",
+                "Carnapping",
+                "Cattle Rustling",
+            ],
+        },
+        {
+            label: "⚖️ Non-Index Crimes",
+            color: "text-yellow-400 font-semibold",
+            offenses: [
+                "Drug Offense",
+                "Illegal Firearms",
+                "Child Abuse",
+                "Cybercrime",
+                "Estafa",
+                "Direct Assault",
+                "Violence Against Women & Children (VAWC)",
+                "Illegal Logging",
+            ],
+        },
+        {
+            label: "🚗 Traffic Violations",
+            color: "text-blue-400 font-semibold",
+            offenses: [
+                "Reckless Driving",
+                "Illegal Parking",
+                "Overspeeding",
+                "Driving Without License",
+                "Road Accident",
+            ],
+        },
+        {
+            label: "📜 Ordinance Violations",
+            color: "text-gray-400 font-semibold",
+            offenses: [
+                "Curfew Violation",
+                "Public Disturbance",
+                "Littering",
+                "Noise Complaint",
+                "Illegal Vending",
+                "Drinking in Public",
+                "Unjust Vexation",
+                "Threats",
+                "Malicious Mischief",
+            ],
+        },
+    ];
+
+    // -------------------- Component --------------------
+
+    const { getReports, changeReportStatus } = useReportStore();
     const [reports, setReports] = useState<any[]>([]);
     const [filteredReports, setFilteredReports] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const [editMode, setEditMode] = useState(false);
+
     const [selectedReport, setSelectedReport] = useState<any | null>(null);
+
+
 
     const [filters, setFilters] = useState({
         search: "",
@@ -36,93 +99,49 @@ const ReportsPage = () => {
         status: "",
     });
 
-    const barangays = [
-        "Almanza Dos",
-        "Almanza Uno",
-        "Daniel Fajardo",
-        "Elias Aldana",
-        "Ilaya",
-        "Manuyo Uno",
-        "Manuyo Dos",
-        "Pamplona Uno",
-        "Pamplona Dos",
-        "Pamplona Tres",
-        "Pilar",
-        "Pulang Lupa Uno",
-        "Pulang Lupa Dos",
-        "Talon Uno",
-        "Talon Dos",
-        "Talon Tres",
-        "Talon Cuatro",
-        "Talon Singko",
-        "Zapote",
-    ];
 
-    // ✅ Mock reports data
+
+    // ✅ Fetch reports
     useEffect(() => {
-        const mockReports = [
-            {
-                blotterNo: "BLTR-2025-4821",
-                dateEncoded: "2025-10-12T08:45:00",
-                barangay: "Pulang Lupa Uno",
-                street: "Almanza Street",
-                typeOfPlace: "Residential",
-                dateReported: "2025-10-12",
-                timeReported: "08:45 AM",
-                offense: "Physical Injury",
-                victim: {
-                    name: "Juan Dela Cruz",
-                    age: "29",
-                    gender: "Male",
-                    harmed: "Harmed",
-                    nationality: "Filipino",
-                    occupation: "Construction Worker",
-                },
-                suspect: {
-                    name: "Pedro Santos",
-                    age: "32",
-                    gender: "Male",
-                    status: "At Large",
-                    nationality: "Filipino",
-                    occupation: "Tricycle Driver",
-                },
-                suspectMotive: "Personal misunderstanding after an argument.",
-                narrative:
-                    "The victim was physically assaulted by the suspect during a heated argument in front of a sari-sari store.",
-                status: "Unsolved",
-                location: { lat: 14.4445, lng: 120.9939 },
-            },
-        ];
+        async function fetchReports() {
+            setLoading(true);
+            const data = await getReports();
+            if (data && data.reports) {
+                setReports(data.reports);
+                setFilteredReports(data.reports);
+            }
+            setLoading(false);
+        }
+        fetchReports();
+    }, [getReports]);
 
-        setReports(mockReports);
-        setFilteredReports(mockReports);
-        setLoading(false);
-    }, []);
-
-    // Filtering logic
+    // ✅ Filtering
     useEffect(() => {
-        if (!reports.length) return;
-
         let filtered = [...reports];
 
-        if (filters.offense) {
-            filtered = filtered.filter((r) => r.offense === filters.offense);
-        }
-        if (filters.barangay) {
-            filtered = filtered.filter((r) => r.barangay === filters.barangay);
-        }
-        if (filters.status) {
+        if (filters.offense)
             filtered = filtered.filter(
-                (r) =>
-                    (r.status || "Pending").toLowerCase() === filters.status.toLowerCase()
+                (r) => r.offense?.toLowerCase() === filters.offense.toLowerCase()
             );
-        }
+
+        if (filters.barangay)
+            filtered = filtered.filter(
+                (r) => r.barangay?.toLowerCase() === filters.barangay.toLowerCase()
+            );
+
+        if (filters.status)
+            filtered = filtered.filter(
+                (r) => r.status?.toLowerCase() === filters.status.toLowerCase()
+            );
+
         if (filters.search.trim()) {
-            const searchLower = filters.search.toLowerCase();
+            const s = filters.search.toLowerCase();
             filtered = filtered.filter(
                 (r) =>
-                    r.victim?.name?.toLowerCase().includes(searchLower) ||
-                    r.offense?.toLowerCase().includes(searchLower)
+                    r.victim?.name?.toLowerCase().includes(s) ||
+                    r.suspect?.name?.toLowerCase().includes(s) ||
+                    r.offense?.toLowerCase().includes(s) ||
+                    r.blotterNo?.toLowerCase().includes(s)
             );
         }
 
@@ -136,102 +155,211 @@ const ReportsPage = () => {
     const unsolvedCount = filteredReports.filter(
         (r) => r.status?.toLowerCase() === "unsolved"
     ).length;
+    const clearedCount = filteredReports.filter(
+        (r) => r.status?.toLowerCase() === "cleared"
+    ).length;
 
-    const offenseFrequency = filteredReports.reduce<Record<string, number>>(
-        (acc, r) => {
-            acc[r.offense] = (acc[r.offense] || 0) + 1;
-            return acc;
-        },
-        {}
-    );
-    const mostCommonOffense = Object.entries(offenseFrequency).reduce(
-        (max, entry) => (entry[1] > max[1] ? entry : max),
-        ["N/A", 0]
-    )[0];
-
-    function handleFilterChange(
-        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-    ) {
+    const handleFilterChange = (e: any) => {
         const { name, value } = e.target;
-        setFilters((prev) => ({ ...prev, [name]: value || "" }));
-    }
+        setFilters((prev) => ({ ...prev, [name]: value }));
+    };
 
-    function resetFilters() {
+    const resetFilters = () =>
         setFilters({ search: "", offense: "", barangay: "", status: "" });
-    }
 
-    function handlePrint() {
+
+    const handlePrint = () => {
         if (!selectedReport) return;
 
-        const printContent = `
-      <html>
-        <head>
-          <title>Case Report - ${selectedReport.blotterNo}</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            h1 { text-align: center; }
-            .section { margin-bottom: 15px; }
-            .label { font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <h1>Case Report</h1>
-          <div class="section">
-            <p><span class="label">Blotter No:</span> ${selectedReport.blotterNo}</p>
-            <p><span class="label">Status:</span> ${selectedReport.status}</p>
-            <p><span class="label">Victim:</span> ${selectedReport.victim.name}</p>
-            <p><span class="label">Barangay:</span> ${selectedReport.barangay}</p>
-            <p><span class="label">Offense:</span> ${selectedReport.offense}</p>
-            <p><span class="label">Narrative:</span> ${selectedReport.narrative}</p>
-            <p><span class="label">Suspect:</span> ${selectedReport.suspect.name || "N/A"}</p>
-          </div>
-        </body>
-      </html>
-    `;
+        const win = window.open("", "_blank");
+        win?.document.write(`
+          <html>
+            <head>
+              <title>Crime Report - ${selectedReport.blotterNo}</title>
+              <style>
+                body {
+                  font-family: "Segoe UI", Arial, sans-serif;
+                  margin: 40px;
+                  background: #fff;
+                  color: #222;
+                  line-height: 1.6;
+                }
+    
+                header {
+                  text-align: center;
+                  border-bottom: 2px solid #000;
+                  padding-bottom: 10px;
+                  margin-bottom: 25px;
+                }
+    
+                header h1 {
+                  font-size: 24px;
+                  margin: 0;
+                  letter-spacing: 1px;
+                  text-transform: uppercase;
+                }
+    
+                header h2 {
+                  font-size: 18px;
+                  margin-top: 5px;
+                  color: #555;
+                }
+    
+                section {
+                  margin-bottom: 20px;
+                }
+    
+                h3 {
+                  border-bottom: 1px solid #ccc;
+                  padding-bottom: 5px;
+                  margin-bottom: 10px;
+                  color: #111;
+                  text-transform: uppercase;
+                  font-size: 15px;
+                }
+    
+                p {
+                  margin: 4px 0;
+                }
+    
+                .details-table {
+                  width: 100%;
+                  border-collapse: collapse;
+                }
+    
+                .details-table td {
+                  padding: 5px 10px;
+                  vertical-align: top;
+                }
+    
+                .details-table td.label {
+                  font-weight: bold;
+                  width: 180px;
+                }
+    
+                footer {
+                  border-top: 2px solid #000;
+                  margin-top: 30px;
+                  padding-top: 10px;
+                  text-align: center;
+                  font-size: 13px;
+                  color: #555;
+                }
+    
+                @media print {
+                  body {
+                    margin: 20px;
+                  }
+                }
+              </style>
+            </head>
+            <body>
+              <header>
+                <h1>Barangay Crime Report</h1>
+                <h2>Official Police Record</h2>
+              </header>
+    
+              <section>
+                <h3>General Information</h3>
+                <table class="details-table">
+                  <tr><td class="label">Blotter No:</td><td>${selectedReport.blotterNo}</td></tr>
+                  <tr><td class="label">Barangay:</td><td>${selectedReport.barangay}</td></tr>
+                  <tr><td class="label">Offense:</td><td>${selectedReport.offense}</td></tr>
+                  <tr><td class="label">Status:</td><td>${selectedReport.status}</td></tr>
+                  <tr><td class="label">Stage of Felony:</td><td>${selectedReport.stageOfFelony}</td></tr>
+                  <tr><td class="label">Mode of Reporting:</td><td>${selectedReport.modeOfReporting}</td></tr>
+                  <tr><td class="label">Date Reported:</td><td>${selectedReport.dateReported}</td></tr>
+                  <tr><td class="label">Date Committed:</td><td>${selectedReport.dateCommitted}</td></tr>
+                  <tr><td class="label">Type of Place:</td><td>${selectedReport.typeOfPlace}</td></tr>
+                  <tr><td class="label">Street:</td><td>${selectedReport.street}</td></tr>
+                </table>
+              </section>
+    
+              <section>
+                <h3>Victim Information</h3>
+                <table class="details-table">
+                  <tr><td class="label">Name:</td><td>${selectedReport.victim?.name}</td></tr>
+                  <tr><td class="label">Age:</td><td>${selectedReport.victim?.age}</td></tr>
+                  <tr><td class="label">Gender:</td><td>${selectedReport.victim?.gender}</td></tr>
+                  <tr><td class="label">Harmed:</td><td>${selectedReport.victim?.harmed}</td></tr>
+                  <tr><td class="label">Nationality:</td><td>${selectedReport.victim?.nationality}</td></tr>
+                  <tr><td class="label">Occupation:</td><td>${selectedReport.victim?.occupation}</td></tr>
+                </table>
+              </section>
+    
+              <section>
+                <h3>Suspect Information</h3>
+                <table class="details-table">
+                  <tr><td class="label">Name:</td><td>${selectedReport.suspect?.name}</td></tr>
+                  <tr><td class="label">Age:</td><td>${selectedReport.suspect?.age}</td></tr>
+                  <tr><td class="label">Gender:</td><td>${selectedReport.suspect?.gender}</td></tr>
+                  <tr><td class="label">Status:</td><td>${selectedReport.suspect?.status}</td></tr>
+                  <tr><td class="label">Nationality:</td><td>${selectedReport.suspect?.nationality}</td></tr>
+                  <tr><td class="label">Occupation:</td><td>${selectedReport.suspect?.occupation}</td></tr>
+                  ${selectedReport.suspectMotive
+                ? `<tr><td class="label">Motive:</td><td>${selectedReport.suspectMotive}</td></tr>`
+                : ""
+            }
+                </table>
+              </section>
+    
+              ${selectedReport.narrative
+                ? `
+                  <section>
+                    <h3>Narrative</h3>
+                    <p style="white-space: pre-line;">${selectedReport.narrative}</p>
+                  </section>`
+                : ""
+            }
+    
+              <section>
+                <h3>Location</h3>
+                <p><b>Coordinates:</b> Lat ${selectedReport.location?.coordinates?.[1]}, Lng ${selectedReport.location?.coordinates?.[0]}</p>
+              </section>
+    
+              <footer>
+                <p>Generated by Barangay Crime Analytics System</p>
+                <p>${new Date().toLocaleString()}</p>
+              </footer>
+            </body>
+          </html>
+        `);
 
-        const newWindow = window.open("", "_blank", "width=800,height=600");
-        newWindow?.document.write(printContent);
-        newWindow?.document.close();
-        newWindow?.print();
-    }
+        win?.document.close();
+        win?.print();
+    };
 
     return (
-        <div className="relative min-h-screen flex flex-col items-center justify-start bg-[#0F1120] text-white p-6 overflow-x-hidden">
-            <div className="w-full max-w-[1200px] space-y-6">
-                <h1 className="text-2xl font-bold">Crime Reports Dashboard</h1>
+
+        <div className="min-h-screen bg-[#0F1120] text-white p-6">
+            <div className="max-w-6xl mx-auto space-y-6">
+                <h1 className="text-2xl font-bold">Barangay Crime Reports Dashboard</h1>
 
                 {/* Filters */}
-                <div className="flex gap-4 flex-wrap items-center">
+                <div className="flex flex-wrap gap-3 items-center">
                     <input
-                        type="text"
                         name="search"
                         value={filters.search}
                         onChange={handleFilterChange}
-                        placeholder="🔍 Search by victim or offense"
+                        placeholder="🔍 Search by victim, suspect, or offense"
                         className="bg-[#1C1E2E] px-3 py-2 rounded-lg text-sm w-64"
                     />
-                    <select
+                    <input
                         name="offense"
                         value={filters.offense}
                         onChange={handleFilterChange}
-                        className="bg-[#1C1E2E] px-3 py-2 rounded-lg text-sm cursor-pointer"
-                    >
-                        <option value="">Offense Type</option>
-                        {Array.from(new Set(reports.map((r) => r.offense))).map((offense) => (
-                            <option key={offense} value={offense}>
-                                {offense}
-                            </option>
-                        ))}
-                    </select>
+                        placeholder="Offense (e.g. Rape)"
+                        className="bg-[#1C1E2E] px-3 py-2 rounded-lg text-sm"
+                    />
                     <select
                         name="barangay"
                         value={filters.barangay}
                         onChange={handleFilterChange}
-                        className="bg-[#1C1E2E] px-3 py-2 rounded-lg text-sm cursor-pointer"
+                        className="bg-[#1C1E2E] px-3 py-2 rounded-lg text-sm"
                     >
                         <option value="">Barangay</option>
-                        {barangays.map((b) => (
-                            <option key={b} value={b}>
+                        {barangays.map((b, i) => (
+                            <option key={i} value={b}>
                                 {b}
                             </option>
                         ))}
@@ -240,7 +368,7 @@ const ReportsPage = () => {
                         name="status"
                         value={filters.status}
                         onChange={handleFilterChange}
-                        className="bg-[#1C1E2E] px-3 py-2 rounded-lg text-sm cursor-pointer"
+                        className="bg-[#1C1E2E] px-3 py-2 rounded-lg text-sm"
                     >
                         <option value="">Status</option>
                         <option value="Solved">Solved</option>
@@ -249,282 +377,496 @@ const ReportsPage = () => {
                     </select>
                     <button
                         onClick={resetFilters}
-                        className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-sm font-medium cursor-pointer"
+                        className="bg-gray-600 px-4 py-2 rounded-lg text-sm"
                     >
-                        Reset Filters
+                        Reset
                     </button>
                 </div>
 
-                {/* Summary Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-[#1C1E2E] p-4 rounded-xl shadow">
+                {/* Stats */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-[#1C1E2E] p-4 rounded-xl">
                         <h2 className="text-sm text-gray-400">Total Reports</h2>
-                        <p className="text-xl font-bold">{loading ? "Loading..." : totalReports}</p>
+                        <p className="text-xl font-bold">{totalReports}</p>
                     </div>
-                    <div className="bg-[#1C1E2E] p-4 rounded-xl shadow">
-                        <h2 className="text-sm text-gray-400">Most Common Offense</h2>
-                        <p className="text-xl font-bold">
-                            {loading ? "Loading..." : mostCommonOffense}
-                        </p>
-                    </div>
-                    <div className="bg-[#1C1E2E] p-4 rounded-xl shadow">
+                    <div className="bg-[#1C1E2E] p-4 rounded-xl">
                         <h2 className="text-sm text-gray-400">Solved Cases</h2>
-                        <p className="text-xl font-bold">{loading ? "Loading..." : solvedCount}</p>
+                        <p className="text-xl font-bold">{solvedCount}</p>
                     </div>
-                    <div className="bg-[#1C1E2E] p-4 rounded-xl shadow">
+                    <div className="bg-[#1C1E2E] p-4 rounded-xl">
                         <h2 className="text-sm text-gray-400">Unsolved Cases</h2>
-                        <p className="text-xl font-bold">{loading ? "Loading..." : unsolvedCount}</p>
+                        <p className="text-xl font-bold">{unsolvedCount}</p>
+                    </div>
+                    <div className="bg-[#1C1E2E] p-4 rounded-xl">
+                        <h2 className="text-sm text-gray-400">Cleared Cases</h2>
+                        <p className="text-xl font-bold">{clearedCount}</p>
                     </div>
                 </div>
 
-                {/* Reports Table */}
-                <div className="bg-[#1C1E2E] rounded-xl p-4 overflow-x-auto">
+                {/* Table */}
+                <div className="bg-[#1C1E2E] rounded-xl overflow-x-auto p-4">
                     {loading ? (
-                        <p className="text-center text-gray-400">Loading reports...</p>
+                        <p>Loading reports...</p>
+                    ) : filteredReports.length === 0 ? (
+                        <p className="text-gray-400 text-center">No reports found.</p>
                     ) : (
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="text-left border-b border-gray-700">
-                                    <th className="p-2">Blotter No</th>
-                                    <th className="p-2">Victim</th>
-                                    <th className="p-2">Offense</th>
-                                    <th className="p-2">Barangay</th>
-                                    <th className="p-2">Date Reported</th>
-                                    <th className="p-2">Status</th>
-                                    <th className="p-2">Actions</th>
+                                <tr className="border-b border-gray-700">
+                                    <th className="p-2 text-left">Blotter No</th>
+                                    <th className="p-2 text-left">Offense</th>
+                                    <th className="p-2 text-left">Barangay</th>
+                                    <th className="p-2 text-left">Victim</th>
+                                    <th className="p-2 text-left">Suspect</th>
+                                    <th className="p-2 text-left">Status</th>
+                                    <th className="p-2 text-left">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredReports.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={7} className="p-4 text-center text-gray-400">
-                                            No reports found.
+                                {filteredReports.map((r, i) => (
+                                    <tr key={r._id || i} className="border-b border-gray-800">
+                                        <td className="p-2">{r.blotterNo}</td>
+                                        <td className="p-2">{r.offense}</td>
+                                        <td className="p-2">{r.barangay}</td>
+                                        <td className="p-2">{r.victim?.name}</td>
+                                        <td className="p-2">{r.suspect?.name}</td>
+                                        <td className="p-2">
+                                            <select
+                                                value={r.status}
+                                                onChange={(e) => {
+                                                    const newStatus = e.target.value;
+                                                    setReports((prev) =>
+                                                        prev.map((x) =>
+                                                            x._id === r._id ? { ...x, status: newStatus } : x
+                                                        )
+                                                    );
+                                                    changeReportStatus(r._id, newStatus);
+                                                }}
+                                                className="bg-[#2A2C3E] rounded-lg px-2 py-1 text-sm"
+                                            >
+                                                <option value="Solved">🟢 Solved</option>
+                                                <option value="Unsolved">🔴 Unsolved</option>
+                                                <option value="Cleared">🟡 Cleared</option>
+                                            </select>
+                                        </td>
+                                        <td className="p-2">
+                                            <button
+                                                onClick={() => setSelectedReport(r)}
+                                                className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-lg text-xs"
+                                            >
+                                                View
+                                            </button>
                                         </td>
                                     </tr>
-                                ) : (
-                                    filteredReports.map((report) => (
-                                        <tr key={report.blotterNo} className="border-b border-gray-800">
-                                            <td className="p-2">{report.blotterNo}</td>
-                                            <td className="p-2">{report.victim.name}</td>
-                                            <td className="p-2">{report.offense}</td>
-                                            <td className="p-2">{report.barangay}</td>
-                                            <td className="p-2">{report.dateReported}</td>
-                                            <td className="p-2">
-                                                <select
-                                                    value={report.status}
-                                                    onChange={(e) => {
-                                                        const newStatus = e.target.value;
-                                                        setReports((prev) =>
-                                                            prev.map((r) =>
-                                                                r.blotterNo === report.blotterNo
-                                                                    ? { ...r, status: newStatus }
-                                                                    : r
-                                                            )
-                                                        );
-                                                        changeReportStatus(report.blotterNo, newStatus);
-                                                    }}
-                                                    className="bg-[#2A2C3E] text-sm px-2 py-1 rounded-lg border border-gray-600 cursor-pointer"
-                                                >
-                                                    <option value="Solved">🟢 Solved</option>
-                                                    <option value="Unsolved">🔴 Unsolved</option>
-                                                    <option value="Cleared">🟡 Cleared</option>
-                                                </select>
-                                            </td>
-                                            <td className="p-2">
-                                                <button
-                                                    onClick={() => setSelectedReport(report)}
-                                                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs cursor-pointer"
-                                                >
-                                                    View
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
+                                ))}
                             </tbody>
                         </table>
                     )}
                 </div>
-            </div>
 
-            {/* View Modal */}
-            {selectedReport && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                    <div className="bg-[#1C1E2E] p-6 rounded-xl w-full max-w-3xl shadow-2xl overflow-y-auto max-h-[90vh]">
-                        {/* Header */}
-                        <div className="flex items-center justify-between border-b border-gray-700 pb-3 mb-4">
-                            <h2 className="text-2xl font-bold text-white">Case Report Details</h2>
-                            <button
-                                onClick={() => setSelectedReport(null)}
-                                className="text-gray-400 hover:text-white text-xl transition"
-                            >
-                                ✕
-                            </button>
-                        </div>
+                {/* Modal */}
+                {selectedReport && (
+                    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 animate-fadeIn">
+                        <div className="relative bg-gradient-to-b from-[#1E2233] to-[#151827] p-8 rounded-2xl w-[850px] max-h-[90vh] overflow-y-auto border border-gray-700/50 shadow-[0_0_30px_rgba(0,0,0,0.4)] transition-all duration-300">
 
-                        {/* Case Summary */}
-                        <div className="space-y-2 mb-4">
-                            <p>
-                                <span className="text-gray-400">Blotter No:</span> {selectedReport.blotterNo}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Date Encoded:</span>{" "}
-                                {new Date(selectedReport.dateEncoded).toLocaleString()}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Status:</span>{" "}
-                                <span className="font-semibold text-yellow-400">
-                                    {selectedReport.status}
-                                </span>
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Date Reported:</span>{" "}
-                                {selectedReport.dateReported} at {selectedReport.timeReported}
-                            </p>
-                        </div>
-
-                        {/* Location Details */}
-                        <div className="bg-[#25273A] p-4 rounded-lg space-y-2 mb-4">
-                            <h3 className="font-semibold text-lg border-b border-gray-600 pb-1">
-                                Location Details
-                            </h3>
-                            <p>
-                                <span className="text-gray-400">Barangay:</span>{" "}
-                                {selectedReport.barangay}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Street:</span> {selectedReport.street}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Type of Place:</span>{" "}
-                                {selectedReport.typeOfPlace}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Latitude:</span>{" "}
-                                {selectedReport.location?.lat}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Longitude:</span>{" "}
-                                {selectedReport.location?.lng}
-                            </p>
-                        </div>
-
-                        {/* Victim Section */}
-                        <div className="bg-[#25273A] p-4 rounded-lg space-y-2 mb-4">
-                            <h3 className="font-semibold text-lg border-b border-gray-600 pb-1">
-                                Victim Information
-                            </h3>
-                            <p>
-                                <span className="text-gray-400">Name:</span>{" "}
-                                {selectedReport.victim.name}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Age:</span>{" "}
-                                {selectedReport.victim.age}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Gender:</span>{" "}
-                                {selectedReport.victim.gender}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Harmed:</span>{" "}
-                                {selectedReport.victim.harmed}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Nationality:</span>{" "}
-                                {selectedReport.victim.nationality}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Occupation:</span>{" "}
-                                {selectedReport.victim.occupation}
-                            </p>
-                        </div>
-
-                        {/* Suspect Section */}
-                        <div className="bg-[#25273A] p-4 rounded-lg space-y-2 mb-4">
-                            <h3 className="font-semibold text-lg border-b border-gray-600 pb-1">
-                                Suspect Information
-                            </h3>
-                            <p>
-                                <span className="text-gray-400">Name:</span>{" "}
-                                {selectedReport.suspect.name || "N/A"}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Age:</span>{" "}
-                                {selectedReport.suspect.age || "N/A"}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Gender:</span>{" "}
-                                {selectedReport.suspect.gender || "N/A"}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Status:</span>{" "}
-                                {selectedReport.suspect.status || "N/A"}
-                            </p>
-                            <p>
-                                <span className="text-gray-400">Motive:</span>{" "}
-                                {selectedReport.suspectMotive || "N/A"}
-                            </p>
-                        </div>
-
-                        {/* Narrative */}
-                        <div className="bg-[#25273A] p-4 rounded-lg space-y-2 mb-4">
-                            <h3 className="font-semibold text-lg border-b border-gray-600 pb-1">
-                                Incident Narrative
-                            </h3>
-                            <p className="text-gray-300 text-sm">{selectedReport.narrative}</p>
-                        </div>
-
-                        {/* 🗺️ Map Section */}
-                        {selectedReport.location && (
-                            <div className="bg-[#25273A] p-4 rounded-lg mb-4">
-                                <h3 className="font-semibold text-lg border-b border-gray-600 pb-2 mb-2">
-                                    Incident Location Map
-                                </h3>
-                                <MapContainer
-                                    center={[
-                                        selectedReport.location.lat,
-                                        selectedReport.location.lng,
-                                    ]}
-                                    zoom={16}
-                                    style={{ height: "300px", width: "100%", borderRadius: "10px" }}
+                            {/* Header */}
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-2xl font-bold text-green-400 flex items-center gap-2">
+                                    <span className="text-3xl">🧾</span> Case Report Details
+                                </h2>
+                                <button
+                                    onClick={() => setEditMode((prev) => !prev)}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-all ${editMode
+                                        ? "bg-blue-600 hover:bg-blue-500 text-white"
+                                        : "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                                        }`}
                                 >
-                                    <TileLayer
-                                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                                    />
-                                    <Marker
-                                        position={[
-                                            selectedReport.location.lat,
-                                            selectedReport.location.lng,
-                                        ]}
-                                    >
-                                        <Popup>
-                                            {selectedReport.barangay}, {selectedReport.street}
-                                        </Popup>
-                                    </Marker>
-                                </MapContainer>
+                                    {editMode ? "💾 Save Changes" : "✏️ Edit"}
+                                </button>
                             </div>
-                        )}
 
-                        {/* Footer Buttons */}
-                        <div className="flex justify-end gap-2 pt-4 border-t border-gray-700">
-                            <button
-                                onClick={handlePrint}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm"
-                            >
-                                🖨️ Print
-                            </button>
-                            <button
-                                onClick={() => setSelectedReport(null)}
-                                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-sm"
-                            >
-                                Close
-                            </button>
+                            <div className="h-[1px] w-full bg-gradient-to-r from-green-400/60 via-gray-500/30 to-transparent mb-6"></div>
+
+                            {/* General Info */}
+                            <section className="mb-6">
+                                <h3 className="text-lg font-semibold text-gray-100 mb-3 flex items-center gap-2">
+                                    📋 General Information
+                                </h3>
+                                <div className="grid grid-cols-2 gap-3 text-sm text-gray-300 bg-[#22263A]/60 p-4 rounded-xl border border-gray-700/50">
+                                    {[
+                                        ["Blotter No", "blotterNo"],
+                                        ["Offense", "offense"],
+                                        ["Status", "status"],
+                                        ["Barangay", "barangay"],
+                                        ["Street", "street"],
+                                        ["Type of Place", "typeOfPlace"],
+                                        ["Date Reported", "dateReported"],
+                                        ["Time Reported", "timeReported"],
+                                        ["Date Committed", "dateCommitted"],
+                                        ["Time Committed", "timeCommitted"],
+                                        ["Stage of Felony", "stageOfFelony"],
+                                        ["Mode of Reporting", "modeOfReporting"],
+                                    ].map(([label, key]) => {
+                                        const value = selectedReport[key as keyof typeof selectedReport];
+
+                                        if (editMode) {
+                                            switch (key) {
+                                                case "blotterNo":
+                                                    return (
+                                                        <div key={key}>
+                                                            <b>{label}:</b>{" "}
+                                                            <input
+                                                                type="text"
+                                                                value={value ? String(value) : ""}
+                                                                readOnly
+                                                                className="bg-gray-700 border-b border-gray-500 px-1 w-full cursor-not-allowed"
+                                                            />
+                                                        </div>
+                                                    );
+
+                                                case "offense":
+                                                    return (
+                                                        <div key={key}>
+                                                            <b>{label}:</b>{" "}
+                                                            <select
+                                                                value={value ? String(value) : ""}
+                                                                onChange={(e) =>
+                                                                    setSelectedReport({ ...selectedReport, [key]: e.target.value })
+                                                                }
+                                                                className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                            >
+                                                                <option value="">Select Offense</option>
+                                                                {offenseCategories.map((cat) => (
+                                                                    <optgroup key={cat.label} label={cat.label} className={cat.color}>
+                                                                        {cat.offenses.map((off) => (
+                                                                            <option key={off} value={off}>
+                                                                                {off}
+                                                                            </option>
+                                                                        ))}
+                                                                    </optgroup>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    );
+
+                                                case "status":
+                                                    return (
+                                                        <div key={key} >
+                                                            <b>{label}:</b>{" "}
+                                                            <select
+                                                                value={value ? String(value) : ""}
+                                                                onChange={(e) =>
+                                                                    setSelectedReport({ ...selectedReport, [key]: e.target.value })
+                                                                }
+                                                                className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                            >
+                                                                <option className='text-black' value="">Select Status</option>
+                                                                <option className='text-black'>Solved</option>
+                                                                <option className='text-black'>Cleared</option>
+                                                                <option className='text-black'>Unsolved</option>
+                                                            </select>
+                                                        </div>
+                                                    );
+
+                                                case "barangay":
+                                                    return (
+                                                        <div key={key}>
+                                                            <b>{label}:</b>{" "}
+                                                            <select
+                                                                value={value ? String(value) : ""}
+                                                                onChange={(e) =>
+                                                                    setSelectedReport({ ...selectedReport, [key]: e.target.value })
+                                                                }
+                                                                className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                            >
+                                                                <option className='text-black' value="">Select Barangay</option>
+                                                                {barangays.map((b) => (
+                                                                    <option key={b} value={b} className='text-black'>
+                                                                        {b}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    );
+
+                                                case "typeOfPlace":
+                                                    return (
+                                                        <div key={key}>
+                                                            <b>{label}:</b>{" "}
+                                                            <select
+                                                                value={value ? String(value) : ""}
+                                                                onChange={(e) =>
+                                                                    setSelectedReport({ ...selectedReport, [key]: e.target.value })
+                                                                }
+                                                                className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                            >
+                                                                <option className='text-black' value="">Select Type</option>
+                                                                <option className='text-black' value="Along the Street">Along the Street</option>
+                                                                <option className='text-black' value="Residential">Residential</option>
+                                                                <option className='text-black' value="Commercial">Commercial</option>
+                                                            </select>
+                                                        </div>
+                                                    );
+
+                                                case "modeOfReporting":
+                                                    return (
+                                                        <div key={key}>
+                                                            <b>{label}:</b>{" "}
+                                                            <select
+                                                                value={value ? String(value) : ""}
+                                                                onChange={(e) =>
+                                                                    setSelectedReport({ ...selectedReport, [key]: e.target.value })
+                                                                }
+                                                                className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                            >
+                                                                <option className='text-black' value="">Select Mode</option>
+                                                                <option className='text-black' value="In Person">In Person</option>
+                                                                <option className='text-black' value="Phone Call">Phone Call</option>
+                                                                <option className='text-black' value="Online">Online</option>
+                                                            </select>
+                                                        </div>
+                                                    );
+
+                                                case "stageOfFelony":
+                                                    return (
+                                                        <div key={key}>
+                                                            <b>{label}:</b>{" "}
+                                                            <select
+                                                                value={value ? String(value) : ""}
+                                                                onChange={(e) =>
+                                                                    setSelectedReport({ ...selectedReport, [key]: e.target.value })
+                                                                }
+                                                                className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                            >
+                                                                <option className='text-black' value="">Select Stage</option>
+                                                                <option className='text-black' value="Attempted">Attempted</option>
+                                                                <option className='text-black' value="Frustrated">Frustrated</option>
+                                                                <option className='text-black' value="Consummated">Consummated</option>
+                                                            </select>
+                                                        </div>
+                                                    );
+
+                                                default:
+                                                    return (
+                                                        <div key={key}>
+                                                            <b>{label}:</b>{" "}
+                                                            <input
+                                                                type="text"
+                                                                value={value ? String(value) : ""}
+                                                                onChange={(e) =>
+                                                                    setSelectedReport({ ...selectedReport, [key]: e.target.value })
+                                                                }
+                                                                className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                            />
+                                                        </div>
+                                                    );
+                                            }
+                                        }
+
+                                        // view mode
+                                        return (
+                                            <div key={key}>
+                                                <b>{label}:</b> <span>{value ? String(value) : "—"}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </section>
+
+                            {/* Victim Information */}
+                            <section className="mb-6">
+                                <h3 className="text-lg font-semibold text-gray-100 mb-3 flex items-center gap-2">
+                                    🙍‍♂️ Victim Information
+                                </h3>
+                                <div className="grid grid-cols-2 gap-3 text-sm text-gray-300 bg-[#22263A]/60 p-4 rounded-xl border border-gray-700/50">
+                                    {Object.entries(selectedReport.victim || {}).map(([key, value]) => (
+                                        <div key={key}>
+                                            <b>{key.charAt(0).toUpperCase() + key.slice(1)}:</b>{" "}
+                                            {editMode ? (
+                                                key === "gender" ? (
+                                                    <select
+                                                        value={value ? String(value) : ""}
+                                                        onChange={(e) =>
+                                                            setSelectedReport({
+                                                                ...selectedReport,
+                                                                victim: { ...selectedReport.victim, [key]: e.target.value },
+                                                            })
+                                                        }
+                                                        className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                    >
+                                                        <option value="">Select Gender</option>
+                                                        <option>Male</option>
+                                                        <option>Female</option>
+                                                    </select>
+                                                ) : key === "harmed" ? (
+                                                    <select
+                                                        value={value ? String(value) : ""}
+                                                        onChange={(e) =>
+                                                            setSelectedReport({
+                                                                ...selectedReport,
+                                                                victim: { ...selectedReport.victim, [key]: e.target.value },
+                                                            })
+                                                        }
+                                                        className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                    >
+                                                        <option value="">Select Status</option>
+                                                        <option>Harmed</option>
+                                                        <option>Unharmed</option>
+                                                    </select>
+                                                ) : (
+                                                    <input
+                                                        type={key === "age" ? "number" : "text"}
+                                                        value={value ? String(value) : ""}
+                                                        onChange={(e) =>
+                                                            setSelectedReport({
+                                                                ...selectedReport,
+                                                                victim: { ...selectedReport.victim, [key]: e.target.value },
+                                                            })
+                                                        }
+                                                        className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                    />
+                                                )
+                                            ) : (
+                                                <span>{value ? String(value) : "—"}</span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+
+                            {/* Suspect Information */}
+                            <section className="mb-6">
+                                <h3 className="text-lg font-semibold text-gray-100 mb-3 flex items-center gap-2">
+                                    🕵️‍♂️ Suspect Information
+                                </h3>
+                                <div className="grid grid-cols-2 gap-3 text-sm text-gray-300 bg-[#22263A]/60 p-4 rounded-xl border border-gray-700/50">
+                                    {Object.entries(selectedReport.suspect || {}).map(([key, value]) => (
+                                        <div key={key}>
+                                            <b>{key.charAt(0).toUpperCase() + key.slice(1)}:</b>{" "}
+                                            {editMode ? (
+                                                key === "gender" ? (
+                                                    <select
+                                                        value={value ? String(value) : ""}
+                                                        onChange={(e) =>
+                                                            setSelectedReport({
+                                                                ...selectedReport,
+                                                                suspect: { ...selectedReport.suspect, [key]: e.target.value },
+                                                            })
+                                                        }
+                                                        className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                    >
+                                                        <option value="">Select Gender</option>
+                                                        <option>Male</option>
+                                                        <option>Female</option>
+                                                    </select>
+                                                ) : key === "status" ? (
+                                                    <select
+                                                        value={value ? String(value) : ""}
+                                                        onChange={(e) =>
+                                                            setSelectedReport({
+                                                                ...selectedReport,
+                                                                suspect: { ...selectedReport.suspect, [key]: e.target.value },
+                                                            })
+                                                        }
+                                                        className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                    >
+                                                        <option value="">Select Status</option>
+                                                        <option>Arrested</option>
+                                                        <option>Detained</option>
+                                                        <option>At Large</option>
+                                                    </select>
+                                                ) : (
+                                                    <input
+                                                        type={key === "age" ? "number" : "text"}
+                                                        value={value ? String(value) : ""}
+                                                        onChange={(e) =>
+                                                            setSelectedReport({
+                                                                ...selectedReport,
+                                                                suspect: { ...selectedReport.suspect, [key]: e.target.value },
+                                                            })
+                                                        }
+                                                        className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                    />
+                                                )
+                                            ) : (
+                                                <span>{value ? String(value) : "—"}</span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+
+                            {/* Narrative */}
+                            {selectedReport.narrative && (
+                                <section className="mb-6">
+                                    <h3 className="text-lg font-semibold text-gray-100 mb-3 flex items-center gap-2">
+                                        🗒 Narrative
+                                    </h3>
+                                    <div className="bg-[#22263A]/60 p-4 rounded-xl border border-gray-700/50">
+                                        {editMode ? (
+                                            <textarea
+                                                value={selectedReport.narrative || ""}
+                                                onChange={(e) =>
+                                                    setSelectedReport({ ...selectedReport, narrative: e.target.value })
+                                                }
+                                                className="w-full bg-transparent border border-gray-600 focus:border-green-400 outline-none p-2 rounded-md text-sm text-gray-300 resize-none"
+                                                rows={4}
+                                            />
+                                        ) : (
+                                            <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">
+                                                {selectedReport.narrative}
+                                            </p>
+                                        )}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* Section: Location */}
+                            <section>
+                                <h3 className="text-lg font-semibold text-gray-100 mb-3 flex items-center gap-2">
+                                    📍 Location
+                                </h3>
+                                <div className="bg-[#22263A]/60 p-4 rounded-xl border border-gray-700/50">
+                                    <p className="text-sm text-gray-300 mb-3">
+                                        <b>Coordinates:</b>{" "}
+                                        {selectedReport.location?.coordinates?.[1]},{" "}
+                                        {selectedReport.location?.coordinates?.[0]}
+                                    </p>
+                                    <iframe
+                                        className="rounded-lg border border-gray-700 shadow-lg"
+                                        width="100%"
+                                        height="250"
+                                        loading="lazy"
+                                        src={`https://www.google.com/maps?q=${selectedReport.location?.coordinates?.[1]},${selectedReport.location?.coordinates?.[0]}&hl=es;z=14&output=embed`}
+                                    ></iframe>
+                                </div>
+                            </section>
+
+                            {/* Footer */}
+                            <div className="flex justify-end mt-8 gap-3 pt-4 border-t border-gray-700/50">
+                                <button
+                                    onClick={() => setSelectedReport(null)}
+                                    className="px-5 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium transition-all duration-200"
+                                >
+                                    ✖ Close
+                                </button>
+                                {!editMode && (
+                                    <button
+                                        onClick={handlePrint}
+                                        className="px-5 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-medium shadow-md hover:shadow-green-400/20 transition-all duration-200"
+                                    >
+                                        🖨 Print Report
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+
+
+
+
+            </div>
         </div>
     );
 };

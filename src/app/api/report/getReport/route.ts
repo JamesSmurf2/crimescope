@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import ReportsModel from "@/utils/models/Reports.model";
+import Report from "@/utils/models/Reports.model";
 import { connectDb } from "@/utils/utility/ConnectDb";
 
 export const GET = async (req: NextRequest) => {
     try {
         await connectDb();
 
-        const reports = await ReportsModel.find().sort({ createdAt: -1 });
+        const reports = await Report.find().sort({ createdAt: -1 });
 
         return NextResponse.json({ reports }, { status: 200 });
     } catch (error) {
