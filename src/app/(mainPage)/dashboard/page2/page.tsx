@@ -357,6 +357,7 @@ const ReportsPage = () => {
                             </option>
                         ))}
                     </select>
+
                     <select
                         name="status"
                         value={filters.status}
@@ -368,6 +369,7 @@ const ReportsPage = () => {
                         <option value="Unsolved">Unsolved</option>
                         <option value="Cleared">Cleared</option>
                     </select>
+
                     <button
                         onClick={resetFilters}
                         className="bg-gray-600 px-4 py-2 rounded-lg text-sm"
@@ -423,24 +425,10 @@ const ReportsPage = () => {
                                         <td className="p-2">{r.barangay}</td>
                                         <td className="p-2">{r.victim?.name}</td>
                                         <td className="p-2">{r.suspect?.name}</td>
-                                        <td className="p-2">
-                                            <select
-                                                value={r.status}
-                                                onChange={(e) => {
-                                                    const newStatus = e.target.value;
-                                                    setReports((prev) =>
-                                                        prev.map((x) =>
-                                                            x._id === r._id ? { ...x, status: newStatus } : x
-                                                        )
-                                                    );
-                                                    changeReportStatus(r._id, newStatus);
-                                                }}
-                                                className="bg-[#2A2C3E] rounded-lg px-2 py-1 text-sm"
-                                            >
-                                                <option value="Solved">🟢 Solved</option>
-                                                <option value="Unsolved">🔴 Unsolved</option>
-                                                <option value="Cleared">🟡 Cleared</option>
-                                            </select>
+                                        <td className="p-2 text-sm">
+                                            {r.status === "Solved" && "🟢 Solved"}
+                                            {r.status === "Unsolved" && "🔴 Unsolved"}
+                                            {r.status === "Cleared" && "🟡 Cleared"}
                                         </td>
                                         <td className="p-2">
                                             <button
@@ -499,6 +487,7 @@ const ReportsPage = () => {
                                         ["Time Committed", "timeCommitted"],
                                         ["Stage of Felony", "stageOfFelony"],
                                         ["Mode of Reporting", "modeOfReporting"],
+                                        ["Suspect Motive", "suspectMotive"],
                                     ].map(([label, key]) => {
                                         const value = selectedReport[key as keyof typeof selectedReport];
 
@@ -672,58 +661,60 @@ const ReportsPage = () => {
                                     🙍‍♂️ Victim Information
                                 </h3>
                                 <div className="grid grid-cols-2 gap-3 text-sm text-gray-300 bg-[#22263A]/60 p-4 rounded-xl border border-gray-700/50">
-                                    {Object.entries(selectedReport.victim || {}).map(([key, value]) => (
-                                        <div key={key}>
-                                            <b>{key.charAt(0).toUpperCase() + key.slice(1)}:</b>{" "}
-                                            {editMode ? (
-                                                key === "gender" ? (
-                                                    <select
-                                                        value={value ? String(value) : ""}
-                                                        onChange={(e) =>
-                                                            setSelectedReport({
-                                                                ...selectedReport,
-                                                                victim: { ...selectedReport.victim, [key]: e.target.value },
-                                                            })
-                                                        }
-                                                        className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
-                                                    >
-                                                        <option value="">Select Gender</option>
-                                                        <option>Male</option>
-                                                        <option>Female</option>
-                                                    </select>
-                                                ) : key === "harmed" ? (
-                                                    <select
-                                                        value={value ? String(value) : ""}
-                                                        onChange={(e) =>
-                                                            setSelectedReport({
-                                                                ...selectedReport,
-                                                                victim: { ...selectedReport.victim, [key]: e.target.value },
-                                                            })
-                                                        }
-                                                        className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
-                                                    >
-                                                        <option value="">Select Status</option>
-                                                        <option>Harmed</option>
-                                                        <option>Unharmed</option>
-                                                    </select>
+                                    {Object.entries(selectedReport.victim || {})
+                                        .filter(([key]) => key !== "_id") // <-- filter out _id
+                                        .map(([key, value]) => (
+                                            <div key={key}>
+                                                <b>{key.charAt(0).toUpperCase() + key.slice(1)}:</b>{" "}
+                                                {editMode ? (
+                                                    key === "gender" ? (
+                                                        <select
+                                                            value={value ? String(value) : ""}
+                                                            onChange={(e) =>
+                                                                setSelectedReport({
+                                                                    ...selectedReport,
+                                                                    victim: { ...selectedReport.victim, [key]: e.target.value },
+                                                                })
+                                                            }
+                                                            className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                        >
+                                                            <option value="">Select Gender</option>
+                                                            <option>Male</option>
+                                                            <option>Female</option>
+                                                        </select>
+                                                    ) : key === "harmed" ? (
+                                                        <select
+                                                            value={value ? String(value) : ""}
+                                                            onChange={(e) =>
+                                                                setSelectedReport({
+                                                                    ...selectedReport,
+                                                                    victim: { ...selectedReport.victim, [key]: e.target.value },
+                                                                })
+                                                            }
+                                                            className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                        >
+                                                            <option value="">Select Status</option>
+                                                            <option>Harmed</option>
+                                                            <option>Unharmed</option>
+                                                        </select>
+                                                    ) : (
+                                                        <input
+                                                            type={key === "age" ? "number" : "text"}
+                                                            value={value ? String(value) : ""}
+                                                            onChange={(e) =>
+                                                                setSelectedReport({
+                                                                    ...selectedReport,
+                                                                    victim: { ...selectedReport.victim, [key]: e.target.value },
+                                                                })
+                                                            }
+                                                            className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                        />
+                                                    )
                                                 ) : (
-                                                    <input
-                                                        type={key === "age" ? "number" : "text"}
-                                                        value={value ? String(value) : ""}
-                                                        onChange={(e) =>
-                                                            setSelectedReport({
-                                                                ...selectedReport,
-                                                                victim: { ...selectedReport.victim, [key]: e.target.value },
-                                                            })
-                                                        }
-                                                        className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
-                                                    />
-                                                )
-                                            ) : (
-                                                <span>{value ? String(value) : "—"}</span>
-                                            )}
-                                        </div>
-                                    ))}
+                                                    <span>{value ? String(value) : "—"}</span>
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             </section>
 
@@ -733,59 +724,61 @@ const ReportsPage = () => {
                                     🕵️‍♂️ Suspect Information
                                 </h3>
                                 <div className="grid grid-cols-2 gap-3 text-sm text-gray-300 bg-[#22263A]/60 p-4 rounded-xl border border-gray-700/50">
-                                    {Object.entries(selectedReport.suspect || {}).map(([key, value]) => (
-                                        <div key={key}>
-                                            <b>{key.charAt(0).toUpperCase() + key.slice(1)}:</b>{" "}
-                                            {editMode ? (
-                                                key === "gender" ? (
-                                                    <select
-                                                        value={value ? String(value) : ""}
-                                                        onChange={(e) =>
-                                                            setSelectedReport({
-                                                                ...selectedReport,
-                                                                suspect: { ...selectedReport.suspect, [key]: e.target.value },
-                                                            })
-                                                        }
-                                                        className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
-                                                    >
-                                                        <option value="">Select Gender</option>
-                                                        <option>Male</option>
-                                                        <option>Female</option>
-                                                    </select>
-                                                ) : key === "status" ? (
-                                                    <select
-                                                        value={value ? String(value) : ""}
-                                                        onChange={(e) =>
-                                                            setSelectedReport({
-                                                                ...selectedReport,
-                                                                suspect: { ...selectedReport.suspect, [key]: e.target.value },
-                                                            })
-                                                        }
-                                                        className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
-                                                    >
-                                                        <option value="">Select Status</option>
-                                                        <option>Arrested</option>
-                                                        <option>Detained</option>
-                                                        <option>At Large</option>
-                                                    </select>
+                                    {Object.entries(selectedReport.suspect || {})
+                                        .filter(([key]) => key !== "_id") // <-- filter out _id
+                                        .map(([key, value]) => (
+                                            <div key={key}>
+                                                <b>{key.charAt(0).toUpperCase() + key.slice(1)}:</b>{" "}
+                                                {editMode ? (
+                                                    key === "gender" ? (
+                                                        <select
+                                                            value={value ? String(value) : ""}
+                                                            onChange={(e) =>
+                                                                setSelectedReport({
+                                                                    ...selectedReport,
+                                                                    suspect: { ...selectedReport.suspect, [key]: e.target.value },
+                                                                })
+                                                            }
+                                                            className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                        >
+                                                            <option value="">Select Gender</option>
+                                                            <option>Male</option>
+                                                            <option>Female</option>
+                                                        </select>
+                                                    ) : key === "status" ? (
+                                                        <select
+                                                            value={value ? String(value) : ""}
+                                                            onChange={(e) =>
+                                                                setSelectedReport({
+                                                                    ...selectedReport,
+                                                                    suspect: { ...selectedReport.suspect, [key]: e.target.value },
+                                                                })
+                                                            }
+                                                            className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                        >
+                                                            <option value="">Select Status</option>
+                                                            <option>Arrested</option>
+                                                            <option>Detained</option>
+                                                            <option>At Large</option>
+                                                        </select>
+                                                    ) : (
+                                                        <input
+                                                            type={key === "age" ? "number" : "text"}
+                                                            value={value ? String(value) : ""}
+                                                            onChange={(e) =>
+                                                                setSelectedReport({
+                                                                    ...selectedReport,
+                                                                    suspect: { ...selectedReport.suspect, [key]: e.target.value },
+                                                                })
+                                                            }
+                                                            className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                        />
+                                                    )
                                                 ) : (
-                                                    <input
-                                                        type={key === "age" ? "number" : "text"}
-                                                        value={value ? String(value) : ""}
-                                                        onChange={(e) =>
-                                                            setSelectedReport({
-                                                                ...selectedReport,
-                                                                suspect: { ...selectedReport.suspect, [key]: e.target.value },
-                                                            })
-                                                        }
-                                                        className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
-                                                    />
-                                                )
-                                            ) : (
-                                                <span>{value ? String(value) : "—"}</span>
-                                            )}
-                                        </div>
-                                    ))}
+                                                    <span>{value ? String(value) : "—"}</span>
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             </section>
 
