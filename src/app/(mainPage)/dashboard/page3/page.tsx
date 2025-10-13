@@ -50,7 +50,7 @@ type CrimeForm = {
 const barangays = [
     "Almanza Dos",
     "Almanza Uno",
-    "BF International CAA",
+    "B.F. CAA International Village",
     "Daniel Fajardo",
     "Elias Aldana",
     "Ilaya",
