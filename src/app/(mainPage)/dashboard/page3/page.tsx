@@ -1,31 +1,38 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
-const CrimeMap = dynamic(() => import("@/components/reusable/CrimeMap"), { ssr: false });
-
+import React, { useEffect, useState } from "react";
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+    ArcElement,
+    TimeScale,
+    PointElement,
+    LineElement,
+} from "chart.js";
+import { Bar, Doughnut, Line } from "react-chartjs-2";
 import useReportStore from "@/utils/zustand/ReportStore";
 
-// -------------------- Types --------------------
-type VictimInfo = {
-    name: string;
-    age: string;
-    gender: string;
-    harmed: string;
-    nationality: string;
-    occupation: string;
-};
+// Register Chart.js components
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    LineElement,
+    PointElement,
+    ArcElement,
+    Title,
+    Tooltip,
+    Legend,
+    TimeScale
+);
 
-type SuspectInfo = {
-    name: string;
-    age: string;
-    gender: string;
-    status: string;
-    nationality: string;
-    occupation: string;
-};
-
-type CrimeForm = {
+interface Report {
+    _id: string;
     blotterNo: string;
     dateEncoded: string;
     barangay: string;
@@ -38,555 +45,413 @@ type CrimeForm = {
     modeOfReporting: string;
     stageOfFelony: string;
     offense: string;
-    victim: VictimInfo;
-    suspect: SuspectInfo;
+    victim: {
+        name: string;
+        age: string;
+        gender: string;
+        harmed: string;
+        nationality: string;
+        occupation: string;
+    };
+    suspect: {
+        name: string;
+        age: string;
+        gender: string;
+        status: string;
+        nationality: string;
+        occupation: string;
+    };
     suspectMotive: string;
     narrative: string;
-    status: string;
+    status: "Solved" | "Cleared" | "Unsolved";
     location: { lat: number; lng: number } | null;
-};
+    createdAt: string;
+}
 
-// -------------------- Data Lists --------------------
-const barangays = [
-    "Almanza Dos",
-    "Almanza Uno",
-    "B.F. CAA International Village",
-    "Daniel Fajardo",
-    "Elias Aldana",
-    "Ilaya",
-    "Manuyo Uno",
-    "Manuyo Dos",
-    "Pamplona Uno",
-    "Pamplona Dos",
-    "Pamplona Tres",
-    "Pilar",
-    "Pulang Lupa Uno",
-    "Pulang Lupa Dos",
-    "Talon Uno",
-    "Talon Dos",
-    "Talon Tres",
-    "Talon Cuatro",
-    "Talon Singko",
-    "Zapote",
-];
+const AnalyticsPage: React.FC = () => {
+    const { getReports } = useReportStore();
+    const [reports, setReports] = useState<Report[]>([]);
+    const [loading, setLoading] = useState(true);
 
-const offenseCategories = [
-    {
-        label: "🚨 Index Crimes",
-        color: "text-red-400 font-semibold",
-        offenses: [
-            "Murder",
-            "Homicide",
-            "Rape",
-            "Physical Injury",
-            "Robbery",
-            "Theft",
-            "Carnapping",
-            "Cattle Rustling",
-        ],
-    },
-    {
-        label: "⚖️ Non-Index Crimes",
-        color: "text-yellow-400 font-semibold",
-        offenses: [
-            "Drug Offense",
-            "Illegal Firearms",
-            "Child Abuse",
-            "Cybercrime",
-            "Estafa",
-            "Direct Assault",
-            "Violence Against Women & Children (VAWC)",
-            "Illegal Logging",
-        ],
-    },
-    {
-        label: "🚗 Traffic Violations",
-        color: "text-blue-400 font-semibold",
-        offenses: [
-            "Reckless Driving",
-            "Illegal Parking",
-            "Overspeeding",
-            "Driving Without License",
-            "Road Accident",
-        ],
-    },
-    {
-        label: "📜 Ordinance Violations",
-        color: "text-gray-400 font-semibold",
-        offenses: [
-            "Curfew Violation",
-            "Public Disturbance",
-            "Littering",
-            "Noise Complaint",
-            "Illegal Vending",
-            "Drinking in Public",
-            "Unjust Vexation",
-            "Threats",
-            "Malicious Mischief",
-        ],
-    },
-];
+    useEffect(() => {
+        async function fetchReports() {
+            setLoading(true);
+            const data = await getReports();
+            if (data?.reports) setReports(data.reports);
+            setLoading(false);
+        }
+        fetchReports();
+    }, [getReports]);
 
-// -------------------- Component --------------------
-const CrimeReportForm = () => {
-    const { addReports } = useReportStore()
+    // -------------------- Helper Functions --------------------
+    const barangays = [
+        "Almanza Dos", "Almanza Uno", "B.F. CAA International Village", "Aldana",
+        "Manuyo Dos", "Manuyo Uno", "Pamplona Dos", "Pamplona Tres",
+        "Pamplona Uno", "Pilar", "Pulang Lupa Dos", "Pulang Lupa Uno",
+        "Talon Dos", "Talon Kuatro", "Talon Singko", "Talon Tres",
+        "Talon Uno", "Zapote",
+    ];
 
-    const [form, setForm] = useState<CrimeForm>({
-        blotterNo: "",
-        dateEncoded: new Date().toLocaleString(),
-        barangay: "",
-        street: "",
-        typeOfPlace: "",
-        dateReported: "",
-        timeReported: "",
-        dateCommitted: "",
-        timeCommitted: "",
-        modeOfReporting: "",
-        stageOfFelony: "",
-        offense: "",
-        victim: {
-            name: "",
-            age: "",
-            gender: "",
-            harmed: "",
-            nationality: "",
-            occupation: "",
-        },
-        suspect: {
-            name: "",
-            age: "",
-            gender: "",
-            status: "",
-            nationality: "",
-            occupation: "",
-        },
-        suspectMotive: "",
-        narrative: "",
-        status: "Solved",
-        location: { lat: 14.4445, lng: 120.9939 },
+    const countByField = (field: string | ((r: Report) => string)) => {
+        return reports.reduce((acc: Record<string, number>, r) => {
+            const key = typeof field === "string" ? (r as any)[field] || "Unspecified" : field(r) || "Unspecified";
+            acc[key] = (acc[key] || 0) + 1;
+            return acc;
+        }, {});
+    };
+
+    const allBarangayCounts: Record<string, number> = {};
+    barangays.forEach((b) => {
+        allBarangayCounts[b] = reports.filter((r) => r.barangay === b).length || 0;
     });
 
-    const handleSubmit = () => {
-        const {
-            blotterNo,
-            dateEncoded,
-            barangay,
-            street,
-            typeOfPlace,
-            dateReported,
-            timeReported,
-            dateCommitted,
-            timeCommitted,
-            modeOfReporting,
-            stageOfFelony,
-            offense,
-            victim,
-            suspect,
-            suspectMotive,
-            narrative,
-            status,
-            location,
-        } = form;
+    // -------------------- Chart Data --------------------
+    const statusCounts = countByField("status");
+    const barangayCounts = countByField("barangay");
+    const offenseCounts = countByField("offense");
+    const modeCounts = countByField("modeOfReporting");
+    const felonyStageCounts = countByField("stageOfFelony");
+    const suspectStatusCounts = countByField((r) => r.suspect.status);
+    const typeOfPlaceCounts = countByField("typeOfPlace");
 
-        // 🛑 Basic validation
-        if (!blotterNo.trim()) return alert("Please enter the blotter number.");
-        if (!dateEncoded.trim()) return alert("Date encoded is missing.");
-        if (!barangay.trim()) return alert("Please select a Barangay.");
-        if (!street.trim()) return alert("Please enter the Street.");
-        if (!typeOfPlace.trim()) return alert("Please specify the Type of Place.");
-        if (!dateReported.trim()) return alert("Please enter the Date Reported.");
-        if (!timeReported.trim()) return alert("Please enter the Time Reported.");
-        if (!dateCommitted.trim()) return alert("Please enter the Date Committed.");
-        if (!timeCommitted.trim()) return alert("Please enter the Time Committed.");
-        if (!modeOfReporting.trim()) return alert("Please select a Mode of Reporting.");
-        if (!stageOfFelony.trim()) return alert("Please select a Stage of Felony.");
-        if (!offense.trim()) return alert("Please select an Offense.");
+    const casesOverTimeCounts = countByField((r) =>
+        new Date(r.createdAt).toLocaleDateString()
+    );
 
-        // 🧍‍ Victim validation
-        if (!victim.name.trim()) return alert("Please enter the Victim's Name.");
-        if (!victim.age.trim()) return alert("Please enter the Victim's Age.");
-        if (isNaN(Number(victim.age)) || Number(victim.age) <= 0)
-            return alert("Victim's Age must be a valid positive number.");
-        if (!victim.gender.trim()) return alert("Please select the Victim's Gender.");
-        if (!victim.harmed.trim()) return alert("Please specify if Victim was harmed.");
-        if (!victim.nationality.trim()) return alert("Please enter the Victim's Nationality.");
-        if (!victim.occupation.trim()) return alert("Please enter the Victim's Occupation.");
+    // -------------------- Predictive Cases for Next 7 Days --------------------
+    const getPredictedCases = (counts: Record<string, number>, daysAhead = 7) => {
+        const dates = Object.keys(counts).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+        const values = dates.map((d) => counts[d]);
 
-        // 🚨 Suspect validation
-        if (!suspect.name.trim()) return alert("Please enter the Suspect's Name.");
-        if (!suspect.age.trim()) return alert("Please enter the Suspect's Age.");
-        if (isNaN(Number(suspect.age)) || Number(suspect.age) <= 0)
-            return alert("Suspect's Age must be a valid positive number.");
-        if (!suspect.gender.trim()) return alert("Please select the Suspect's Gender.");
-        if (!suspect.status.trim()) return alert("Please select the Suspect's Status.");
-        if (!suspect.nationality.trim()) return alert("Please enter the Suspect's Nationality.");
-        if (!suspect.occupation.trim()) return alert("Please enter the Suspect's Occupation.");
+        if (values.length < 2) return {};
 
-        // 🗺️ Location validation
-        if (!location || !location.lat || !location.lng)
-            return alert("Please select a location on the map.");
+        const n = values.length;
+        const xMean = (n - 1) / 2;
+        const yMean = values.reduce((a, b) => a + b, 0) / n;
 
-        // 📝 Optional narrative check
-        if (!narrative.trim()) return alert("Please enter the Narrative or Case Details.");
+        let numerator = 0;
+        let denominator = 0;
+        for (let i = 0; i < n; i++) {
+            numerator += (i - xMean) * (values[i] - yMean);
+            denominator += (i - xMean) ** 2;
+        }
+        const slope = numerator / denominator;
+        const intercept = yMean - slope * xMean;
 
-        // ✅ If all good, submit form
-        addReports(form);
-        console.log(form);
+        const predicted: Record<string, number> = {};
+        for (let i = 0; i < daysAhead; i++) {
+            const nextIndex = n + i;
+            const nextDate = new Date(dates[n - 1]);
+            nextDate.setDate(nextDate.getDate() + i + 1);
+            const formatted = nextDate.toLocaleDateString();
+            const predictedValue = Math.max(Math.round(intercept + slope * nextIndex), 0);
+            predicted[formatted] = predictedValue;
+        }
+        return predicted;
+    };
 
-        alert("Form Submitted!")
-        // Clear the form after
-        setForm({
-            blotterNo: "",
-            dateEncoded: new Date().toLocaleString(),
-            barangay: "",
-            street: "",
-            typeOfPlace: "",
-            dateReported: "",
-            timeReported: "",
-            dateCommitted: "",
-            timeCommitted: "",
-            modeOfReporting: "",
-            stageOfFelony: "",
-            offense: "",
-            victim: {
-                name: "",
-                age: "",
-                gender: "",
-                harmed: "",
-                nationality: "",
-                occupation: "",
+    const predictedNextWeek = getPredictedCases(casesOverTimeCounts, 7);
+
+    const casesWithPrediction = {
+        ...casesOverTimeCounts,
+        ...predictedNextWeek,
+    };
+
+    const predictedLineData = {
+        labels: Object.keys(casesWithPrediction),
+        datasets: [
+            {
+                label: "Actual Cases",
+                data: Object.keys(casesOverTimeCounts).map((d) => casesOverTimeCounts[d]),
+                borderColor: "#3b82f6",
+                backgroundColor: "rgba(59, 130, 246, 0.2)",
             },
-            suspect: {
-                name: "",
-                age: "",
-                gender: "",
-                status: "",
-                nationality: "",
-                occupation: "",
+            {
+                label: "Predicted Cases",
+                data: Object.keys(casesWithPrediction).map((d) =>
+                    casesOverTimeCounts[d] ?? casesWithPrediction[d]
+                ),
+                borderColor: "#f97316",
+                borderDash: [5, 5],
+                backgroundColor: "rgba(249, 115, 22, 0.2)",
             },
-            suspectMotive: "",
-            narrative: "",
-            status: "Solved",
-            location: { lat: 14.4445, lng: 120.9939 },
+        ],
+    };
+
+    // -------------------- Chart Options --------------------
+    const options: any = {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: "bottom",
+            },
+        },
+    };
+
+    // -------------------- New Helper Functions to Fix Redeclare --------------------
+    const getCasesByDayCounts = (reports: Report[]) => {
+        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const counts: Record<string, number> = {};
+        days.forEach(d => counts[d] = 0);
+        reports.forEach((r) => {
+            const day = days[new Date(r.createdAt).getDay()];
+            counts[day] += 1;
         });
+        return counts;
     };
 
-
-    // Auto-generate blotter number
-    useEffect(() => {
-        const year = new Date().getFullYear();
-        const random = Math.floor(Math.random() * 9000) + 1000;
-        setForm((prev) => ({ ...prev, blotterNo: `BLTR-${year}-${random}` }));
-    }, []);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
+    const getCasesByHourCounts = (reports: Report[]) => {
+        const counts: Record<string, number> = {};
+        Array.from({ length: 24 }).forEach((_, i) => counts[i.toString()] = 0);
+        reports.forEach((r) => {
+            const hour = new Date(r.createdAt).getHours();
+            counts[hour.toString()] += 1;
+        });
+        return counts;
     };
 
-    const handleNestedChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-        category: "victim" | "suspect"
-    ) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({
-            ...prev,
-            [category]: { ...prev[category], [name]: value },
-        }));
+    const casesByDayCounts = getCasesByDayCounts(reports);
+    const casesByHourCounts = getCasesByHourCounts(reports);
+
+    // -------------------- Render --------------------
+    const getBarData = (counts: Record<string, number>) => ({
+        labels: Object.keys(counts),
+        datasets: [{ label: "Cases", data: Object.values(counts), backgroundColor: "#3b82f6" }],
+    });
+
+    const getDonutData = (counts: Record<string, number>) => ({
+        labels: Object.keys(counts),
+        datasets: [{ data: Object.values(counts), backgroundColor: ["#3b82f6", "#f97316", "#22c55e", "#ef4444", "#facc15", "#94a3b8"] }],
+    });
+
+    const getLineData = (counts: Record<string, number>) => ({
+        labels: Object.keys(counts),
+        datasets: [{ label: "Cases Over Time", data: Object.values(counts), borderColor: "#3b82f6", backgroundColor: "rgba(59, 130, 246, 0.2)" }],
+    });
+
+    const barangayBarChartData = {
+        labels: barangays,
+        datasets: [
+            { label: "Total Crimes", data: barangays.map((b) => allBarangayCounts[b] || 0), backgroundColor: "#f97316" },
+        ],
     };
 
-    const handleSetCoords = (coords: [number, number]) => {
-        setForm((prev) => ({ ...prev, location: { lat: coords[0], lng: coords[1] } }));
-    };
+    const casesByMonthCounts: Record<string, number> = {};
+    reports.forEach(r => {
+        const date = new Date(r.createdAt);
+        const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        casesByMonthCounts[month] = (casesByMonthCounts[month] || 0) + 1;
+    });
 
-    const inputClass =
-        "bg-[#1C1E2E] text-white px-3 py-2 rounded-lg w-full focus:outline-none border border-gray-700";
-    const labelClass = "font-semibold text-gray-300 mb-1 block";
+    const casesByDayData = { labels: Object.keys(casesByDayCounts), datasets: [{ label: "Cases by Day of Week", data: Object.values(casesByDayCounts), backgroundColor: "#ef4444" }] };
+    const casesByMonthData = { labels: Object.keys(casesByMonthCounts), datasets: [{ label: "Cases by Month", data: Object.values(casesByMonthCounts), borderColor: "#facc15", backgroundColor: "rgba(250, 204, 21, 0.2)" }] };
+    const casesByHourData = { labels: Object.keys(casesByHourCounts), datasets: [{ label: "Cases by Hour", data: Object.values(casesByHourCounts), backgroundColor: "#22c55e" }] };
 
+    // -------------------- Summary Calculations --------------------
+    const totalReports = reports.length;
+    const solvedCount = reports.filter(r => r.status === "Solved").length;
+    const clearedCount = reports.filter(r => r.status === "Cleared").length;
+    const unsolvedCount = reports.filter(r => r.status === "Unsolved").length;
+
+    // Most common barangay
+    const barangayCountsSummary = reports.reduce((acc: Record<string, number>, r) => {
+        if (!r.barangay) return acc;
+        acc[r.barangay] = (acc[r.barangay] || 0) + 1;
+        return acc;
+    }, {});
+    const mostCommonBarangay = Object.entries(barangayCountsSummary)
+        .sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+
+    // Most common offense
+    const offenseCountsSummary = reports.reduce((acc: Record<string, number>, r) => {
+        if (!r.offense) return acc;
+        acc[r.offense] = (acc[r.offense] || 0) + 1;
+        return acc;
+    }, {});
+    const mostCommonOffense = Object.entries(offenseCountsSummary)
+        .sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+
+    // Peak day of week
+    const dayCountsSummary = reports.reduce((acc: Record<string, number>, r) => {
+        if (!r.createdAt) return acc;
+        const day = new Date(r.createdAt).toLocaleDateString("en-US", { weekday: "long" });
+        acc[day] = (acc[day] || 0) + 1;
+        return acc;
+    }, {});
+    const peakDay = Object.entries(dayCountsSummary)
+        .sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+
+    // Peak hour
+    const hourCountsSummary = reports.reduce((acc: Record<number, number>, r) => {
+        if (!r.createdAt) return acc;
+        const hour = new Date(r.createdAt).getHours();
+        acc[hour] = (acc[hour] || 0) + 1;
+        return acc;
+    }, {});
+    const peakHour = Object.entries(hourCountsSummary)
+        .sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+
+    // Predicted cases next 7 days (already in your code)
+    const predictedNext7DaysTotal = Object.values(predictedNextWeek).reduce((a, b) => a + b, 0);
+
+
+    // -------------------- Render --------------------
     return (
-        <div className="min-h-screen bg-[#0F1120] text-white p-6 flex justify-center">
-            <div className="w-full max-w-[1100px] space-y-6">
-                <h1 className="text-3xl font-bold text-center border-b border-gray-700 pb-3">
-                    Barangay Crime Report Form
-                </h1>
+        <div className="min-h-screen bg-[#0F1120] text-white p-4">
+            <div className="max-w-7xl mx-auto space-y-6">
+                <h1 className="text-2xl font-bold">Barangay Crime Analytics Dashboard</h1>
 
-                <form className="space-y-6">
-                    {/* Basic Info */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelClass}>Blotter Number</label>
-                            <input name="blotterNo" value={form.blotterNo} readOnly className={inputClass} />
+                {!loading && reports.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h3 className="text-sm font-semibold mb-1">Total Reports</h3>
+                            <p className="text-xl font-bold">{totalReports}</p>
                         </div>
 
-                        <div>
-                            <label className={labelClass}>Barangay</label>
-                            <select name="barangay" value={form.barangay} onChange={handleChange} className={inputClass}>
-                                <option value="">Select Barangay</option>
-                                {barangays.map((b) => (
-                                    <option key={b}>{b}</option>
-                                ))}
-                            </select>
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h3 className="text-sm font-semibold mb-1">Solved</h3>
+                            <p className="text-xl font-bold">{solvedCount}</p>
                         </div>
 
-                        <div>
-                            <label className={labelClass}>Street</label>
-                            <input name="street" value={form.street} onChange={handleChange} className={inputClass} />
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h3 className="text-sm font-semibold mb-1">Cleared</h3>
+                            <p className="text-xl font-bold">{clearedCount}</p>
                         </div>
 
-                        <div>
-                            <label className={labelClass}>Type of Place</label>
-                            <select name="typeOfPlace" value={form.typeOfPlace} onChange={handleChange} className={inputClass}>
-                                <option value="">Select Type</option>
-                                <option value="Along the Street">Along the Street</option>
-                                <option value="Residential">Residential</option>
-                                <option value="Commercial">Commercial</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Offense */}
-                    <div>
-                        <label className={labelClass}>Offense</label>
-                        <select name="offense" value={form.offense} onChange={handleChange} className={inputClass}>
-                            <option value="">Select an offense</option>
-                            {offenseCategories.map((group) => (
-                                <optgroup key={group.label} label={group.label} className={group.color}>
-                                    {group.offenses.map((off) => (
-                                        <option key={off}>{off}</option>
-                                    ))}
-                                </optgroup>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Report & Incident Dates */}
-                    <div className="bg-[#1C1E2E] p-4 rounded-xl space-y-3">
-                        <h2 className="text-lg font-bold border-b border-gray-700 pb-2">Date and Time Information</h2>
-
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className={labelClass}>Date Reported</label>
-                                <input
-                                    type="date"
-                                    name="dateReported"
-                                    value={form.dateReported}
-                                    onChange={handleChange}
-                                    className={inputClass}
-                                />
-                            </div>
-
-                            <div>
-                                <label className={labelClass}>Time Reported</label>
-                                <input
-                                    type="time"
-                                    name="timeReported"
-                                    value={form.timeReported}
-                                    onChange={handleChange}
-                                    className={inputClass}
-                                />
-                            </div>
-
-                            <div>
-                                <label className={labelClass}>Date Committed</label>
-                                <input
-                                    type="date"
-                                    name="dateCommitted"
-                                    value={form.dateCommitted}
-                                    onChange={handleChange}
-                                    className={inputClass}
-                                />
-                            </div>
-
-                            <div>
-                                <label className={labelClass}>Time Committed</label>
-                                <input
-                                    type="time"
-                                    name="timeCommitted"
-                                    value={form.timeCommitted}
-                                    onChange={handleChange}
-                                    className={inputClass}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Mode of Reporting & Stage of Felony */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelClass}>Mode of Reporting</label>
-                            <select
-                                name="modeOfReporting"
-                                value={form.modeOfReporting}
-                                onChange={handleChange}
-                                className={inputClass}
-                            >
-                                <option value="">Select Mode</option>
-                                <option value="In Person">In Person</option>
-                                <option value="Phone Call">Phone Call</option>
-                                <option value="Online">Online</option>
-                            </select>
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h3 className="text-sm font-semibold mb-1">Unsolved</h3>
+                            <p className="text-xl font-bold">{unsolvedCount}</p>
                         </div>
 
-                        <div>
-                            <label className={labelClass}>Stage of Felony</label>
-                            <select
-                                name="stageOfFelony"
-                                value={form.stageOfFelony}
-                                onChange={handleChange}
-                                className={inputClass}
-                            >
-                                <option value="">Select Stage</option>
-                                <option value="Attempted">Attempted</option>
-                                <option value="Frustrated">Frustrated</option>
-                                <option value="Consummated">Consummated</option>
-                            </select>
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50 md:col-span-2">
+                            <h3 className="text-sm font-semibold mb-1">Most Common Barangay</h3>
+                            <p className="text-xl font-bold">{mostCommonBarangay}</p>
                         </div>
-                    </div>
 
-
-                    {/* Victim Info */}
-                    <div className="bg-[#1C1E2E] p-4 rounded-xl space-y-3">
-                        <h2 className="text-lg font-bold border-b border-gray-700 pb-2">Victim Information</h2>
-                        <div className="grid md:grid-cols-6 gap-3">
-                            {Object.keys(form.victim).map((key) => {
-                                if (key === "gender" || key === "harmed") {
-                                    return (
-                                        <select
-                                            key={key}
-                                            name={key}
-                                            value={(form.victim as any)[key]}
-                                            onChange={(e) => handleNestedChange(e, "victim")}
-                                            className={inputClass}
-                                        >
-                                            <option value="">{key}</option>
-                                            {key === "gender" && (
-                                                <>
-                                                    <option>Male</option>
-                                                    <option>Female</option>
-                                                </>
-                                            )}
-                                            {key === "harmed" && (
-                                                <>
-                                                    <option>Harmed</option>
-                                                    <option>Unharmed</option>
-                                                </>
-                                            )}
-                                        </select>
-                                    );
-                                }
-                                return (
-                                    <input
-                                        key={key}
-                                        name={key}
-                                        placeholder={key}
-                                        value={(form.victim as any)[key]}
-                                        onChange={(e) => handleNestedChange(e, "victim")}
-                                        className={inputClass}
-                                    />
-                                );
-                            })}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50 md:col-span-2">
+                            <h3 className="text-sm font-semibold mb-1">Most Common Offense</h3>
+                            <p className="text-xl font-bold">{mostCommonOffense}</p>
                         </div>
-                    </div>
 
-                    {/* Suspect Info */}
-                    <div className="bg-[#1C1E2E] p-4 rounded-xl space-y-3">
-                        <h2 className="text-lg font-bold border-b border-gray-700 pb-2">Suspect Information</h2>
-                        <div className="grid md:grid-cols-6 gap-3">
-                            {Object.keys(form.suspect).map((key) => {
-                                if (key === "gender" || key === "status") {
-                                    return (
-                                        <select
-                                            key={key}
-                                            name={key}
-                                            value={(form.suspect as any)[key]}
-                                            onChange={(e) => handleNestedChange(e, "suspect")}
-                                            className={inputClass}
-                                        >
-                                            <option value="">{key}</option>
-                                            {key === "gender" && (
-                                                <>
-                                                    <option>Male</option>
-                                                    <option>Female</option>
-                                                </>
-                                            )}
-                                            {key === "status" && (
-                                                <>
-                                                    <option>Arrested</option>
-                                                    <option>Detained</option>
-                                                    <option>At Large</option>
-                                                </>
-                                            )}
-                                        </select>
-                                    );
-                                }
-                                return (
-                                    <input
-                                        key={key}
-                                        name={key}
-                                        placeholder={key}
-                                        value={(form.suspect as any)[key]}
-                                        onChange={(e) => handleNestedChange(e, "suspect")}
-                                        className={inputClass}
-                                    />
-                                );
-                            })}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50 md:col-span-2">
+                            <h3 className="text-sm font-semibold mb-1">Peak Day of Week</h3>
+                            <p className="text-xl font-bold">{peakDay}</p>
                         </div>
-                    </div>
 
-                    {/* Motive & Narrative */}
-                    <div>
-                        <label className={labelClass}>Suspect Motive</label>
-                        <input
-                            name="suspectMotive"
-                            value={form.suspectMotive}
-                            onChange={handleChange}
-                            className={inputClass}
-                        />
-                    </div>
-                    <div>
-                        <label className={labelClass}>Narrative</label>
-                        <textarea
-                            name="narrative"
-                            value={form.narrative}
-                            onChange={handleChange}
-                            className={`${inputClass} h-28`}
-                        />
-                    </div>
-
-                    {/* Status */}
-                    <div>
-                        <label className={labelClass}>Case Status</label>
-                        <select name="status" value={form.status} onChange={handleChange} className={inputClass}>
-                            <option value="Solved">Solved</option>
-                            <option value="Cleared">Cleared</option>
-                            <option value="Unsolved">Unsolved</option>
-                        </select>
-                    </div>
-
-                    {/* Map */}
-                    <div>
-                        <h2 className="text-lg font-semibold mb-2">Select Incident Location</h2>
-                        <div className="h-[400px] w-full rounded-xl overflow-hidden border border-gray-700">
-                            <CrimeMap setCoords={handleSetCoords} />
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50 md:col-span-2">
+                            <h3 className="text-sm font-semibold mb-1">Peak Hour</h3>
+                            <p className="text-xl font-bold">{peakHour}:00</p>
                         </div>
-                        {form.location && (
-                            <p className="mt-2 text-sm text-green-400">
-                                Selected Location: {form.location.lat.toFixed(5)}, {form.location.lng.toFixed(5)}
-                            </p>
-                        )}
-                    </div>
 
-                    <button
-                        type="button"
-                        onClick={() => handleSubmit()}
-                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold mt-4"
-                    >
-                        Submit Report
-                    </button>
-                </form>
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50 md:col-span-4">
+                            <h3 className="text-sm font-semibold mb-1">Predicted Cases Next 7 Days</h3>
+                            <p className="text-xl font-bold">{predictedNext7DaysTotal}</p>
+                        </div>
+
+                    </div>
+                )}
+
+                {loading ? (
+                    <p>Loading analytics...</p>
+                ) : reports.length === 0 ? (
+                    <p className="text-gray-400 text-center">No reports available for analytics.</p>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                        {/* Overall Crimes by Barangay - Full Width */}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50 md:col-span-3 lg:col-span-3">
+                            <h2 className="text-sm font-semibold mb-2">Overall Crimes by Barangay</h2>
+                            <Bar
+                                data={barangayBarChartData}
+                                options={{
+                                    responsive: true,
+                                    plugins: { legend: { display: false } },
+                                    scales: {
+                                        y: { beginAtZero: true },
+                                    },
+                                }}
+                            />
+                        </div>
+
+                        {/*9. Cases by Hour */}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h2 className="text-sm font-semibold mb-2">Cases by Hour</h2>
+                            <Bar data={casesByHourData} options={{ ...options, scales: { y: { beginAtZero: true } } }} />
+                        </div>
+
+                        {/*10. Cases by Day of Week */}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h2 className="text-sm font-semibold mb-2">Cases by Day of Week</h2>
+                            <Bar data={casesByDayData} options={{ ...options, scales: { y: { beginAtZero: true } } }} />
+                        </div>
+
+                        {/*11. Cases by Month */}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h2 className="text-sm font-semibold mb-2">Cases by Month</h2>
+                            <Line data={casesByMonthData} options={options} />
+                        </div>
+
+                        {/* 9. Predicted Cases Next 7 Days */}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50 md:col-span-3 lg:col-span-3">
+                            <h2 className="text-sm font-semibold mb-2">Predicted Cases Next 7 Days</h2>
+                            <Line data={predictedLineData} options={options} />
+                        </div>
+
+
+                        {/* 1. Cases by Status */}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h2 className="text-sm font-semibold mb-2">Cases by Status</h2>
+                            <Doughnut data={getDonutData(statusCounts)} options={options} />
+                        </div>
+
+                        {/* 2. Cases by Barangay */}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h2 className="text-sm font-semibold mb-2">Cases by Barangay</h2>
+                            <Bar data={getBarData(barangayCounts)} options={options} />
+                        </div>
+
+                        {/* 3. Cases by Offense */}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h2 className="text-sm font-semibold mb-2">Cases by Offense</h2>
+                            <Bar data={getBarData(offenseCounts)} options={options} />
+                        </div>
+
+                        {/* 4. Cases Over Time */}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h2 className="text-sm font-semibold mb-2">Cases Over Time</h2>
+                            <Line data={getLineData(casesOverTimeCounts)} options={options} />
+                        </div>
+
+                        {/* 5. Cases by Mode of Reporting */}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h2 className="text-sm font-semibold mb-2">Cases by Mode of Reporting</h2>
+                            <Doughnut data={getDonutData(modeCounts)} options={options} />
+                        </div>
+
+                        {/* 6. Cases by Stage of Felony */}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h2 className="text-sm font-semibold mb-2">Cases by Stage of Felony</h2>
+                            <Doughnut data={getDonutData(felonyStageCounts)} options={options} />
+                        </div>
+
+                        {/* 7. Cases by Suspect Status */}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h2 className="text-sm font-semibold mb-2">Cases by Suspect Status</h2>
+                            <Doughnut data={getDonutData(suspectStatusCounts)} options={options} />
+                        </div>
+
+                        {/* 8. Cases by Type of Place */}
+                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
+                            <h2 className="text-sm font-semibold mb-2">Cases by Type of Place</h2>
+                            <Bar data={getBarData(typeOfPlaceCounts)} options={options} />
+                        </div>
+
+                    </div>
+                )}
             </div>
         </div>
     );
 };
 
-export default CrimeReportForm;
+export default AnalyticsPage;
