@@ -1,17 +1,33 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import useAuthStore from '@/utils/zustand/useAuthStore';
 
+
 const Page = () => {
-    const { LoginFunction } = useAuthStore();
+    const { LoginFunction, getAuthUserFunction, authUser } = useAuthStore();
 
     const router = useRouter();
     const [formData, setFormData] = useState({ username: '', password: '' });
     const [error, setError] = useState<string>('');
+
+    //For auth
+    const [authLoading, setAuthLoading] = useState(true);
+    useEffect(() => {
+        const checkAuth = async () => {
+            await getAuthUserFunction();
+            setAuthLoading(false);
+        };
+        checkAuth();
+    }, [getAuthUserFunction]);
+    useEffect(() => {
+        if (!authLoading && authUser) {
+            router.push('/dashboard/page1');
+        }
+    }, [authUser, authLoading, router]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -29,6 +45,8 @@ const Page = () => {
         }
         router.push('/dashboard/page1');
     };
+
+
 
     return (
         <div className="w-[100vw] h-[100vh] bg-black flex items-center justify-center text-white">

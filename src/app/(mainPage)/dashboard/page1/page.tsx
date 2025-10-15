@@ -1,6 +1,8 @@
 'use client'
 import React, { useEffect, useState } from "react";
 import useReportStore from "@/utils/zustand/ReportStore";
+import useAuthStore from "@/utils/zustand/useAuthStore";
+import { useRouter } from "next/navigation";
 
 type Barangay = {
     name: string;
@@ -121,8 +123,27 @@ const barangays: Barangay[] = [
 ];
 
 const Page = () => {
+    const router = useRouter()
+    const { getAuthUserFunction, authUser } = useAuthStore()
+
     const { getReports, reports } = useReportStore();
     const [hovered, setHovered] = useState<Barangay | null>(null);
+
+    //For auth
+    const [authLoading, setAuthLoading] = useState(true);
+    useEffect(() => {
+        const checkAuth = async () => {
+            await getAuthUserFunction();
+            setAuthLoading(false);
+        };
+        checkAuth();
+    }, [getAuthUserFunction]);
+    useEffect(() => {
+        if (!authLoading && authUser === null) {
+            router.push('/');
+        }
+    }, [authUser, authLoading, router]);
+
 
     useEffect(() => {
         getReports();

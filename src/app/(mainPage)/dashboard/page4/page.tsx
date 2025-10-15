@@ -5,6 +5,8 @@ import dynamic from "next/dynamic";
 const CrimeMap = dynamic(() => import("@/components/reusable/CrimeMap"), { ssr: false });
 
 import useReportStore from "@/utils/zustand/ReportStore";
+import useAuthStore from "@/utils/zustand/useAuthStore";
+import { useRouter } from "next/navigation";
 
 // -------------------- Types --------------------
 type VictimInfo = {
@@ -133,7 +135,26 @@ const offenseCategories = [
 
 // -------------------- Component --------------------
 const CrimeReportForm = () => {
+    const router = useRouter()
+
     const { addReports } = useReportStore()
+
+    const { getAuthUserFunction, authUser } = useAuthStore()
+    
+    //For auth
+    const [authLoading, setAuthLoading] = useState(true);
+    useEffect(() => {
+        const checkAuth = async () => {
+            await getAuthUserFunction();
+            setAuthLoading(false);
+        };
+        checkAuth();
+    }, [getAuthUserFunction]);
+    useEffect(() => {
+        if (!authLoading && authUser === null) {
+            router.push('/');
+        }
+    }, [authUser, authLoading, router]);
 
     const [form, setForm] = useState<CrimeForm>({
         blotterNo: "",

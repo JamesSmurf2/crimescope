@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import useReportStore from "@/utils/zustand/ReportStore";
+import useAuthStore from "@/utils/zustand/useAuthStore";
+import { useRouter } from "next/navigation";
 
 const ReportsPage = () => {
-
+    const router = useRouter()
 
     // -------------------- Data Lists --------------------
     const barangays = [
@@ -86,6 +88,23 @@ const ReportsPage = () => {
     const [editMode, setEditMode] = useState(false);
 
     const [selectedReport, setSelectedReport] = useState<any | null>(null);
+
+    const { getAuthUserFunction, authUser } = useAuthStore()
+    //For auth
+    const [authLoading, setAuthLoading] = useState(true);
+    useEffect(() => {
+        const checkAuth = async () => {
+            await getAuthUserFunction();
+            setAuthLoading(false);
+        };
+        checkAuth();
+    }, [getAuthUserFunction]);
+    useEffect(() => {
+        if (!authLoading && authUser === null) {
+            router.push('/');
+        }
+    }, [authUser, authLoading, router]);
+
 
 
 

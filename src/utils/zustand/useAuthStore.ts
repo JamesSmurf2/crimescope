@@ -17,7 +17,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
             const data = await res.json()
             set({ authUser: data })
             //on for debugging
-            // console.log(data) 
+            // console.log(data)
             return data
         } catch (error) {
             console.log(error)

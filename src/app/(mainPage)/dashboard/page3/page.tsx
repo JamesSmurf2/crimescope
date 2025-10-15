@@ -16,6 +16,8 @@ import {
 } from "chart.js";
 import { Bar, Doughnut, Line } from "react-chartjs-2";
 import useReportStore from "@/utils/zustand/ReportStore";
+import useAuthStore from "@/utils/zustand/useAuthStore";
+import { useRouter } from "next/navigation";
 
 // Register Chart.js components
 ChartJS.register(
@@ -69,9 +71,27 @@ interface Report {
 }
 
 const AnalyticsPage: React.FC = () => {
+    const router = useRouter()
+
     const { getReports } = useReportStore();
     const [reports, setReports] = useState<Report[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const { getAuthUserFunction, authUser } = useAuthStore()
+    //For auth
+    const [authLoading, setAuthLoading] = useState(true);
+    useEffect(() => {
+        const checkAuth = async () => {
+            await getAuthUserFunction();
+            setAuthLoading(false);
+        };
+        checkAuth();
+    }, [getAuthUserFunction]);
+    useEffect(() => {
+        if (!authLoading && authUser === null) {
+            router.push('/');
+        }
+    }, [authUser, authLoading, router]);
 
     useEffect(() => {
         async function fetchReports() {
