@@ -72,7 +72,7 @@ const Page = () => {
 
                     <button
                         type="submit"
-                        className="mt-4 w-full bg-gradient-to-r from-blue-500 to-purple-600 text-center py-3 rounded-lg font-semibold hover:opacity-90 transition"
+                        className="mt-4 w-full bg-gradient-to-r from-blue-500 to-purple-600 text-center py-3 rounded-lg font-semibold hover:opacity-90 transition cursor-pointer"
                     >
                         Login
                     </button>

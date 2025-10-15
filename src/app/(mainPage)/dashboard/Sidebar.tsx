@@ -76,7 +76,7 @@ const Sidebar = () => {
           <div className="p-6">
             <button
               onClick={handleLogout}
-              className="w-full bg-red-600 hover:bg-red-700 transition text-white font-semibold py-2 rounded-xl shadow-md"
+              className="w-full bg-red-600 hover:bg-red-700 transition text-white font-semibold py-2 rounded-xl shadow-md cursor-pointer"
             >
               Logout
             </button>
