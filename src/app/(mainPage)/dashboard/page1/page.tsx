@@ -6,7 +6,7 @@ type Barangay = {
     name: string;
     img: string;
     style: string;
-    crimes: string;
+    offense: string;
 };
 
 const barangays: Barangay[] = [
@@ -14,109 +14,109 @@ const barangays: Barangay[] = [
         name: "Manuyo Uno",
         img: "/maps/Manuyo uno.png",
         style: "absolute left-[400px]",
-        crimes: "Reported theft and minor robbery cases in 2024.",
+        offense: "Reported theft and minor robbery cases in 2024.",
     },
     {
         name: "Aldana",
         img: "/maps/Aldana.png",
         style: "absolute top-[45px] left-[365px]",
-        crimes: "Low crime rate. Mostly traffic-related violations.",
+        offense: "Low crime rate. Mostly traffic-related violations.",
     },
     {
         name: "Manuyo Dos",
         img: "/maps/Manuyo dos.png",
         style: "absolute top-[40px] left-[440px]",
-        crimes: "Frequent cases of physical altercations reported.",
+        offense: "Frequent cases of physical altercations reported.",
     },
     {
         name: "Pulang Lupa Dos",
         img: "/maps/Pulang lupa dos.png",
         style: "absolute top-[105px] left-[399px]",
-        crimes: "Noted for burglary and illegal parking issues.",
+        offense: "Noted for burglary and illegal parking issues.",
     },
     {
         name: "B.F. CAA International Village",
         img: "/maps/CAA BF INT.png",
         style: "absolute top-[180px] left-[500px]",
-        crimes: "High cases of drug-related incidents in 2023–2024.",
+        offense: "High cases of drug-related incidents in 2023–2024.",
     },
     {
         name: "Talon Tres",
         img: "/maps/Talon tres.png",
         style: "absolute top-[272px] left-[527px]",
-        crimes: "Petty theft and domestic disturbance are common.",
+        offense: "Petty theft and domestic disturbance are common.",
     },
     {
         name: "Almanza Uno",
         img: "/maps/Almanza Uno.png",
         style: "absolute top-[330px] left-[595px]",
-        crimes: "Traffic congestion and pickpocketing issues.",
+        offense: "Traffic congestion and pickpocketing issues.",
     },
     {
         name: "Talon Uno",
         img: "/maps/Talon uno.png",
         style: "absolute top-[248px] left-[500px]",
-        crimes: "Moderate crime, mostly physical assault cases.",
+        offense: "Moderate crime, mostly physical assault cases.",
     },
     {
         name: "Pilar",
         img: "/maps/Pillar.png",
         style: "absolute top-[381px] left-[540px]",
-        crimes: "Frequent cases of illegal gambling reported.",
+        offense: "Frequent cases of illegal gambling reported.",
     },
     {
         name: "Talon Cinco",
         img: "/maps/Talon sinko.png",
         style: "absolute top-[360px] left-[455px]",
-        crimes: "Street-level crimes and illegal vendors.",
+        offense: "Street-level offense and illegal vendors.",
     },
     {
         name: "Talon Kwatro",
         img: "/maps/Talon kwatro.png",
         style: "absolute top-[335px] left-[500px]",
-        crimes: "High vehicular accidents and traffic problems.",
+        offense: "High vehicular accidents and traffic problems.",
     },
     {
         name: "Pamplona Dos",
         img: "/maps/Pamplona dos.png",
         style: "absolute top-[240px] left-[340px]",
-        crimes: "Pickpocketing incidents near marketplaces.",
+        offense: "Pickpocketing incidents near marketplaces.",
     },
     {
         name: "Pamplona Uno",
         img: "/maps/Pamplona uno.png",
         style: "absolute top-[170px] left-[325px]",
-        crimes: "Low crime rate, mainly curfew violations.",
+        offense: "Low crime rate, mainly curfew violations.",
     },
     {
         name: "Pamplona Tres",
         img: "/maps/Pamplona tres.png",
         style: "absolute top-[170px] left-[375px]",
-        crimes: "Frequent cases of petty theft in public areas.",
+        offense: "Frequent cases of petty theft in public areas.",
     },
     {
         name: "Pulang Lupa Uno",
         img: "/maps/Pulang lupa uno.png",
         style: "absolute top-[78px] left-[333px]",
-        crimes: "Cases of illegal street racing reported.",
+        offense: "Cases of illegal street racing reported.",
     },
     {
         name: "Zapote",
         img: "/maps/Zapote.png",
         style: "absolute top-[133px] left-[320px]",
-        crimes: "Drug-related cases and property theft.",
+        offense: "Drug-related cases and property theft.",
     },
     {
         name: "Talon Dos",
         img: "/maps/Talon dos.png",
         style: "absolute top-[275px] left-[355px]",
-        crimes: "Street brawls and noise complaints.",
+        offense: "Street brawls and noise complaints.",
     },
     {
         name: "Almanza Dos",
         img: "/maps/Almanza dos.png",
         style: "absolute top-[435px] left-[510px]",
-        crimes: "Moderate crime, mostly petty theft and robbery.",
+        offense: "Moderate crime, mostly petty theft and robbery.",
     },
 ];
 
@@ -133,23 +133,40 @@ const Page = () => {
         return reportList.filter((r: any) => r.barangay === barangayName).length;
     };
 
-    const getCommonCrimes = (barangayName: string) => {
+    const getCommonoffense = (barangayName: string) => {
         const reportList = reports || [];
-        const crimes = reportList.filter((r: any) => r.barangay === barangayName);
+        const offenseList = reportList.filter((r: any) => r.barangay === barangayName);
 
-        if (crimes.length === 0) return "No reported crimes";
+        if (offenseList.length === 0) return "No reported offense";
 
-        const crimeCount: Record<string, number> = {};
-        crimes.forEach((r: any) => {
-            crimeCount[r.crime] = (crimeCount[r.crime] || 0) + 1;
+        const offenseCount: Record<string, number> = {};
+        offenseList.forEach((r: any) => {
+            offenseCount[r.offense] = (offenseCount[r.offense] || 0) + 1;
         });
 
-        const sorted = Object.entries(crimeCount).sort((a, b) => b[1] - a[1]);
+        const sorted = Object.entries(offenseCount).sort((a, b) => b[1] - a[1]);
         return sorted[0][0];
     };
 
+    // ✅ NEW: Count status types (Cleared / Solved / Unsolved)
+    const getStatusCount = (barangayName: string) => {
+        const reportList = reports || [];
+        const filtered = reportList.filter((r: any) => r.barangay === barangayName);
+
+        const counts = { Cleared: 0, Solved: 0, Unsolved: 0 };
+
+        filtered.forEach((r: any) => {
+            const status = r.status?.toLowerCase();
+            if (status === "cleared") counts.Cleared++;
+            else if (status === "solved") counts.Solved++;
+            else if (status === "unsolved") counts.Unsolved++;
+        });
+
+        return counts;
+    };
+
     return (
-        <div className="overflow-x-hidden w-[100vw] ">
+        <div className="overflow-x-hidden w-[100vw] bg-[#0F1120] ">
             {/* Header */}
             <header className="w-full py-8 text-center border-b border-white/10 mb-6">
                 <h1 className="text-4xl font-bold tracking-wide text-red-400 drop-shadow-lg">
@@ -185,18 +202,15 @@ const Page = () => {
                                         <h3 className="font-semibold text-xl text-white tracking-wide">
                                             {b.name}
                                         </h3>
-                                        <span className="px-3 py-1 text-sm rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                                            {getCrimeCount(b.name)} cases
-                                        </span>
                                     </div>
 
                                     <p className="text-base text-gray-300 mt-3 leading-relaxed">
-                                        {b.crimes}
+                                        {b.offense}
                                     </p>
 
                                     <div className="mt-5 space-y-3 text-base">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-gray-400">📊 Reported Crimes</span>
+                                            <span className="text-gray-400">📊 Reported offense</span>
                                             <span className="text-white font-semibold">
                                                 {getCrimeCount(b.name)}
                                             </span>
@@ -204,8 +218,23 @@ const Page = () => {
                                         <div className="flex items-center justify-between">
                                             <span className="text-gray-400">🔎 Common Crime</span>
                                             <span className="text-white font-semibold">
-                                                {getCommonCrimes(b.name)}
+                                                {getCommonoffense(b.name)}
                                             </span>
+                                        </div>
+
+                                        {/* ✅ NEW: Status Count Section */}
+                                        <div className="border-t border-white/10 pt-3 mt-4">
+                                            <h4 className="text-gray-400 mb-2">📍 Status Count</h4>
+                                            {(() => {
+                                                const status = getStatusCount(b.name);
+                                                return (
+                                                    <ul className="text-sm text-gray-300 space-y-1">
+                                                        <li>🟩 Cleared: <span className="text-white font-semibold">{status.Cleared}</span></li>
+                                                        <li>🟦 Solved: <span className="text-white font-semibold">{status.Solved}</span></li>
+                                                        <li>🟥 Unsolved: <span className="text-white font-semibold">{status.Unsolved}</span></li>
+                                                    </ul>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
                                 </div>
@@ -213,13 +242,6 @@ const Page = () => {
                         </div>
                     ))}
                 </div>
-            </div>
-
-
-            {/* Baranggay here news or information */}
-
-            <div>
-
             </div>
         </div>
     );

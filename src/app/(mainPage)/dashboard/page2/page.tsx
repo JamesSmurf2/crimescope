@@ -322,6 +322,11 @@ const ReportsPage = () => {
         win?.print();
     };
 
+    const handleChange = (selectedReport: any) => {
+        changeReportStatus(selectedReport);
+        alert("Selected Report Updated!")
+    }
+
     return (
 
         <div className="min-h-screen bg-[#0F1120] text-white p-6">
@@ -455,6 +460,14 @@ const ReportsPage = () => {
                                 <h2 className="text-2xl font-bold text-green-400 flex items-center gap-2">
                                     <span className="text-3xl">🧾</span> Case Report Details
                                 </h2>
+
+                                {editMode && <button
+                                    onClick={() => {
+                                        handleChange(JSON.stringify(selectedReport, null, 2));
+                                    }}
+                                    className="px-4 py-2 rounded-lg font-medium transition-all bg-green-600 hover:bg-green-500 text-white"
+                                >💾 Save Changes</button>}
+
                                 <button
                                     onClick={() => setEditMode((prev) => !prev)}
                                     className={`px-4 py-2 rounded-lg font-medium transition-all ${editMode
@@ -462,7 +475,7 @@ const ReportsPage = () => {
                                         : "bg-gray-700 hover:bg-gray-600 text-gray-200"
                                         }`}
                                 >
-                                    {editMode ? "💾 Save Changes" : "✏️ Edit"}
+                                    {editMode ? " Cancel Edit" : "✏️ Edit"}
                                 </button>
                             </div>
 
