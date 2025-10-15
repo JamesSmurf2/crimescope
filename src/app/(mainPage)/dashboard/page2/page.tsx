@@ -352,164 +352,174 @@ const ReportsPage = () => {
 
     return (
 
-        <div className="min-h-screen bg-[#0F1120] text-white p-6">
-            <div className="max-w-6xl mx-auto space-y-6">
-                <h1 className="text-2xl font-bold">Barangay Crime Reports Dashboard</h1>
+        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-8">
+            <div className="max-w-7xl mx-auto space-y-8">
+                <div className="space-y-2">
+                    <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">
+                        Crime Reports Dashboard
+                    </h1>
+                    <p className="text-gray-400 text-sm font-light">Comprehensive view of all barangay crime incidents</p>
+                </div>
 
                 {/* Filters */}
-                <div className="flex flex-wrap gap-3 items-center">
-                    <input
-                        name="search"
-                        value={filters.search}
-                        onChange={handleFilterChange}
-                        placeholder="🔍 Search by victim, suspect, or offense"
-                        className="bg-[#1C1E2E] px-3 py-2 rounded-lg text-sm w-64"
-                    />
-                    <input
-                        name="offense"
-                        value={filters.offense}
-                        onChange={handleFilterChange}
-                        placeholder="Offense (e.g. Rape)"
-                        className="bg-[#1C1E2E] px-3 py-2 rounded-lg text-sm"
-                    />
-                    <select
-                        name="barangay"
-                        value={filters.barangay}
-                        onChange={handleFilterChange}
-                        className="bg-[#1C1E2E] px-3 py-2 rounded-lg text-sm"
-                    >
-                        <option value="">Barangay</option>
-                        {barangays.map((b, i) => (
-                            <option key={i} value={b}>
-                                {b}
-                            </option>
-                        ))}
-                    </select>
+                <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 space-y-4">
+                    <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Filters & Search</h2>
+                    <div className="flex flex-wrap gap-3 items-center">
+                        <input
+                            name="search"
+                            value={filters.search}
+                            onChange={handleFilterChange}
+                            placeholder="Search by victim, suspect, offense..."
+                            className="bg-slate-900/70 border border-slate-700/50 hover:border-slate-600/70 focus:border-cyan-400/50 focus:outline-none px-4 py-2 rounded-lg text-sm w-80 text-gray-200 placeholder-gray-500 transition-all"
+                        />
+                        <input
+                            name="offense"
+                            value={filters.offense}
+                            onChange={handleFilterChange}
+                            placeholder="Offense type..."
+                            className="bg-slate-900/70 border border-slate-700/50 hover:border-slate-600/70 focus:border-cyan-400/50 focus:outline-none px-4 py-2 rounded-lg text-sm text-gray-200 placeholder-gray-500 transition-all"
+                        />
+                        <select
+                            name="barangay"
+                            value={filters.barangay}
+                            onChange={handleFilterChange}
+                            className="bg-slate-900/70 border border-slate-700/50 hover:border-slate-600/70 focus:border-cyan-400/50 focus:outline-none px-4 py-2 rounded-lg text-sm text-gray-200 transition-all cursor-pointer"
+                        >
+                            <option value="">All Barangays</option>
+                            {barangays.map((b, i) => (
+                                <option key={i} value={b} className="bg-slate-800">
+                                    {b}
+                                </option>
+                            ))}
+                        </select>
 
-                    <select
-                        name="status"
-                        value={filters.status}
-                        onChange={handleFilterChange}
-                        className="bg-[#1C1E2E] px-3 py-2 rounded-lg text-sm"
-                    >
-                        <option value="">Status</option>
-                        <option value="Solved">Solved</option>
-                        <option value="Unsolved">Unsolved</option>
-                        <option value="Cleared">Cleared</option>
-                    </select>
+                        <select
+                            name="status"
+                            value={filters.status}
+                            onChange={handleFilterChange}
+                            className="bg-slate-900/70 border border-slate-700/50 hover:border-slate-600/70 focus:border-cyan-400/50 focus:outline-none px-4 py-2 rounded-lg text-sm text-gray-200 transition-all cursor-pointer"
+                        >
+                            <option value="">All Status</option>
+                            <option value="Solved" className="bg-slate-800">Solved</option>
+                            <option value="Unsolved" className="bg-slate-800">Unsolved</option>
+                            <option value="Cleared" className="bg-slate-800">Cleared</option>
+                        </select>
 
-                    <button
-                        onClick={resetFilters}
-                        className="bg-gray-600 px-4 py-2 rounded-lg text-sm"
-                    >
-                        Reset
-                    </button>
+                        <button
+                            onClick={resetFilters}
+                            className="bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 px-5 py-2 rounded-lg text-sm font-medium text-white transition-all shadow-md hover:shadow-lg"
+                        >
+                            Reset
+                        </button>
+                    </div>
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="bg-[#1C1E2E] p-4 rounded-xl">
-                        <h2 className="text-sm text-gray-400">Total Reports</h2>
-                        <p className="text-xl font-bold">{totalReports}</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30 rounded-xl p-5 space-y-2 hover:border-blue-400/60 transition-all">
+                        <p className="text-xs font-semibold text-blue-300 uppercase tracking-wider">Total Reports</p>
+                        <p className="text-3xl font-black text-blue-300">{totalReports}</p>
                     </div>
-                    <div className="bg-[#1C1E2E] p-4 rounded-xl">
-                        <h2 className="text-sm text-gray-400">Solved Cases</h2>
-                        <p className="text-xl font-bold">{solvedCount}</p>
+                    <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30 rounded-xl p-5 space-y-2 hover:border-emerald-400/60 transition-all">
+                        <p className="text-xs font-semibold text-emerald-300 uppercase tracking-wider">Solved Cases</p>
+                        <p className="text-3xl font-black text-emerald-300">{solvedCount}</p>
                     </div>
-                    <div className="bg-[#1C1E2E] p-4 rounded-xl">
-                        <h2 className="text-sm text-gray-400">Unsolved Cases</h2>
-                        <p className="text-xl font-bold">{unsolvedCount}</p>
+                    <div className="bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/30 rounded-xl p-5 space-y-2 hover:border-red-400/60 transition-all">
+                        <p className="text-xs font-semibold text-red-300 uppercase tracking-wider">Unsolved Cases</p>
+                        <p className="text-3xl font-black text-red-300">{unsolvedCount}</p>
                     </div>
-                    <div className="bg-[#1C1E2E] p-4 rounded-xl">
-                        <h2 className="text-sm text-gray-400">Cleared Cases</h2>
-                        <p className="text-xl font-bold">{clearedCount}</p>
+                    <div className="bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 rounded-xl p-5 space-y-2 hover:border-amber-400/60 transition-all">
+                        <p className="text-xs font-semibold text-amber-300 uppercase tracking-wider">Cleared Cases</p>
+                        <p className="text-3xl font-black text-amber-300">{clearedCount}</p>
                     </div>
                 </div>
 
                 {/* Table */}
-                <div className="bg-[#1C1E2E] rounded-xl overflow-x-auto p-4">
+                <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl overflow-hidden shadow-xl">
                     {loading ? (
-                        <p>Loading reports...</p>
+                        <div className="p-8 text-center text-gray-400">Loading reports...</div>
                     ) : filteredReports.length === 0 ? (
-                        <p className="text-gray-400 text-center">No reports found.</p>
+                        <div className="p-8 text-center text-gray-400">No reports found.</div>
                     ) : (
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b border-gray-700">
-                                    <th className="p-2 text-left">Blotter No</th>
-                                    <th className="p-2 text-left">Offense</th>
-                                    <th className="p-2 text-left">Barangay</th>
-                                    <th className="p-2 text-left">Victim</th>
-                                    <th className="p-2 text-left">Suspect</th>
-                                    <th className="p-2 text-left">Status</th>
-                                    <th className="p-2 text-left">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredReports.map((r, i) => (
-                                    <tr key={r._id || i} className="border-b border-gray-800">
-                                        <td className="p-2">{r.blotterNo}</td>
-                                        <td className="p-2">{r.offense}</td>
-                                        <td className="p-2">{r.barangay}</td>
-                                        <td className="p-2">{r.victim?.name}</td>
-                                        <td className="p-2  max-w-[200px]">{r.suspect?.name}</td>
-                                        <td className="p-2 text-sm">
-                                            {r.status === "Solved" && "🟢 Solved"}
-                                            {r.status === "Unsolved" && "🔴 Unsolved"}
-                                            {r.status === "Cleared" && "🟡 Cleared"}
-                                        </td>
-                                        <td className="p-2">
-                                            <button
-                                                onClick={() => setSelectedReport(r)}
-                                                className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-lg text-xs"
-                                            >
-                                                View
-                                            </button>
-                                        </td>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b border-slate-700/50 bg-slate-900/60">
+                                        <th className="p-4 text-left font-semibold text-gray-300 text-xs uppercase tracking-wider">Blotter No</th>
+                                        <th className="p-4 text-left font-semibold text-gray-300 text-xs uppercase tracking-wider">Offense</th>
+                                        <th className="p-4 text-left font-semibold text-gray-300 text-xs uppercase tracking-wider">Barangay</th>
+                                        <th className="p-4 text-left font-semibold text-gray-300 text-xs uppercase tracking-wider">Victim</th>
+                                        <th className="p-4 text-left font-semibold text-gray-300 text-xs uppercase tracking-wider">Suspect</th>
+                                        <th className="p-4 text-left font-semibold text-gray-300 text-xs uppercase tracking-wider">Status</th>
+                                        <th className="p-4 text-left font-semibold text-gray-300 text-xs uppercase tracking-wider">Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {filteredReports.map((r, i) => (
+                                        <tr key={r._id || i} className="border-b border-slate-700/30 hover:bg-slate-900/40 transition-all">
+                                            <td className="p-4 text-gray-300 font-medium">{r.blotterNo}</td>
+                                            <td className="p-4 text-gray-400 text-sm">{r.offense}</td>
+                                            <td className="p-4 text-gray-400 text-sm">{r.barangay}</td>
+                                            <td className="p-4 text-gray-400 text-sm">{r.victim?.name}</td>
+                                            <td className="p-4 text-gray-400 text-sm max-w-xs truncate">{r.suspect?.name}</td>
+                                            <td className="p-4">
+                                                {r.status === "Solved" && <span className="inline-block bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-xs font-semibold border border-emerald-500/30">Solved</span>}
+                                                {r.status === "Unsolved" && <span className="inline-block bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-xs font-semibold border border-red-500/30">Unsolved</span>}
+                                                {r.status === "Cleared" && <span className="inline-block bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full text-xs font-semibold border border-amber-500/30">Cleared</span>}
+                                            </td>
+                                            <td className="p-4">
+                                                <button
+                                                    onClick={() => setSelectedReport(r)}
+                                                    className="bg-gradient-to-r from-cyan-500/30 to-blue-500/30 hover:from-cyan-500/40 hover:to-blue-500/40 border border-cyan-400/50 hover:border-cyan-300 text-cyan-300 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
+                                                >
+                                                    View Details
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     )}
                 </div>
 
                 {/* Modal */}
                 {selectedReport && (
-                    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 animate-fadeIn">
-                        <div className="relative bg-gradient-to-b from-[#1E2233] to-[#151827] p-8 rounded-2xl w-[850px] max-h-[90vh] overflow-y-auto border border-gray-700/50 shadow-[0_0_30px_rgba(0,0,0,0.4)] transition-all duration-300">
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-50 p-4">
+                        <div className="relative bg-gradient-to-b from-slate-800/95 to-slate-900/95 p-8 rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-slate-700/50 shadow-2xl">
 
                             {/* Header */}
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-bold text-green-400 flex items-center gap-2">
-                                    <span className="text-3xl">🧾</span> Case Report Details
+                            <div className="flex justify-between items-center mb-8">
+                                <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
+                                    Case Details
                                 </h2>
 
                                 {editMode && <button
                                     onClick={() => {
                                         handleChange(JSON.stringify(selectedReport, null, 2));
                                     }}
-                                    className="px-4 py-2 rounded-lg font-medium transition-all bg-green-600 hover:bg-green-500 text-white"
-                                >💾 Save Changes</button>}
+                                    className="px-5 py-2 rounded-lg font-semibold transition-all bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-lg"
+                                >
+                                    Save Changes
+                                </button>}
 
                                 <button
                                     onClick={() => setEditMode((prev) => !prev)}
-                                    className={`px-4 py-2 rounded-lg font-medium transition-all ${editMode
-                                        ? "bg-blue-600 hover:bg-blue-500 text-white"
-                                        : "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                                    className={`px-5 py-2 rounded-lg font-semibold transition-all ${editMode
+                                        ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-lg"
+                                        : "bg-slate-700 hover:bg-slate-600 text-gray-200"
                                         }`}
                                 >
-                                    {editMode ? " Cancel Edit" : "✏️ Edit"}
+                                    {editMode ? "Cancel Edit" : "Edit"}
                                 </button>
                             </div>
 
-                            <div className="h-[1px] w-full bg-gradient-to-r from-green-400/60 via-gray-500/30 to-transparent mb-6"></div>
+                            <div className="h-[1px] w-full bg-gradient-to-r from-cyan-400/40 via-slate-600/20 to-transparent mb-8"></div>
 
                             {/* General Info */}
-                            <section className="mb-6">
-                                <h3 className="text-lg font-semibold text-gray-100 mb-3 flex items-center gap-2">
-                                    📋 General Information
-                                </h3>
-                                <div className="grid grid-cols-2 gap-3 text-sm text-gray-300 bg-[#22263A]/60 p-4 rounded-xl border border-gray-700/50">
+                            <section className="mb-8">
+                                <h3 className="text-lg font-bold text-gray-100 mb-4 uppercase tracking-wider">General Information</h3>
+                                <div className="grid grid-cols-2 gap-4 text-sm text-gray-300 bg-slate-900/50 p-6 rounded-2xl border border-slate-700/40">
                                     {[
                                         ["Blotter No", "blotterNo"],
                                         ["Offense", "offense"],
@@ -532,12 +542,12 @@ const ReportsPage = () => {
                                                 case "blotterNo":
                                                     return (
                                                         <div key={key}>
-                                                            <b>{label}:</b>{" "}
+                                                            <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">{label}</label>
                                                             <input
                                                                 type="text"
                                                                 value={value ? String(value) : ""}
                                                                 readOnly
-                                                                className="bg-gray-700 border-b border-gray-500 px-1 w-full cursor-not-allowed"
+                                                                className="bg-slate-800/50 border border-slate-600/50 px-3 py-2 w-full rounded-lg text-gray-400 cursor-not-allowed text-sm"
                                                             />
                                                         </div>
                                                     );
@@ -545,19 +555,19 @@ const ReportsPage = () => {
                                                 case "offense":
                                                     return (
                                                         <div key={key}>
-                                                            <b>{label}:</b>{" "}
+                                                            <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">{label}</label>
                                                             <select
                                                                 value={value ? String(value) : ""}
                                                                 onChange={(e) =>
                                                                     setSelectedReport({ ...selectedReport, [key]: e.target.value })
                                                                 }
-                                                                className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                                className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
                                                             >
                                                                 <option value="">Select Offense</option>
                                                                 {offenseCategories.map((cat) => (
                                                                     <optgroup key={cat.label} label={cat.label} className={cat.color}>
                                                                         {cat.offenses.map((off) => (
-                                                                            <option key={off} value={off}>
+                                                                            <option key={off} value={off} className="bg-slate-800">
                                                                                 {off}
                                                                             </option>
                                                                         ))}
@@ -569,19 +579,19 @@ const ReportsPage = () => {
 
                                                 case "status":
                                                     return (
-                                                        <div key={key} >
-                                                            <b>{label}:</b>{" "}
+                                                        <div key={key}>
+                                                            <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">{label}</label>
                                                             <select
                                                                 value={value ? String(value) : ""}
                                                                 onChange={(e) =>
                                                                     setSelectedReport({ ...selectedReport, [key]: e.target.value })
                                                                 }
-                                                                className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                                className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
                                                             >
-                                                                <option className='text-black' value="">Select Status</option>
-                                                                <option className='text-black'>Solved</option>
-                                                                <option className='text-black'>Cleared</option>
-                                                                <option className='text-black'>Unsolved</option>
+                                                                <option value="">Select Status</option>
+                                                                <option value="Solved" className="bg-slate-800">Solved</option>
+                                                                <option value="Cleared" className="bg-slate-800">Cleared</option>
+                                                                <option value="Unsolved" className="bg-slate-800">Unsolved</option>
                                                             </select>
                                                         </div>
                                                     );
@@ -589,17 +599,17 @@ const ReportsPage = () => {
                                                 case "barangay":
                                                     return (
                                                         <div key={key}>
-                                                            <b>{label}:</b>{" "}
+                                                            <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">{label}</label>
                                                             <select
                                                                 value={value ? String(value) : ""}
                                                                 onChange={(e) =>
                                                                     setSelectedReport({ ...selectedReport, [key]: e.target.value })
                                                                 }
-                                                                className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                                className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
                                                             >
-                                                                <option className='text-black' value="">Select Barangay</option>
+                                                                <option value="" className="bg-slate-800">Select Barangay</option>
                                                                 {barangays.map((b) => (
-                                                                    <option key={b} value={b} className='text-black'>
+                                                                    <option key={b} value={b} className="bg-slate-800">
                                                                         {b}
                                                                     </option>
                                                                 ))}
@@ -610,18 +620,18 @@ const ReportsPage = () => {
                                                 case "typeOfPlace":
                                                     return (
                                                         <div key={key}>
-                                                            <b>{label}:</b>{" "}
+                                                            <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">{label}</label>
                                                             <select
                                                                 value={value ? String(value) : ""}
                                                                 onChange={(e) =>
                                                                     setSelectedReport({ ...selectedReport, [key]: e.target.value })
                                                                 }
-                                                                className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                                className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
                                                             >
-                                                                <option className='text-black' value="">Select Type</option>
-                                                                <option className='text-black' value="Along the Street">Along the Street</option>
-                                                                <option className='text-black' value="Residential">Residential</option>
-                                                                <option className='text-black' value="Commercial">Commercial</option>
+                                                                <option value="" className="bg-slate-800">Select Type</option>
+                                                                <option value="Along the Street" className="bg-slate-800">Along the Street</option>
+                                                                <option value="Residential" className="bg-slate-800">Residential</option>
+                                                                <option value="Commercial" className="bg-slate-800">Commercial</option>
                                                             </select>
                                                         </div>
                                                     );
@@ -629,19 +639,19 @@ const ReportsPage = () => {
                                                 case "modeOfReporting":
                                                     return (
                                                         <div key={key}>
-                                                            <b>{label}:</b>{" "}
+                                                            <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">{label}</label>
                                                             <select
                                                                 value={value ? String(value) : ""}
                                                                 onChange={(e) =>
                                                                     setSelectedReport({ ...selectedReport, [key]: e.target.value })
                                                                 }
-                                                                className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                                className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
                                                             >
-                                                                <option className='text-black' value="">Select Mode</option>
-                                                                <option className='text-black' value="In Person">N/A</option>
-                                                                <option className='text-black' value="In Person">In Person</option>
-                                                                <option className='text-black' value="Phone Call">Phone Call</option>
-                                                                <option className='text-black' value="Online">Online</option>
+                                                                <option value="" className="bg-slate-800">Select Mode</option>
+                                                                <option value="N/A" className="bg-slate-800">N/A</option>
+                                                                <option value="In Person" className="bg-slate-800">In Person</option>
+                                                                <option value="Phone Call" className="bg-slate-800">Phone Call</option>
+                                                                <option value="Online" className="bg-slate-800">Online</option>
                                                             </select>
                                                         </div>
                                                     );
@@ -649,19 +659,19 @@ const ReportsPage = () => {
                                                 case "stageOfFelony":
                                                     return (
                                                         <div key={key}>
-                                                            <b>{label}:</b>{" "}
+                                                            <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">{label}</label>
                                                             <select
                                                                 value={value ? String(value) : ""}
                                                                 onChange={(e) =>
                                                                     setSelectedReport({ ...selectedReport, [key]: e.target.value })
                                                                 }
-                                                                className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                                className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
                                                             >
-                                                                <option className='text-black' value="">Select Stage</option>
-                                                                <option className='text-black' value="In Person">N/A</option>
-                                                                <option className='text-black' value="Attempted">Attempted</option>
-                                                                <option className='text-black' value="Frustrated">Frustrated</option>
-                                                                <option className='text-black' value="Consummated">Consummated</option>
+                                                                <option value="" className="bg-slate-800">Select Stage</option>
+                                                                <option value="N/A" className="bg-slate-800">N/A</option>
+                                                                <option value="Attempted" className="bg-slate-800">Attempted</option>
+                                                                <option value="Frustrated" className="bg-slate-800">Frustrated</option>
+                                                                <option value="Consummated" className="bg-slate-800">Consummated</option>
                                                             </select>
                                                         </div>
                                                     );
@@ -669,14 +679,14 @@ const ReportsPage = () => {
                                                 default:
                                                     return (
                                                         <div key={key}>
-                                                            <b>{label}:</b>{" "}
+                                                            <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">{label}</label>
                                                             <input
                                                                 type="text"
                                                                 value={value ? String(value) : ""}
                                                                 onChange={(e) =>
                                                                     setSelectedReport({ ...selectedReport, [key]: e.target.value })
                                                                 }
-                                                                className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                                className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
                                                             />
                                                         </div>
                                                     );
@@ -686,7 +696,8 @@ const ReportsPage = () => {
                                         // view mode
                                         return (
                                             <div key={key}>
-                                                <b>{label}:</b> <span>{value ? String(value) : "—"}</span>
+                                                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">{label}</label>
+                                                <p className="text-gray-300 text-sm">{value ? String(value) : "—"}</p>
                                             </div>
                                         );
                                     })}
@@ -694,16 +705,14 @@ const ReportsPage = () => {
                             </section>
 
                             {/* Victim Information */}
-                            <section className="mb-6">
-                                <h3 className="text-lg font-semibold text-gray-100 mb-3 flex items-center gap-2">
-                                    🙍‍♂️ Victim Information
-                                </h3>
-                                <div className="grid grid-cols-2 gap-3 text-sm text-gray-300 bg-[#22263A]/60 p-4 rounded-xl border border-gray-700/50">
+                            <section className="mb-8">
+                                <h3 className="text-lg font-bold text-gray-100 mb-4 uppercase tracking-wider">Victim Information</h3>
+                                <div className="grid grid-cols-2 gap-4 text-sm text-gray-300 bg-slate-900/50 p-6 rounded-2xl border border-slate-700/40">
                                     {Object.entries(selectedReport.victim || {})
-                                        .filter(([key]) => key !== "_id") // <-- filter out _id
+                                        .filter(([key]) => key !== "_id")
                                         .map(([key, value]) => (
                                             <div key={key}>
-                                                <b>{key.charAt(0).toUpperCase() + key.slice(1)}:</b>{" "}
+                                                <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">{key.charAt(0).toUpperCase() + key.slice(1)}</label>
                                                 {editMode ? (
                                                     key === "gender" ? (
                                                         <select
@@ -714,12 +723,12 @@ const ReportsPage = () => {
                                                                     victim: { ...selectedReport.victim, [key]: e.target.value },
                                                                 })
                                                             }
-                                                            className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                            className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
                                                         >
-                                                            <option className='text-black' value="">Select Gender</option>
-                                                            <option className='text-black'>N/A</option>
-                                                            <option className='text-black'>Male</option>
-                                                            <option className='text-black'>Female</option>
+                                                            <option value="" className="bg-slate-800">Select Gender</option>
+                                                            <option value="N/A" className="bg-slate-800">N/A</option>
+                                                            <option value="Male" className="bg-slate-800">Male</option>
+                                                            <option value="Female" className="bg-slate-800">Female</option>
                                                         </select>
                                                     ) : key === "harmed" ? (
                                                         <select
@@ -730,12 +739,12 @@ const ReportsPage = () => {
                                                                     victim: { ...selectedReport.victim, [key]: e.target.value },
                                                                 })
                                                             }
-                                                            className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                            className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
                                                         >
-                                                            <option className='text-black' value="">Select Status</option>
-                                                            <option className='text-black'>N/A</option>
-                                                            <option className='text-black'>Harmed</option>
-                                                            <option className='text-black'>Unharmed</option>
+                                                            <option value="" className="bg-slate-800">Select Status</option>
+                                                            <option value="N/A" className="bg-slate-800">N/A</option>
+                                                            <option value="Harmed" className="bg-slate-800">Harmed</option>
+                                                            <option value="Unharmed" className="bg-slate-800">Unharmed</option>
                                                         </select>
                                                     ) : (
                                                         <input
@@ -747,11 +756,11 @@ const ReportsPage = () => {
                                                                     victim: { ...selectedReport.victim, [key]: e.target.value },
                                                                 })
                                                             }
-                                                            className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                            className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
                                                         />
                                                     )
                                                 ) : (
-                                                    <span>{value ? String(value) : "—"}</span>
+                                                    <p className="text-gray-300 text-sm">{value ? String(value) : "—"}</p>
                                                 )}
                                             </div>
                                         ))}
@@ -759,16 +768,14 @@ const ReportsPage = () => {
                             </section>
 
                             {/* Suspect Information */}
-                            <section className="mb-6">
-                                <h3 className="text-lg font-semibold text-gray-100 mb-3 flex items-center gap-2">
-                                    🕵️‍♂️ Suspect Information
-                                </h3>
-                                <div className="grid grid-cols-2 gap-3 text-sm text-gray-300 bg-[#22263A]/60 p-4 rounded-xl border border-gray-700/50">
+                            <section className="mb-8">
+                                <h3 className="text-lg font-bold text-gray-100 mb-4 uppercase tracking-wider">Suspect Information</h3>
+                                <div className="grid grid-cols-2 gap-4 text-sm text-gray-300 bg-slate-900/50 p-6 rounded-2xl border border-slate-700/40">
                                     {Object.entries(selectedReport.suspect || {})
-                                        .filter(([key]) => key !== "_id") // <-- filter out _id
+                                        .filter(([key]) => key !== "_id")
                                         .map(([key, value]) => (
                                             <div key={key}>
-                                                <b>{key.charAt(0).toUpperCase() + key.slice(1)}:</b>{" "}
+                                                <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">{key.charAt(0).toUpperCase() + key.slice(1)}</label>
                                                 {editMode ? (
                                                     key === "gender" ? (
                                                         <select
@@ -779,12 +786,12 @@ const ReportsPage = () => {
                                                                     suspect: { ...selectedReport.suspect, [key]: e.target.value },
                                                                 })
                                                             }
-                                                            className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                            className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
                                                         >
-                                                            <option className='text-black' value="">Select Gender</option>
-                                                            <option className='text-black' >N/A</option>
-                                                            <option className='text-black' >Male</option>
-                                                            <option className='text-black'>Female</option>
+                                                            <option value="" className="bg-slate-800">Select Gender</option>
+                                                            <option value="N/A" className="bg-slate-800">N/A</option>
+                                                            <option value="Male" className="bg-slate-800">Male</option>
+                                                            <option value="Female" className="bg-slate-800">Female</option>
                                                         </select>
                                                     ) : key === "status" ? (
                                                         <select
@@ -795,13 +802,13 @@ const ReportsPage = () => {
                                                                     suspect: { ...selectedReport.suspect, [key]: e.target.value },
                                                                 })
                                                             }
-                                                            className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                            className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
                                                         >
-                                                            <option className='text-black' value="">Select Status</option>
-                                                            <option className='text-black'>N/A</option>
-                                                            <option className='text-black'>Arrested</option>
-                                                            <option className='text-black'>Detained</option>
-                                                            <option className='text-black'>At Large</option>
+                                                            <option value="" className="bg-slate-800">Select Status</option>
+                                                            <option value="N/A" className="bg-slate-800">N/A</option>
+                                                            <option value="Arrested" className="bg-slate-800">Arrested</option>
+                                                            <option value="Detained" className="bg-slate-800">Detained</option>
+                                                            <option value="At Large" className="bg-slate-800">At Large</option>
                                                         </select>
                                                     ) : (
                                                         <input
@@ -813,11 +820,11 @@ const ReportsPage = () => {
                                                                     suspect: { ...selectedReport.suspect, [key]: e.target.value },
                                                                 })
                                                             }
-                                                            className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
+                                                            className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
                                                         />
                                                     )
                                                 ) : (
-                                                    <span>{value ? String(value) : "—"}</span>
+                                                    <p className="text-gray-300 text-sm">{value ? String(value) : "—"}</p>
                                                 )}
                                             </div>
                                         ))}
@@ -826,19 +833,17 @@ const ReportsPage = () => {
 
                             {/* Narrative */}
                             {selectedReport.narrative && (
-                                <section className="mb-6">
-                                    <h3 className="text-lg font-semibold text-gray-100 mb-3 flex items-center gap-2">
-                                        🗒 Narrative
-                                    </h3>
-                                    <div className="bg-[#22263A]/60 p-4 rounded-xl border border-gray-700/50">
+                                <section className="mb-8">
+                                    <h3 className="text-lg font-bold text-gray-100 mb-4 uppercase tracking-wider">Narrative</h3>
+                                    <div className="bg-slate-900/50 p-6 rounded-2xl border border-slate-700/40">
                                         {editMode ? (
                                             <textarea
                                                 value={selectedReport.narrative || ""}
                                                 onChange={(e) =>
                                                     setSelectedReport({ ...selectedReport, narrative: e.target.value })
                                                 }
-                                                className="w-full bg-transparent border border-gray-600 focus:border-green-400 outline-none p-2 rounded-md text-sm text-gray-300 resize-none"
-                                                rows={4}
+                                                className="w-full bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none p-3 rounded-lg text-sm text-gray-300 resize-none transition-all"
+                                                rows={5}
                                             />
                                         ) : (
                                             <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">
@@ -849,21 +854,17 @@ const ReportsPage = () => {
                                 </section>
                             )}
 
-                            {/* Section: Location */}
-                            <section>
-                                <h3 className="text-lg font-semibold text-gray-100 mb-3 flex items-center gap-2">
-                                    📍 Location
-                                </h3>
-                                <div className="bg-[#22263A]/60 p-4 rounded-xl border border-gray-700/50">
-                                    <p className="text-sm text-gray-300 mb-3">
-                                        <b>Coordinates:</b>{" "}
-                                        {selectedReport.location?.coordinates?.[1]},{" "}
-                                        {selectedReport.location?.coordinates?.[0]}
+                            {/* Location */}
+                            <section className="mb-8">
+                                <h3 className="text-lg font-bold text-gray-100 mb-4 uppercase tracking-wider">Location</h3>
+                                <div className="bg-slate-900/50 p-6 rounded-2xl border border-slate-700/40">
+                                    <p className="text-sm text-gray-300 mb-4">
+                                        <span className="font-semibold text-cyan-300">Coordinates:</span> {selectedReport.location?.coordinates?.[1]}, {selectedReport.location?.coordinates?.[0]}
                                     </p>
                                     <iframe
-                                        className="rounded-lg border border-gray-700 shadow-lg"
+                                        className="rounded-xl border border-slate-700/50 shadow-lg w-full"
                                         width="100%"
-                                        height="250"
+                                        height="300"
                                         loading="lazy"
                                         src={`https://www.google.com/maps?q=${selectedReport.location?.coordinates?.[1]},${selectedReport.location?.coordinates?.[0]}&hl=es;z=14&output=embed`}
                                     ></iframe>
@@ -871,29 +872,25 @@ const ReportsPage = () => {
                             </section>
 
                             {/* Footer */}
-                            <div className="flex justify-end mt-8 gap-3 pt-4 border-t border-gray-700/50">
+                            <div className="flex justify-end gap-3 pt-6 border-t border-slate-700/50">
                                 <button
                                     onClick={() => setSelectedReport(null)}
-                                    className="px-5 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium transition-all duration-200"
+                                    className="px-6 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-gray-200 font-semibold transition-all"
                                 >
-                                    ✖ Close
+                                    Close
                                 </button>
                                 {!editMode && (
                                     <button
                                         onClick={handlePrint}
-                                        className="px-5 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-medium shadow-md hover:shadow-green-400/20 transition-all duration-200"
+                                        className="px-6 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-semibold shadow-lg transition-all"
                                     >
-                                        🖨 Print Report
+                                        Print Report
                                     </button>
                                 )}
                             </div>
                         </div>
                     </div>
                 )}
-
-
-
-
             </div>
         </div>
     );

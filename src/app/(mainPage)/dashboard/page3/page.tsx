@@ -183,8 +183,9 @@ const AnalyticsPage: React.FC = () => {
             {
                 label: "Actual Cases",
                 data: Object.keys(casesOverTimeCounts).map((d) => casesOverTimeCounts[d]),
-                borderColor: "#3b82f6",
-                backgroundColor: "rgba(59, 130, 246, 0.2)",
+                borderColor: "#0ea5e9",
+                backgroundColor: "rgba(6, 182, 212, 0.2)",
+                tension: 0.3,
             },
             {
                 label: "Predicted Cases",
@@ -194,6 +195,7 @@ const AnalyticsPage: React.FC = () => {
                 borderColor: "#f97316",
                 borderDash: [5, 5],
                 backgroundColor: "rgba(249, 115, 22, 0.2)",
+                tension: 0.3,
             },
         ],
     };
@@ -201,11 +203,17 @@ const AnalyticsPage: React.FC = () => {
     // -------------------- Chart Options --------------------
     const options: any = {
         responsive: true,
+        maintainAspectRatio: true,
         plugins: {
             legend: {
                 position: "bottom",
+                labels: { color: "#d1d5db", font: { size: 12 } }
             },
         },
+        scales: {
+            x: { ticks: { color: "#9ca3af" }, grid: { color: "rgba(75, 85, 99, 0.2)" } },
+            y: { ticks: { color: "#9ca3af" }, grid: { color: "rgba(75, 85, 99, 0.2)" } },
+        }
     };
 
     // -------------------- New Helper Functions to Fix Redeclare --------------------
@@ -236,23 +244,23 @@ const AnalyticsPage: React.FC = () => {
     // -------------------- Render --------------------
     const getBarData = (counts: Record<string, number>) => ({
         labels: Object.keys(counts),
-        datasets: [{ label: "Cases", data: Object.values(counts), backgroundColor: "#3b82f6" }],
+        datasets: [{ label: "Cases", data: Object.values(counts), backgroundColor: "#0ea5e9", borderColor: "#0284c7", borderWidth: 1 }],
     });
 
     const getDonutData = (counts: Record<string, number>) => ({
         labels: Object.keys(counts),
-        datasets: [{ data: Object.values(counts), backgroundColor: ["#3b82f6", "#f97316", "#22c55e", "#ef4444", "#facc15", "#94a3b8"] }],
+        datasets: [{ data: Object.values(counts), backgroundColor: ["#0ea5e9", "#f97316", "#22c55e", "#ef4444", "#facc15", "#94a3b8", "#ec4899"] }],
     });
 
     const getLineData = (counts: Record<string, number>) => ({
         labels: Object.keys(counts),
-        datasets: [{ label: "Cases Over Time", data: Object.values(counts), borderColor: "#3b82f6", backgroundColor: "rgba(59, 130, 246, 0.2)" }],
+        datasets: [{ label: "Cases Over Time", data: Object.values(counts), borderColor: "#0ea5e9", backgroundColor: "rgba(6, 182, 212, 0.1)", tension: 0.3 }],
     });
 
     const barangayBarChartData = {
         labels: barangays,
         datasets: [
-            { label: "Total Crimes", data: barangays.map((b) => allBarangayCounts[b] || 0), backgroundColor: "#f97316" },
+            { label: "Total Crimes", data: barangays.map((b) => allBarangayCounts[b] || 0), backgroundColor: "#f97316", borderColor: "#ea580c", borderWidth: 1 },
         ],
     };
 
@@ -263,9 +271,9 @@ const AnalyticsPage: React.FC = () => {
         casesByMonthCounts[month] = (casesByMonthCounts[month] || 0) + 1;
     });
 
-    const casesByDayData = { labels: Object.keys(casesByDayCounts), datasets: [{ label: "Cases by Day of Week", data: Object.values(casesByDayCounts), backgroundColor: "#ef4444" }] };
-    const casesByMonthData = { labels: Object.keys(casesByMonthCounts), datasets: [{ label: "Cases by Month", data: Object.values(casesByMonthCounts), borderColor: "#facc15", backgroundColor: "rgba(250, 204, 21, 0.2)" }] };
-    const casesByHourData = { labels: Object.keys(casesByHourCounts), datasets: [{ label: "Cases by Hour", data: Object.values(casesByHourCounts), backgroundColor: "#22c55e" }] };
+    const casesByDayData = { labels: Object.keys(casesByDayCounts), datasets: [{ label: "Cases by Day of Week", data: Object.values(casesByDayCounts), backgroundColor: "#ef4444", borderColor: "#dc2626", borderWidth: 1 }] };
+    const casesByMonthData = { labels: Object.keys(casesByMonthCounts), datasets: [{ label: "Cases by Month", data: Object.values(casesByMonthCounts), borderColor: "#facc15", backgroundColor: "rgba(250, 204, 21, 0.1)", tension: 0.3 }] };
+    const casesByHourData = { labels: Object.keys(casesByHourCounts), datasets: [{ label: "Cases by Hour", data: Object.values(casesByHourCounts), backgroundColor: "#22c55e", borderColor: "#16a34a", borderWidth: 1 }] };
 
     // -------------------- Summary Calculations --------------------
     const totalReports = reports.length;
@@ -311,159 +319,137 @@ const AnalyticsPage: React.FC = () => {
     const peakHour = Object.entries(hourCountsSummary)
         .sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
 
-    // Predicted cases next 7 days (already in your code)
+    // Predicted cases next 7 days
     const predictedNext7DaysTotal = Object.values(predictedNextWeek).reduce((a, b) => a + b, 0);
 
+    const StatCard = ({ title, value, icon, color }: { title: string; value: string | number; icon: string; color: string }) => (
+        <div className={`bg-gradient-to-br ${color} backdrop-blur-xl border border-opacity-20 rounded-2xl p-5 space-y-2 hover:shadow-lg transition-all`}>
+            <div className="flex items-center justify-between">
+                <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">{title}</h3>
+                <span className="text-2xl">{icon}</span>
+            </div>
+            <p className="text-3xl font-black text-white">{value}</p>
+        </div>
+    );
 
     // -------------------- Render --------------------
     return (
-        <div className="min-h-screen bg-[#0F1120] text-white p-4">
-            <div className="max-w-7xl mx-auto space-y-6">
-                <h1 className="text-2xl font-bold">Barangay Crime Analytics Dashboard</h1>
+        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-8">
+            <div className="max-w-7xl mx-auto space-y-8">
+                <div className="space-y-2">
+                    <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">
+                        Crime Analytics Dashboard
+                    </h1>
+                    <p className="text-gray-400 text-sm">Real-time insights and predictive analytics for barangay crime data</p>
+                </div>
 
                 {!loading && reports.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h3 className="text-sm font-semibold mb-1">Total Reports</h3>
-                            <p className="text-xl font-bold">{totalReports}</p>
+                        <StatCard title="Total Reports" value={totalReports} icon="📊" color="from-blue-500/20 to-cyan-500/20 border-blue-500/30" />
+                        <StatCard title="Solved Cases" value={solvedCount} icon="✅" color="from-emerald-500/20 to-green-500/20 border-emerald-500/30" />
+                        <StatCard title="Cleared Cases" value={clearedCount} icon="⭐" color="from-amber-500/20 to-yellow-500/20 border-amber-500/30" />
+                        <StatCard title="Unsolved Cases" value={unsolvedCount} icon="🔍" color="from-red-500/20 to-pink-500/20 border-red-500/30" />
+
+                        <StatCard title="Most Common Barangay" value={mostCommonBarangay} icon="📍" color="from-purple-500/20 to-pink-500/20 border-purple-500/30" />
+                        <StatCard title="Most Common Offense" value={mostCommonOffense} icon="⚖️" color="from-orange-500/20 to-red-500/20 border-orange-500/30" />
+                        <StatCard title="Peak Day of Week" value={peakDay} icon="📅" color="from-indigo-500/20 to-blue-500/20 border-indigo-500/30" />
+                        <StatCard title="Peak Hour" value={`${peakHour}:00`} icon="⏰" color="from-violet-500/20 to-purple-500/20 border-violet-500/30" />
+
+                        <div className="lg:col-span-4 bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                            <h3 className="text-lg font-bold text-gray-100 mb-2 flex items-center gap-2">
+                                🔮 Predicted Cases Next 7 Days
+                            </h3>
+                            <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">
+                                {predictedNext7DaysTotal}
+                            </div>
                         </div>
-
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h3 className="text-sm font-semibold mb-1">Solved</h3>
-                            <p className="text-xl font-bold">{solvedCount}</p>
-                        </div>
-
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h3 className="text-sm font-semibold mb-1">Cleared</h3>
-                            <p className="text-xl font-bold">{clearedCount}</p>
-                        </div>
-
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h3 className="text-sm font-semibold mb-1">Unsolved</h3>
-                            <p className="text-xl font-bold">{unsolvedCount}</p>
-                        </div>
-
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50 md:col-span-2">
-                            <h3 className="text-sm font-semibold mb-1">Most Common Barangay</h3>
-                            <p className="text-xl font-bold">{mostCommonBarangay}</p>
-                        </div>
-
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50 md:col-span-2">
-                            <h3 className="text-sm font-semibold mb-1">Most Common Offense</h3>
-                            <p className="text-xl font-bold">{mostCommonOffense}</p>
-                        </div>
-
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50 md:col-span-2">
-                            <h3 className="text-sm font-semibold mb-1">Peak Day of Week</h3>
-                            <p className="text-xl font-bold">{peakDay}</p>
-                        </div>
-
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50 md:col-span-2">
-                            <h3 className="text-sm font-semibold mb-1">Peak Hour</h3>
-                            <p className="text-xl font-bold">{peakHour}:00</p>
-                        </div>
-
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50 md:col-span-4">
-                            <h3 className="text-sm font-semibold mb-1">Predicted Cases Next 7 Days</h3>
-                            <p className="text-xl font-bold">{predictedNext7DaysTotal}</p>
-                        </div>
-
                     </div>
                 )}
 
                 {loading ? (
-                    <p>Loading analytics...</p>
+                    <div className="text-center py-12">
+                        <div className="inline-block">
+                            <div className="h-8 w-8 border-4 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin"></div>
+                        </div>
+                        <p className="text-gray-400 mt-4">Loading analytics...</p>
+                    </div>
                 ) : reports.length === 0 ? (
-                    <p className="text-gray-400 text-center">No reports available for analytics.</p>
+                    <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-12 text-center">
+                        <p className="text-gray-400 text-lg">No reports available for analytics.</p>
+                    </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                         {/* Overall Crimes by Barangay - Full Width */}
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50 md:col-span-3 lg:col-span-3">
-                            <h2 className="text-sm font-semibold mb-2">Overall Crimes by Barangay</h2>
-                            <Bar
-                                data={barangayBarChartData}
-                                options={{
-                                    responsive: true,
-                                    plugins: { legend: { display: false } },
-                                    scales: {
-                                        y: { beginAtZero: true },
-                                    },
-                                }}
-                            />
+                        <div className="lg:col-span-3 bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                            <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">📈 Overall Crimes by Barangay</h2>
+                            <Bar data={barangayBarChartData} options={{ ...options, scales: { y: { beginAtZero: true } } }} />
                         </div>
 
-                        {/*9. Cases by Hour */}
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h2 className="text-sm font-semibold mb-2">Cases by Hour</h2>
+                        {/* Cases by Hour */}
+                        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                            <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">⏱️ Cases by Hour</h2>
                             <Bar data={casesByHourData} options={{ ...options, scales: { y: { beginAtZero: true } } }} />
                         </div>
 
-                        {/*10. Cases by Day of Week */}
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h2 className="text-sm font-semibold mb-2">Cases by Day of Week</h2>
+                        {/* Cases by Day of Week */}
+                        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                            <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">📅 Cases by Day of Week</h2>
                             <Bar data={casesByDayData} options={{ ...options, scales: { y: { beginAtZero: true } } }} />
                         </div>
 
-                        {/*11. Cases by Month */}
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h2 className="text-sm font-semibold mb-2">Cases by Month</h2>
+                        {/* Cases by Month */}
+                        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                            <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">📊 Cases by Month</h2>
                             <Line data={casesByMonthData} options={options} />
                         </div>
 
-                        {/* 9. Predicted Cases Next 7 Days */}
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50 md:col-span-3 lg:col-span-3">
-                            <h2 className="text-sm font-semibold mb-2">Predicted Cases Next 7 Days</h2>
+                        {/* Predicted Cases Next 7 Days */}
+                        <div className="lg:col-span-3 bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                            <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">🔮 Predicted Cases Next 7 Days</h2>
                             <Line data={predictedLineData} options={options} />
                         </div>
 
-
-                        {/* 1. Cases by Status */}
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h2 className="text-sm font-semibold mb-2">Cases by Status</h2>
+                        {/* Cases by Status */}
+                        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                            <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">🎯 Cases by Status</h2>
                             <Doughnut data={getDonutData(statusCounts)} options={options} />
                         </div>
 
-                        {/* 2. Cases by Barangay */}
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h2 className="text-sm font-semibold mb-2">Cases by Barangay</h2>
-                            <Bar data={getBarData(barangayCounts)} options={options} />
-                        </div>
-
-                        {/* 3. Cases by Offense */}
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h2 className="text-sm font-semibold mb-2">Cases by Offense</h2>
+                        {/* Cases by Offense */}
+                        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                            <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">⚖️ Cases by Offense Type</h2>
                             <Bar data={getBarData(offenseCounts)} options={options} />
                         </div>
 
-                        {/* 4. Cases Over Time */}
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h2 className="text-sm font-semibold mb-2">Cases Over Time</h2>
+                        {/* Cases Over Time */}
+                        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                            <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">📈 Cases Over Time</h2>
                             <Line data={getLineData(casesOverTimeCounts)} options={options} />
                         </div>
 
-                        {/* 5. Cases by Mode of Reporting */}
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h2 className="text-sm font-semibold mb-2">Cases by Mode of Reporting</h2>
+                        {/* Cases by Mode of Reporting */}
+                        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                            <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">📞 Mode of Reporting</h2>
                             <Doughnut data={getDonutData(modeCounts)} options={options} />
                         </div>
 
-                        {/* 6. Cases by Stage of Felony */}
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h2 className="text-sm font-semibold mb-2">Cases by Stage of Felony</h2>
+                        {/* Cases by Stage of Felony */}
+                        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                            <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">⚔️ Stage of Felony</h2>
                             <Doughnut data={getDonutData(felonyStageCounts)} options={options} />
                         </div>
 
-                        {/* 7. Cases by Suspect Status */}
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h2 className="text-sm font-semibold mb-2">Cases by Suspect Status</h2>
+                        {/* Cases by Suspect Status */}
+                        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                            <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">🕵️ Suspect Status</h2>
                             <Doughnut data={getDonutData(suspectStatusCounts)} options={options} />
                         </div>
 
-                        {/* 8. Cases by Type of Place */}
-                        <div className="bg-[#1C1E2E] p-4 rounded-md border border-gray-700/50">
-                            <h2 className="text-sm font-semibold mb-2">Cases by Type of Place</h2>
+                        {/* Cases by Type of Place */}
+                        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                            <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">📍 Type of Place</h2>
                             <Bar data={getBarData(typeOfPlaceCounts)} options={options} />
                         </div>
 

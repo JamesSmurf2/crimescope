@@ -113,7 +113,7 @@ const Sidebar = () => {
               <Link href="/dashboard/page3">
                 <SidebarItem
                   label="Analytics"
-                  active={pathname === '/dashboard/page4'}
+                  active={pathname === '/dashboard/page3'}
                   icon={<BarChart3 size={20} />}
                 />
               </Link>
@@ -121,7 +121,7 @@ const Sidebar = () => {
                 <Link href="/dashboard/page4">
                   <SidebarItem
                     label="Make a Report"
-                    active={pathname === '/dashboard/page3'}
+                    active={pathname === '/dashboard/page4'}
                     icon={<Plus size={20} />}
                   />
                 </Link>

@@ -96,9 +96,9 @@ const offenseCategories = [
             "Child Abuse",
             "Cybercrime",
             "Estafa",
-            "Direct Assault",          // RPC Art. 148
-            "Grave Threats",           // RPC Art. 282
-            "Other Forms of Trespass", // RPC Art. 281
+            "Direct Assault",
+            "Grave Threats",
+            "Other Forms of Trespass",
             "Violence Against Women & Children (VAWC)",
             "Illegal Logging",
         ],
@@ -124,10 +124,10 @@ const offenseCategories = [
             "Noise Complaint",
             "Illegal Vending",
             "Drinking in Public",
-            "Alarms and Scandals",  // RPC Art. 155
-            "Unjust Vexations",     // RPC Art. 287
-            "Light Threats",        // RPC Art. 283
-            "Malicious Mischief",   // RPC Art. 327
+            "Alarms and Scandals",
+            "Unjust Vexations",
+            "Light Threats",
+            "Malicious Mischief",
         ],
     },
 ];
@@ -140,7 +140,7 @@ const CrimeReportForm = () => {
     const { addReports } = useReportStore()
 
     const { getAuthUserFunction, authUser } = useAuthStore()
-    
+
     //For auth
     const [authLoading, setAuthLoading] = useState(true);
     useEffect(() => {
@@ -307,68 +307,83 @@ const CrimeReportForm = () => {
     };
 
     const inputClass =
-        "bg-[#1C1E2E] text-white px-3 py-2 rounded-lg w-full focus:outline-none border border-gray-700";
-    const labelClass = "font-semibold text-gray-300 mb-1 block";
+        "bg-slate-800/50 border border-slate-700/50 hover:border-slate-600/70 focus:border-cyan-400/50 focus:outline-none text-white px-4 py-2.5 rounded-lg w-full transition-all placeholder-gray-500";
+    const labelClass = "font-semibold text-gray-300 mb-2 block text-sm uppercase tracking-wider";
 
     return (
-        <div className="min-h-screen bg-[#0F1120] text-white p-6 flex justify-center">
-            <div className="w-full max-w-[1100px] space-y-6">
-                <h1 className="text-3xl font-bold text-center border-b border-gray-700 pb-3">
-                    Barangay Crime Report Form
-                </h1>
+        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-8">
+            <div className="w-full max-w-5xl mx-auto space-y-8">
+                <div className="space-y-2 text-center">
+                    <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">
+                        Crime Report Form
+                    </h1>
+                    <p className="text-gray-400 text-sm">File and manage barangay crime incidents</p>
+                </div>
 
-                <form className="space-y-6">
+                <form className="space-y-8">
                     {/* Basic Info */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelClass}>Blotter Number</label>
-                            <input name="blotterNo" value={form.blotterNo} readOnly className={inputClass} />
-                        </div>
+                    <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 space-y-4">
+                        <h2 className="text-lg font-bold text-gray-100 uppercase tracking-wider flex items-center gap-2">
+                            📋 Basic Information
+                        </h2>
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label className={labelClass}>Blotter Number</label>
+                                <input name="blotterNo" value={form.blotterNo} readOnly className={`${inputClass} bg-slate-800/70 cursor-not-allowed`} />
+                            </div>
 
-                        <div>
-                            <label className={labelClass}>Barangay</label>
-                            <select name="barangay" value={form.barangay} onChange={handleChange} className={inputClass}>
-                                <option value="">Select Barangay</option>
-                                {barangays.map((b) => (
-                                    <option key={b}>{b}</option>
-                                ))}
-                            </select>
-                        </div>
+                            <div>
+                                <label className={labelClass}>Barangay</label>
+                                <select name="barangay" value={form.barangay} onChange={handleChange} className={inputClass}>
+                                    <option value="">Select Barangay</option>
+                                    {barangays.map((b) => (
+                                        <option key={b} className="bg-slate-800" value={b}>{b}</option>
+                                    ))}
+                                </select>
+                            </div>
 
-                        <div>
-                            <label className={labelClass}>Street</label>
-                            <input name="street" value={form.street} onChange={handleChange} className={inputClass} />
-                        </div>
+                            <div>
+                                <label className={labelClass}>Street</label>
+                                <input name="street" value={form.street} onChange={handleChange} placeholder="Enter street name" className={inputClass} />
+                            </div>
 
-                        <div>
-                            <label className={labelClass}>Type of Place</label>
-                            <select name="typeOfPlace" value={form.typeOfPlace} onChange={handleChange} className={inputClass}>
-                                <option value="">Select Type</option>
-                                <option value="Along the Street">Along the Street</option>
-                                <option value="Residential">Residential</option>
-                                <option value="Commercial">Commercial</option>
-                            </select>
+                            <div>
+                                <label className={labelClass}>Type of Place</label>
+                                <select name="typeOfPlace" value={form.typeOfPlace} onChange={handleChange} className={inputClass}>
+                                    <option value="">Select Type</option>
+                                    <option className="bg-slate-800" value="Along the Street">Along the Street</option>
+                                    <option className="bg-slate-800" value="Residential">Residential</option>
+                                    <option className="bg-slate-800" value="Commercial">Commercial</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
                     {/* Offense */}
-                    <div>
-                        <label className={labelClass}>Offense</label>
-                        <select name="offense" value={form.offense} onChange={handleChange} className={inputClass}>
-                            <option value="">Select an offense</option>
-                            {offenseCategories.map((group) => (
-                                <optgroup key={group.label} label={group.label} className={group.color}>
-                                    {group.offenses.map((off) => (
-                                        <option key={off}>{off}</option>
-                                    ))}
-                                </optgroup>
-                            ))}
-                        </select>
+                    <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 space-y-4">
+                        <h2 className="text-lg font-bold text-gray-100 uppercase tracking-wider flex items-center gap-2">
+                            ⚖️ Offense Details
+                        </h2>
+                        <div>
+                            <label className={labelClass}>Offense</label>
+                            <select name="offense" value={form.offense} onChange={handleChange} className={inputClass}>
+                                <option value="">Select an offense</option>
+                                {offenseCategories.map((group) => (
+                                    <optgroup key={group.label} label={group.label} className={group.color}>
+                                        {group.offenses.map((off) => (
+                                            <option key={off} className="bg-slate-800" value={off}>{off}</option>
+                                        ))}
+                                    </optgroup>
+                                ))}
+                            </select>
+                        </div>
                     </div>
 
                     {/* Report & Incident Dates */}
-                    <div className="bg-[#1C1E2E] p-4 rounded-xl space-y-3">
-                        <h2 className="text-lg font-bold border-b border-gray-700 pb-2">Date and Time Information</h2>
+                    <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 space-y-4">
+                        <h2 className="text-lg font-bold text-gray-100 uppercase tracking-wider flex items-center gap-2">
+                            📅 Date and Time Information
+                        </h2>
 
                         <div className="grid md:grid-cols-2 gap-4">
                             <div>
@@ -418,9 +433,9 @@ const CrimeReportForm = () => {
                     </div>
 
                     {/* Mode of Reporting & Stage of Felony */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelClass}>Mode of Reporting</label>
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 space-y-4">
+                            <label className="text-lg font-bold text-gray-100 uppercase tracking-wider">Mode of Reporting</label>
                             <select
                                 name="modeOfReporting"
                                 value={form.modeOfReporting}
@@ -428,15 +443,15 @@ const CrimeReportForm = () => {
                                 className={inputClass}
                             >
                                 <option value="">Select Mode</option>
-                                <option value="N/A">N/A</option>
-                                <option value="In Person">In Person</option>
-                                <option value="Phone Call">Phone Call</option>
-                                <option value="Online">Walk In</option>
+                                <option className="bg-slate-800" value="N/A">N/A</option>
+                                <option className="bg-slate-800" value="In Person">In Person</option>
+                                <option className="bg-slate-800" value="Phone Call">Phone Call</option>
+                                <option className="bg-slate-800" value="Online">Walk In</option>
                             </select>
                         </div>
 
-                        <div>
-                            <label className={labelClass}>Stage of Felony</label>
+                        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 space-y-4">
+                            <label className="text-lg font-bold text-gray-100 uppercase tracking-wider">Stage of Felony</label>
                             <select
                                 name="stageOfFelony"
                                 value={form.stageOfFelony}
@@ -444,144 +459,163 @@ const CrimeReportForm = () => {
                                 className={inputClass}
                             >
                                 <option value="">Select Stage</option>
-                                <option>N/A</option>
-                                <option value="Attempted">Attempted</option>
-                                <option value="Frustrated">Frustrated</option>
-                                <option value="Consummated">Consummated</option>
+                                <option className="bg-slate-800" value="N/A">N/A</option>
+                                <option className="bg-slate-800" value="Attempted">Attempted</option>
+                                <option className="bg-slate-800" value="Frustrated">Frustrated</option>
+                                <option className="bg-slate-800" value="Consummated">Consummated</option>
                             </select>
                         </div>
                     </div>
 
 
                     {/* Victim Info */}
-                    <div className="bg-[#1C1E2E] p-4 rounded-xl space-y-3">
-                        <h2 className="text-lg font-bold border-b border-gray-700 pb-2">Victim Information</h2>
-                        <div className="grid md:grid-cols-6 gap-3">
+                    <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 space-y-4">
+                        <h2 className="text-lg font-bold text-gray-100 uppercase tracking-wider flex items-center gap-2">
+                            🙍 Victim Information
+                        </h2>
+                        <div className="grid md:grid-cols-3 gap-3">
                             {Object.keys(form.victim).map((key) => {
                                 if (key === "gender" || key === "harmed") {
                                     return (
-                                        <select
-                                            key={key}
-                                            name={key}
-                                            value={(form.victim as any)[key]}
-                                            onChange={(e) => handleNestedChange(e, "victim")}
-                                            className={inputClass}
-                                        >
-                                            <option value="">{key}</option>
-                                            {key === "gender" && (
-                                                <>
-                                                    <option>N/A</option>
-                                                    <option>Male</option>
-                                                    <option>Female</option>
-                                                </>
-                                            )}
-                                            {key === "harmed" && (
-                                                <>
-                                                    <option>N/A</option>
-                                                    <option>Harmed</option>
-                                                    <option>Unharmed</option>
-                                                </>
-                                            )}
-                                        </select>
+                                        <div key={key}>
+                                            <label className={labelClass}>{key}</label>
+                                            <select
+                                                name={key}
+                                                value={(form.victim as any)[key]}
+                                                onChange={(e) => handleNestedChange(e, "victim")}
+                                                className={inputClass}
+                                            >
+                                                <option value="">Select {key}</option>
+                                                {key === "gender" && (
+                                                    <>
+                                                        <option className="bg-slate-800" value="N/A">N/A</option>
+                                                        <option className="bg-slate-800" value="Male">Male</option>
+                                                        <option className="bg-slate-800" value="Female">Female</option>
+                                                    </>
+                                                )}
+                                                {key === "harmed" && (
+                                                    <>
+                                                        <option className="bg-slate-800" value="N/A">N/A</option>
+                                                        <option className="bg-slate-800" value="Harmed">Harmed</option>
+                                                        <option className="bg-slate-800" value="Unharmed">Unharmed</option>
+                                                    </>
+                                                )}
+                                            </select>
+                                        </div>
                                     );
                                 }
                                 return (
-                                    <input
-                                        key={key}
-                                        name={key}
-                                        placeholder={key}
-                                        value={(form.victim as any)[key]}
-                                        onChange={(e) => handleNestedChange(e, "victim")}
-                                        className={inputClass}
-                                    />
+                                    <div key={key}>
+                                        <label className={labelClass}>{key}</label>
+                                        <input
+                                            name={key}
+                                            placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+                                            value={(form.victim as any)[key]}
+                                            onChange={(e) => handleNestedChange(e, "victim")}
+                                            className={inputClass}
+                                        />
+                                    </div>
                                 );
                             })}
                         </div>
                     </div>
 
                     {/* Suspect Info */}
-                    <div className="bg-[#1C1E2E] p-4 rounded-xl space-y-3">
-                        <h2 className="text-lg font-bold border-b border-gray-700 pb-2">Suspect Information</h2>
-                        <div className="grid md:grid-cols-6 gap-3">
+                    <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 space-y-4">
+                        <h2 className="text-lg font-bold text-gray-100 uppercase tracking-wider flex items-center gap-2">
+                            🕵️ Suspect Information
+                        </h2>
+                        <div className="grid md:grid-cols-3 gap-3">
                             {Object.keys(form.suspect).map((key) => {
                                 if (key === "gender" || key === "status") {
                                     return (
-                                        <select
-                                            key={key}
-                                            name={key}
-                                            value={(form.suspect as any)[key]}
-                                            onChange={(e) => handleNestedChange(e, "suspect")}
-                                            className={inputClass}
-                                        >
-                                            <option value="">{key}</option>
-                                            {key === "gender" && (
-                                                <>
-                                                    <option>N/A</option>
-                                                    <option>Male</option>
-                                                    <option>Female</option>
-                                                </>
-                                            )}
-                                            {key === "status" && (
-                                                <>
-                                                    <option>N/A</option>
-                                                    <option>Arrested</option>
-                                                    <option>Detained</option>
-                                                    <option>At Large</option>
-                                                </>
-                                            )}
-                                        </select>
+                                        <div key={key}>
+                                            <label className={labelClass}>{key}</label>
+                                            <select
+                                                name={key}
+                                                value={(form.suspect as any)[key]}
+                                                onChange={(e) => handleNestedChange(e, "suspect")}
+                                                className={inputClass}
+                                            >
+                                                <option value="">Select {key}</option>
+                                                {key === "gender" && (
+                                                    <>
+                                                        <option className="bg-slate-800" value="N/A">N/A</option>
+                                                        <option className="bg-slate-800" value="Male">Male</option>
+                                                        <option className="bg-slate-800" value="Female">Female</option>
+                                                    </>
+                                                )}
+                                                {key === "status" && (
+                                                    <>
+                                                        <option className="bg-slate-800" value="N/A">N/A</option>
+                                                        <option className="bg-slate-800" value="Arrested">Arrested</option>
+                                                        <option className="bg-slate-800" value="Detained">Detained</option>
+                                                        <option className="bg-slate-800" value="At Large">At Large</option>
+                                                    </>
+                                                )}
+                                            </select>
+                                        </div>
                                     );
                                 }
                                 return (
-                                    <input
-                                        key={key}
-                                        name={key}
-                                        placeholder={key}
-                                        value={(form.suspect as any)[key]}
-                                        onChange={(e) => handleNestedChange(e, "suspect")}
-                                        className={inputClass}
-                                    />
+                                    <div key={key}>
+                                        <label className={labelClass}>{key}</label>
+                                        <input
+                                            name={key}
+                                            placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+                                            value={(form.suspect as any)[key]}
+                                            onChange={(e) => handleNestedChange(e, "suspect")}
+                                            className={inputClass}
+                                        />
+                                    </div>
                                 );
                             })}
                         </div>
                     </div>
 
                     {/* Motive & Narrative */}
-                    <div>
-                        <label className={labelClass}>Suspect Motive</label>
-                        <input
-                            name="suspectMotive"
-                            value={form.suspectMotive}
-                            onChange={handleChange}
-                            className={inputClass}
-                        />
-                    </div>
-                    <div>
-                        <label className={labelClass}>Narrative</label>
-                        <textarea
-                            name="narrative"
-                            value={form.narrative}
-                            onChange={handleChange}
-                            className={`${inputClass} h-28`}
-                        />
-                    </div>
-
-                    {/* Status */}
-                    <div>
-                        <label className={labelClass}>Case Status</label>
-                        <select name="status" value={form.status} onChange={handleChange} className={inputClass}>
-                            <option value="Solved">Solved</option>
-                            <option value="Cleared">Cleared</option>
-                            <option value="Unsolved">Unsolved</option>
-                        </select>
+                    <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 space-y-4">
+                        <h2 className="text-lg font-bold text-gray-100 uppercase tracking-wider flex items-center gap-2">
+                            📝 Additional Details
+                        </h2>
+                        <div>
+                            <label className={labelClass}>Suspect Motive</label>
+                            <input
+                                name="suspectMotive"
+                                value={form.suspectMotive}
+                                onChange={handleChange}
+                                placeholder="Enter suspect motive"
+                                className={inputClass}
+                            />
+                        </div>
+                        <div>
+                            <label className={labelClass}>Narrative</label>
+                            <textarea
+                                name="narrative"
+                                value={form.narrative}
+                                onChange={handleChange}
+                                placeholder="Describe the incident in detail..."
+                                className={`${inputClass} h-32 resize-none`}
+                            />
+                        </div>
+                        <div>
+                            <label className={labelClass}>Case Status</label>
+                            <select name="status" value={form.status} onChange={handleChange} className={inputClass}>
+                                <option className="bg-slate-800" value="Solved">Solved</option>
+                                <option className="bg-slate-800" value="Cleared">Cleared</option>
+                                <option className="bg-slate-800" value="Unsolved">Unsolved</option>
+                            </select>
+                        </div>
                     </div>
 
                     {/* Map & Manual Coordinates */}
-                    <div>
-                        <h2 className="text-lg font-semibold mb-2">Select Incident Location</h2>
+                    <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 space-y-4">
+                        <h2 className="text-lg font-bold text-gray-100 uppercase tracking-wider flex items-center gap-2">
+                            📍 Incident Location
+                        </h2>
 
                         {/* Manual Coordinates Input */}
-                        <div className="grid md:grid-cols-2 gap-4 mb-3">
+                        <div className="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label className={labelClass}>Latitude</label>
                                 <input
@@ -618,7 +652,7 @@ const CrimeReportForm = () => {
                         </div>
 
                         {/* Interactive Map */}
-                        <div className="h-[400px] w-full rounded-xl overflow-hidden border border-gray-700">
+                        <div className="h-96 w-full rounded-xl overflow-hidden border border-slate-700/50 shadow-lg">
                             <CrimeMap
                                 setCoords={handleSetCoords}
                                 coords={[form.location?.lat ?? 14.4445, form.location?.lng ?? 120.9939]}
@@ -626,9 +660,11 @@ const CrimeReportForm = () => {
                         </div>
 
                         {form.location && (
-                            <p className="mt-2 text-sm text-green-400">
-                                Selected Location: {form.location.lat.toFixed(5)}, {form.location.lng.toFixed(5)}
-                            </p>
+                            <div className="bg-gradient-to-r from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30 rounded-lg p-3">
+                                <p className="text-sm text-emerald-300 font-semibold">
+                                    Selected Location: {form.location.lat.toFixed(5)}, {form.location.lng.toFixed(5)}
+                                </p>
+                            </div>
                         )}
                     </div>
 
@@ -636,7 +672,7 @@ const CrimeReportForm = () => {
                     <button
                         type="button"
                         onClick={() => handleSubmit()}
-                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold mt-4"
+                        className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all uppercase tracking-wider"
                     >
                         Submit Report
                     </button>
