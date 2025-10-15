@@ -48,10 +48,10 @@ export default function Home() {
               <span className="text-xs sm:text-sm text-gray-300">Secure Data Analytics Platform</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-4 sm:mb-6 leading-tight px-4">
-              Barangay Crime Data
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-4 sm:mb-6 leading-tight px-4">
+              Crimescope
               <br />
-              <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl">Visualization & Pattern Analysis</span>
+              <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl">Barangay Crime Data Visualization & Pattern Analysis</span>
             </h1>
 
             <p className="text-base sm:text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-8 sm:mb-12 px-4">
