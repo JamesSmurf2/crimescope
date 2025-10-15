@@ -60,28 +60,7 @@ export const POST = async (req: NextRequest) => {
             status: status || "Solved",
             location: geoLocation, // ✅ use GeoJSON
         });
-        // For test
-        // const report = {
-        //     blotterNo,
-        //     dateEncoded,
-        //     barangay,
-        //     street,
-        //     typeOfPlace,
-        //     dateReported,
-        //     timeReported,
-        //     dateCommitted,
-        //     timeCommitted,
-        //     modeOfReporting,
-        //     stageOfFelony,
-        //     offense,
-        //     victim,
-        //     suspect,
-        //     suspectMotive,
-        //     narrative,
-        //     status: status || "Solved",
-        //     location,
-        // };
-        // console.log(report)
+   
 
         return NextResponse.json(
             { message: "Crime report submitted successfully", report },

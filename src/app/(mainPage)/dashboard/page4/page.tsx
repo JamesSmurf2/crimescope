@@ -94,7 +94,9 @@ const offenseCategories = [
             "Child Abuse",
             "Cybercrime",
             "Estafa",
-            "Direct Assault",
+            "Direct Assault",          // RPC Art. 148
+            "Grave Threats",           // RPC Art. 282
+            "Other Forms of Trespass", // RPC Art. 281
             "Violence Against Women & Children (VAWC)",
             "Illegal Logging",
         ],
@@ -120,12 +122,14 @@ const offenseCategories = [
             "Noise Complaint",
             "Illegal Vending",
             "Drinking in Public",
-            "Unjust Vexation",
-            "Threats",
-            "Malicious Mischief",
+            "Alarms and Scandals",  // RPC Art. 155
+            "Unjust Vexations",     // RPC Art. 287
+            "Light Threats",        // RPC Art. 283
+            "Malicious Mischief",   // RPC Art. 327
         ],
     },
 ];
+
 
 // -------------------- Component --------------------
 const CrimeReportForm = () => {
@@ -202,25 +206,7 @@ const CrimeReportForm = () => {
         if (!stageOfFelony.trim()) return alert("Please select a Stage of Felony.");
         if (!offense.trim()) return alert("Please select an Offense.");
 
-        // 🧍‍ Victim validation
-        if (!victim.name.trim()) return alert("Please enter the Victim's Name.");
-        if (!victim.age.trim()) return alert("Please enter the Victim's Age.");
-        if (isNaN(Number(victim.age)) || Number(victim.age) <= 0)
-            return alert("Victim's Age must be a valid positive number.");
-        if (!victim.gender.trim()) return alert("Please select the Victim's Gender.");
-        if (!victim.harmed.trim()) return alert("Please specify if Victim was harmed.");
-        if (!victim.nationality.trim()) return alert("Please enter the Victim's Nationality.");
-        if (!victim.occupation.trim()) return alert("Please enter the Victim's Occupation.");
 
-        // 🚨 Suspect validation
-        if (!suspect.name.trim()) return alert("Please enter the Suspect's Name.");
-        if (!suspect.age.trim()) return alert("Please enter the Suspect's Age.");
-        if (isNaN(Number(suspect.age)) || Number(suspect.age) <= 0)
-            return alert("Suspect's Age must be a valid positive number.");
-        if (!suspect.gender.trim()) return alert("Please select the Suspect's Gender.");
-        if (!suspect.status.trim()) return alert("Please select the Suspect's Status.");
-        if (!suspect.nationality.trim()) return alert("Please enter the Suspect's Nationality.");
-        if (!suspect.occupation.trim()) return alert("Please enter the Suspect's Occupation.");
 
         // 🗺️ Location validation
         if (!location || !location.lat || !location.lng)
@@ -235,40 +221,40 @@ const CrimeReportForm = () => {
 
         alert("Form Submitted!")
         // Clear the form after
-        setForm({
-            blotterNo: "",
-            dateEncoded: new Date().toLocaleString(),
-            barangay: "",
-            street: "",
-            typeOfPlace: "",
-            dateReported: "",
-            timeReported: "",
-            dateCommitted: "",
-            timeCommitted: "",
-            modeOfReporting: "",
-            stageOfFelony: "",
-            offense: "",
-            victim: {
-                name: "",
-                age: "",
-                gender: "",
-                harmed: "",
-                nationality: "",
-                occupation: "",
-            },
-            suspect: {
-                name: "",
-                age: "",
-                gender: "",
-                status: "",
-                nationality: "",
-                occupation: "",
-            },
-            suspectMotive: "",
-            narrative: "",
-            status: "Solved",
-            location: { lat: 14.4445, lng: 120.9939 },
-        });
+        // setForm({
+        //     blotterNo: "",
+        //     dateEncoded: new Date().toLocaleString(),
+        //     barangay: "",
+        //     street: "",
+        //     typeOfPlace: "",
+        //     dateReported: "",
+        //     timeReported: "",
+        //     dateCommitted: "",
+        //     timeCommitted: "",
+        //     modeOfReporting: "",
+        //     stageOfFelony: "",
+        //     offense: "",
+        //     victim: {
+        //         name: "",
+        //         age: "",
+        //         gender: "",
+        //         harmed: "",
+        //         nationality: "",
+        //         occupation: "",
+        //     },
+        //     suspect: {
+        //         name: "",
+        //         age: "",
+        //         gender: "",
+        //         status: "",
+        //         nationality: "",
+        //         occupation: "",
+        //     },
+        //     suspectMotive: "",
+        //     narrative: "",
+        //     status: "Solved",
+        //     location: { lat: 14.4445, lng: 120.9939 },
+        // });
     };
 
 
@@ -421,6 +407,7 @@ const CrimeReportForm = () => {
                                 className={inputClass}
                             >
                                 <option value="">Select Mode</option>
+                                <option value="N/A">N/A</option>
                                 <option value="In Person">In Person</option>
                                 <option value="Phone Call">Phone Call</option>
                                 <option value="Online">Online</option>
@@ -436,6 +423,7 @@ const CrimeReportForm = () => {
                                 className={inputClass}
                             >
                                 <option value="">Select Stage</option>
+                                <option>N/A</option>
                                 <option value="Attempted">Attempted</option>
                                 <option value="Frustrated">Frustrated</option>
                                 <option value="Consummated">Consummated</option>
@@ -461,12 +449,14 @@ const CrimeReportForm = () => {
                                             <option value="">{key}</option>
                                             {key === "gender" && (
                                                 <>
+                                                    <option>N/A</option>
                                                     <option>Male</option>
                                                     <option>Female</option>
                                                 </>
                                             )}
                                             {key === "harmed" && (
                                                 <>
+                                                    <option>N/A</option>
                                                     <option>Harmed</option>
                                                     <option>Unharmed</option>
                                                 </>
@@ -505,12 +495,14 @@ const CrimeReportForm = () => {
                                             <option value="">{key}</option>
                                             {key === "gender" && (
                                                 <>
+                                                    <option>N/A</option>
                                                     <option>Male</option>
                                                     <option>Female</option>
                                                 </>
                                             )}
                                             {key === "status" && (
                                                 <>
+                                                    <option>N/A</option>
                                                     <option>Arrested</option>
                                                     <option>Detained</option>
                                                     <option>At Large</option>

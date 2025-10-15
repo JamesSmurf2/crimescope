@@ -39,7 +39,9 @@ const ReportsPage = () => {
                 "Child Abuse",
                 "Cybercrime",
                 "Estafa",
-                "Direct Assault",
+                "Direct Assault",          // RPC Art. 148
+                "Grave Threats",           // RPC Art. 282
+                "Other Forms of Trespass", // RPC Art. 281
                 "Violence Against Women & Children (VAWC)",
                 "Illegal Logging",
             ],
@@ -65,12 +67,14 @@ const ReportsPage = () => {
                 "Noise Complaint",
                 "Illegal Vending",
                 "Drinking in Public",
-                "Unjust Vexation",
-                "Threats",
-                "Malicious Mischief",
+                "Alarms and Scandals",  // RPC Art. 155
+                "Unjust Vexations",     // RPC Art. 287
+                "Light Threats",        // RPC Art. 283
+                "Malicious Mischief",   // RPC Art. 327
             ],
         },
     ];
+    
 
     // -------------------- Component --------------------
 
@@ -429,7 +433,7 @@ const ReportsPage = () => {
                                         <td className="p-2">{r.offense}</td>
                                         <td className="p-2">{r.barangay}</td>
                                         <td className="p-2">{r.victim?.name}</td>
-                                        <td className="p-2">{r.suspect?.name}</td>
+                                        <td className="p-2  max-w-[200px]">{r.suspect?.name}</td>
                                         <td className="p-2 text-sm">
                                             {r.status === "Solved" && "🟢 Solved"}
                                             {r.status === "Unsolved" && "🔴 Unsolved"}
@@ -692,6 +696,7 @@ const ReportsPage = () => {
                                                             className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
                                                         >
                                                             <option value="">Select Gender</option>
+                                                            <option>N/A</option>
                                                             <option>Male</option>
                                                             <option>Female</option>
                                                         </select>
@@ -707,6 +712,7 @@ const ReportsPage = () => {
                                                             className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
                                                         >
                                                             <option value="">Select Status</option>
+                                                            <option>n/a</option>
                                                             <option>Harmed</option>
                                                             <option>Unharmed</option>
                                                         </select>
