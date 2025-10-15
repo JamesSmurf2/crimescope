@@ -1,44 +1,51 @@
 "use client";
-
-import React from "react";
+import React, { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-// ✅ Custom marker (fixes broken default icon in Next.js)
-const customIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+const markerIcon = L.icon({
+    iconUrl: "https://unpkg.com/leaflet@1.7/dist/images/marker-icon.png",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
 });
 
-// ✅ Handles map clicks & updates coordinates
-function LocationMarker({ setCoords }: { setCoords: (coords: [number, number]) => void }) {
-    const [position, setPosition] = React.useState<[number, number] | null>(null);
-
-    useMapEvents({
-        click(e) {
-            const { lat, lng } = e.latlng;
-            setPosition([lat, lng]);
-            setCoords([lat, lng]);
-            alert(`Coordinates selected: ${lat}, ${lng}`);
-        },
-    });
-
-    return position ? <Marker position={position} icon={customIcon} /> : null;
+interface CrimeMapProps {
+    setCoords: (coords: [number, number]) => void;
+    coords?: [number, number];
 }
 
-export default function CrimeMap({ setCoords }: { setCoords: (coords: [number, number]) => void }) {
+const CrimeMap: React.FC<CrimeMapProps> = ({ setCoords, coords = [14.4445, 120.9939] }) => {
+    const [position, setPosition] = React.useState<[number, number]>(coords);
+
+    useEffect(() => {
+        // update marker when parent (manual input) changes
+        setPosition(coords);
+    }, [coords]);
+
+    const MapClickHandler = () => {
+        useMapEvents({
+            click(e) {
+                const { lat, lng } = e.latlng;
+                setPosition([lat, lng]);
+                setCoords([lat, lng]);
+            },
+        });
+        return null;
+    };
+
     return (
         <MapContainer
-            center={[14.45, 120.98]} // 📍 Las Piñas
-            zoom={13}
+            center={position}
+            zoom={15}
+            className="h-full w-full"
             style={{ height: "100%", width: "100%" }}
         >
-            <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution="&copy; OpenStreetMap contributors"
-            />
-            <LocationMarker setCoords={setCoords} />
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <MapClickHandler />
+            <Marker position={position} icon={markerIcon} />
         </MapContainer>
     );
-}
+};
+
+export default CrimeMap;

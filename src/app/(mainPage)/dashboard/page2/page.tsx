@@ -74,7 +74,7 @@ const ReportsPage = () => {
             ],
         },
     ];
-    
+
 
     // -------------------- Component --------------------
 
@@ -619,6 +619,7 @@ const ReportsPage = () => {
                                                                 className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
                                                             >
                                                                 <option className='text-black' value="">Select Mode</option>
+                                                                <option className='text-black' value="In Person">N/A</option>
                                                                 <option className='text-black' value="In Person">In Person</option>
                                                                 <option className='text-black' value="Phone Call">Phone Call</option>
                                                                 <option className='text-black' value="Online">Online</option>
@@ -638,6 +639,7 @@ const ReportsPage = () => {
                                                                 className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
                                                             >
                                                                 <option className='text-black' value="">Select Stage</option>
+                                                                <option className='text-black' value="In Person">N/A</option>
                                                                 <option className='text-black' value="Attempted">Attempted</option>
                                                                 <option className='text-black' value="Frustrated">Frustrated</option>
                                                                 <option className='text-black' value="Consummated">Consummated</option>
@@ -695,10 +697,10 @@ const ReportsPage = () => {
                                                             }
                                                             className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
                                                         >
-                                                            <option value="">Select Gender</option>
-                                                            <option>N/A</option>
-                                                            <option>Male</option>
-                                                            <option>Female</option>
+                                                            <option className='text-black' value="">Select Gender</option>
+                                                            <option className='text-black'>N/A</option>
+                                                            <option className='text-black'>Male</option>
+                                                            <option className='text-black'>Female</option>
                                                         </select>
                                                     ) : key === "harmed" ? (
                                                         <select
@@ -711,10 +713,10 @@ const ReportsPage = () => {
                                                             }
                                                             className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
                                                         >
-                                                            <option value="">Select Status</option>
-                                                            <option>n/a</option>
-                                                            <option>Harmed</option>
-                                                            <option>Unharmed</option>
+                                                            <option className='text-black' value="">Select Status</option>
+                                                            <option className='text-black'>N/A</option>
+                                                            <option className='text-black'>Harmed</option>
+                                                            <option className='text-black'>Unharmed</option>
                                                         </select>
                                                     ) : (
                                                         <input
@@ -760,9 +762,10 @@ const ReportsPage = () => {
                                                             }
                                                             className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
                                                         >
-                                                            <option value="">Select Gender</option>
-                                                            <option>Male</option>
-                                                            <option>Female</option>
+                                                            <option className='text-black' value="">Select Gender</option>
+                                                            <option className='text-black' >N/A</option>
+                                                            <option className='text-black' >Male</option>
+                                                            <option className='text-black'>Female</option>
                                                         </select>
                                                     ) : key === "status" ? (
                                                         <select
@@ -775,10 +778,11 @@ const ReportsPage = () => {
                                                             }
                                                             className="bg-transparent border-b border-gray-500 focus:border-green-400 outline-none px-1 w-full transition"
                                                         >
-                                                            <option value="">Select Status</option>
-                                                            <option>Arrested</option>
-                                                            <option>Detained</option>
-                                                            <option>At Large</option>
+                                                            <option className='text-black' value="">Select Status</option>
+                                                            <option className='text-black'>N/A</option>
+                                                            <option className='text-black'>Arrested</option>
+                                                            <option className='text-black'>Detained</option>
+                                                            <option className='text-black'>At Large</option>
                                                         </select>
                                                     ) : (
                                                         <input

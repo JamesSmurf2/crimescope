@@ -221,40 +221,40 @@ const CrimeReportForm = () => {
 
         alert("Form Submitted!")
         // Clear the form after
-        // setForm({
-        //     blotterNo: "",
-        //     dateEncoded: new Date().toLocaleString(),
-        //     barangay: "",
-        //     street: "",
-        //     typeOfPlace: "",
-        //     dateReported: "",
-        //     timeReported: "",
-        //     dateCommitted: "",
-        //     timeCommitted: "",
-        //     modeOfReporting: "",
-        //     stageOfFelony: "",
-        //     offense: "",
-        //     victim: {
-        //         name: "",
-        //         age: "",
-        //         gender: "",
-        //         harmed: "",
-        //         nationality: "",
-        //         occupation: "",
-        //     },
-        //     suspect: {
-        //         name: "",
-        //         age: "",
-        //         gender: "",
-        //         status: "",
-        //         nationality: "",
-        //         occupation: "",
-        //     },
-        //     suspectMotive: "",
-        //     narrative: "",
-        //     status: "Solved",
-        //     location: { lat: 14.4445, lng: 120.9939 },
-        // });
+        setForm({
+            blotterNo: "",
+            dateEncoded: new Date().toLocaleString(),
+            barangay: "",
+            street: "",
+            typeOfPlace: "",
+            dateReported: "",
+            timeReported: "",
+            dateCommitted: "",
+            timeCommitted: "",
+            modeOfReporting: "",
+            stageOfFelony: "",
+            offense: "",
+            victim: {
+                name: "",
+                age: "",
+                gender: "",
+                harmed: "",
+                nationality: "",
+                occupation: "",
+            },
+            suspect: {
+                name: "",
+                age: "",
+                gender: "",
+                status: "",
+                nationality: "",
+                occupation: "",
+            },
+            suspectMotive: "",
+            narrative: "",
+            status: "Solved",
+            location: { lat: 14.4445, lng: 120.9939 },
+        });
     };
 
 
@@ -410,7 +410,7 @@ const CrimeReportForm = () => {
                                 <option value="N/A">N/A</option>
                                 <option value="In Person">In Person</option>
                                 <option value="Phone Call">Phone Call</option>
-                                <option value="Online">Online</option>
+                                <option value="Online">Walk In</option>
                             </select>
                         </div>
 
@@ -555,18 +555,62 @@ const CrimeReportForm = () => {
                         </select>
                     </div>
 
-                    {/* Map */}
+                    {/* Map & Manual Coordinates */}
                     <div>
                         <h2 className="text-lg font-semibold mb-2">Select Incident Location</h2>
-                        <div className="h-[400px] w-full rounded-xl overflow-hidden border border-gray-700">
-                            <CrimeMap setCoords={handleSetCoords} />
+
+                        {/* Manual Coordinates Input */}
+                        <div className="grid md:grid-cols-2 gap-4 mb-3">
+                            <div>
+                                <label className={labelClass}>Latitude</label>
+                                <input
+                                    type="number"
+                                    step="any"
+                                    value={form.location?.lat ?? ""}
+                                    onChange={(e) => {
+                                        const newLat = parseFloat(e.target.value) || 0;
+                                        setForm((prev) => ({
+                                            ...prev,
+                                            location: { lat: newLat, lng: prev.location?.lng ?? 0 },
+                                        }));
+                                    }}
+                                    className={inputClass}
+                                />
+                            </div>
+
+                            <div>
+                                <label className={labelClass}>Longitude</label>
+                                <input
+                                    type="number"
+                                    step="any"
+                                    value={form.location?.lng ?? ""}
+                                    onChange={(e) => {
+                                        const newLng = parseFloat(e.target.value) || 0;
+                                        setForm((prev) => ({
+                                            ...prev,
+                                            location: { lat: prev.location?.lat ?? 0, lng: newLng },
+                                        }));
+                                    }}
+                                    className={inputClass}
+                                />
+                            </div>
                         </div>
+
+                        {/* Interactive Map */}
+                        <div className="h-[400px] w-full rounded-xl overflow-hidden border border-gray-700">
+                            <CrimeMap
+                                setCoords={handleSetCoords}
+                                coords={[form.location?.lat ?? 14.4445, form.location?.lng ?? 120.9939]}
+                            />
+                        </div>
+
                         {form.location && (
                             <p className="mt-2 text-sm text-green-400">
                                 Selected Location: {form.location.lat.toFixed(5)}, {form.location.lng.toFixed(5)}
                             </p>
                         )}
                     </div>
+
 
                     <button
                         type="button"
