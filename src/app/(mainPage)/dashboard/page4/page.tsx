@@ -281,9 +281,36 @@ const CrimeReportForm = () => {
 
     // Auto-generate blotter number
     useEffect(() => {
-        const year = new Date().getFullYear();
-        const random = Math.floor(Math.random() * 9000) + 1000;
-        setForm((prev) => ({ ...prev, blotterNo: `BLTR-${year}-${random}` }));
+        const generateBlotterNumber = () => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+
+            // Get all reports from the store
+            const reports = useReportStore.getState().reports || [];
+
+            // Filter reports from current year-month
+            const currentPeriodPrefix = `${year}-${month}`;
+            const currentPeriodReports = reports.filter((report: any) =>
+                report.blotterNo && report.blotterNo.startsWith(currentPeriodPrefix)
+            );
+
+            // Find the highest number
+            let maxNumber = 0;
+            currentPeriodReports.forEach((report: any) => {
+                const match = report.blotterNo.match(/-(\d{4})$/);
+                if (match) {
+                    const num = parseInt(match[1], 10);
+                    if (num > maxNumber) maxNumber = num;
+                }
+            });
+
+            // Increment and format
+            const nextNumber = String(maxNumber + 1).padStart(4, '0');
+            return `${year}-${month}-${nextNumber}`;
+        };
+
+        setForm((prev) => ({ ...prev, blotterNo: generateBlotterNumber() }));
     }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
