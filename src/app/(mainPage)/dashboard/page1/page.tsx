@@ -19,7 +19,7 @@ const barangays: Barangay[] = [
         offense: "Reported theft and minor robbery cases in 2024.",
     },
     {
-        name: "Aldana",
+        name: "Elias Aldana",
         img: "/maps/Aldana.png",
         style: "absolute top-[45px] left-[365px]",
         offense: "Low crime rate. Mostly traffic-related violations.",
