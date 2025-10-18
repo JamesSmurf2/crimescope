@@ -1,6 +1,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import Report from "@/utils/models/Reports.model";
+
+import Logs from "@/utils/models/Logs.model";
+
 import { connectDb } from "@/utils/utility/ConnectDb";
 import { getAuthenticatedUser } from "@/utils/utility/verifyUser";
 
@@ -277,6 +280,8 @@ export const POST = async (req: NextRequest) => {
             coordinates: [location.lng, location.lat],
         };
 
+
+
         // ✅ Create Report
         const report = await Report.create({
             blotterNo,
@@ -297,6 +302,16 @@ export const POST = async (req: NextRequest) => {
             narrative,
             status: finalStatus,
             location: geoLocation,
+        });
+
+        //Create logs here
+        await Logs.create({
+            adminId: user._id,
+            blotterNo,
+            action: "Created Report",
+            reportId: report._id,
+            offense,
+            barangay,
         });
 
         return NextResponse.json(

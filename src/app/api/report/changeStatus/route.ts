@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { connectDb } from "@/utils/utility/ConnectDb";
 import { NextRequest } from "next/server";
-import ReportsModel from "@/utils/models/Reports.model";
+import Report from "@/utils/models/Reports.model";
 import { getAuthenticatedUser } from "@/utils/utility/verifyUser";
+import Logs from "@/utils/models/Logs.model";
 
 // ✅ Validation helper functions
 const isValidString = (value: any, minLength: number = 1): boolean => {
@@ -251,7 +252,7 @@ export const POST = async (req: NextRequest) => {
         }
 
         // ✅ Find and update the report
-        const updatedReport = await ReportsModel.findByIdAndUpdate(
+        const updatedReport = await Report.findByIdAndUpdate(
             parsedData._id,
             { $set: updateFields },
             {
@@ -268,6 +269,16 @@ export const POST = async (req: NextRequest) => {
         }
 
         console.log("Report updated successfully:", updatedReport._id);
+
+        // Create logs here
+        await Logs.create({
+            adminId: user._id,
+            blotterNo: updatedReport?.blotterNo,
+            action: "Updated Report",
+            reportId: updatedReport?._id,
+            offense: updatedReport?.offense,
+            barangay: updatedReport?.barangay,
+        });
 
         return NextResponse.json(
             {

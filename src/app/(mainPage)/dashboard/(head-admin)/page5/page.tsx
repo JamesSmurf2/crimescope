@@ -11,8 +11,10 @@ const AdminLogsPage = () => {
     const router = useRouter();
 
     const { RegisterFunction, getAuthUserFunction, authUser } = useAuthStore()
-    const { getAllAdmin, deleteAdmin } = useAdminStore()
+    const { getAllAdmin, deleteAdmin, getLogsAdmin } = useAdminStore()
     const [authLoading, setAuthLoading] = useState(true);
+    const [logs, setLogs] = useState([]);
+    const [logsLoading, setLogsLoading] = useState(true);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -23,12 +25,31 @@ const AdminLogsPage = () => {
     }, [getAuthUserFunction]);
 
     useEffect(() => {
-        if (!authLoading && authUser === null
-            // && authUser?.role !== 'head-admin'
-        ) {
+        if (!authLoading && authUser === null) {
             router.push('/');
         }
     }, [authUser, authLoading, router]);
+
+    // Fetch logs on component mount
+    useEffect(() => {
+        const fetchLogs = async () => {
+            try {
+                setLogsLoading(true);
+                const logsData = await getLogsAdmin();
+                if (logsData && !logsData.error) {
+                    setLogs(logsData);
+                }
+            } catch (error) {
+                console.error('Error fetching logs:', error);
+            } finally {
+                setLogsLoading(false);
+            }
+        };
+
+        if (authUser) {
+            fetchLogs();
+        }
+    }, [authUser, getLogsAdmin]);
 
     const [filters, setFilters] = useState({
         search: "",
@@ -45,160 +66,6 @@ const AdminLogsPage = () => {
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showAdminListModal, setShowAdminListModal] = useState(false);
-
-    const mockLogs = [
-        {
-            id: 1,
-            timestamp: '2025-10-18 14:23:45',
-            admin: 'Juan Dela Cruz',
-            action: 'Created Report',
-            details: 'Created new crime report - Blotter No: BL-2025-001',
-            reportId: 'BL-2025-001',
-            offense: 'Theft',
-            barangay: 'Almanza Uno'
-        }
-        // ,
-        // {
-        //     id: 2,
-        //     timestamp: '2025-10-18 14:24:12',
-        //     admin: 'Maria Santos',
-        //     action: 'Updated Report',
-        //     details: 'Updated status from Unsolved to Solved - Blotter No: BL-2025-002',
-        //     reportId: 'BL-2025-002',
-        //     offense: 'Robbery',
-        //     barangay: 'Talon Dos'
-        // },
-        // {
-        //     id: 3,
-        //     timestamp: '2025-10-18 14:25:33',
-        //     admin: 'Pedro Garcia',
-        //     action: 'Deleted Report',
-        //     details: 'Deleted duplicate report - Blotter No: BL-2025-003',
-        //     reportId: 'BL-2025-003',
-        //     offense: 'Physical Injury',
-        //     barangay: 'Pamplona Uno'
-        // },
-        // {
-        //     id: 4,
-        //     timestamp: '2025-10-18 14:26:45',
-        //     admin: 'Juan Dela Cruz',
-        //     action: 'Created Report',
-        //     details: 'Created new crime report - Blotter No: BL-2025-004',
-        //     reportId: 'BL-2025-004',
-        //     offense: 'Drug Offense',
-        //     barangay: 'Zapote'
-        // },
-        // {
-        //     id: 5,
-        //     timestamp: '2025-10-18 14:28:11',
-        //     admin: 'Anna Reyes',
-        //     action: 'Viewed Report',
-        //     details: 'Viewed detailed information - Blotter No: BL-2025-001',
-        //     reportId: 'BL-2025-001',
-        //     offense: 'Theft',
-        //     barangay: 'Almanza Uno'
-        // },
-        // {
-        //     id: 6,
-        //     timestamp: '2025-10-18 14:29:22',
-        //     admin: 'Maria Santos',
-        //     action: 'Updated Report',
-        //     details: 'Updated victim information - Blotter No: BL-2025-005',
-        //     reportId: 'BL-2025-005',
-        //     offense: 'Carnapping',
-        //     barangay: 'Pilar'
-        // },
-        // {
-        //     id: 7,
-        //     timestamp: '2025-10-18 14:31:45',
-        //     admin: 'Juan Dela Cruz',
-        //     action: 'Created Report',
-        //     details: 'Created new crime report - Blotter No: BL-2025-006',
-        //     reportId: 'BL-2025-006',
-        //     offense: 'Reckless Driving',
-        //     barangay: 'Manuyo Dos'
-        // },
-        // {
-        //     id: 8,
-        //     timestamp: '2025-10-18 14:33:18',
-        //     admin: 'Pedro Garcia',
-        //     action: 'Updated Report',
-        //     details: 'Updated suspect status to Arrested - Blotter No: BL-2025-004',
-        //     reportId: 'BL-2025-004',
-        //     offense: 'Drug Offense',
-        //     barangay: 'Zapote'
-        // },
-        // {
-        //     id: 9,
-        //     timestamp: '2025-10-18 14:35:27',
-        //     admin: 'Anna Reyes',
-        //     action: 'Viewed Report',
-        //     details: 'Viewed detailed information - Blotter No: BL-2025-006',
-        //     reportId: 'BL-2025-006',
-        //     offense: 'Reckless Driving',
-        //     barangay: 'Manuyo Dos'
-        // },
-        // {
-        //     id: 10,
-        //     timestamp: '2025-10-18 14:37:41',
-        //     admin: 'Maria Santos',
-        //     action: 'Created Report',
-        //     details: 'Created new crime report - Blotter No: BL-2025-007',
-        //     reportId: 'BL-2025-007',
-        //     offense: 'Public Disturbance',
-        //     barangay: 'Talon Tres'
-        // },
-        // {
-        //     id: 11,
-        //     timestamp: '2025-10-18 14:39:15',
-        //     admin: 'Juan Dela Cruz',
-        //     action: 'Updated Report',
-        //     details: 'Updated narrative section - Blotter No: BL-2025-001',
-        //     reportId: 'BL-2025-001',
-        //     offense: 'Theft',
-        //     barangay: 'Almanza Uno'
-        // },
-        // {
-        //     id: 12,
-        //     timestamp: '2025-10-18 14:41:33',
-        //     admin: 'Pedro Garcia',
-        //     action: 'Viewed Report',
-        //     details: 'Viewed detailed information - Blotter No: BL-2025-007',
-        //     reportId: 'BL-2025-007',
-        //     offense: 'Public Disturbance',
-        //     barangay: 'Talon Tres'
-        // },
-        // {
-        //     id: 13,
-        //     timestamp: '2025-10-18 14:43:52',
-        //     admin: 'Anna Reyes',
-        //     action: 'Updated Report',
-        //     details: 'Updated status from Unsolved to Cleared - Blotter No: BL-2025-005',
-        //     reportId: 'BL-2025-005',
-        //     offense: 'Carnapping',
-        //     barangay: 'Pilar'
-        // },
-        // {
-        //     id: 14,
-        //     timestamp: '2025-10-18 14:45:28',
-        //     admin: 'Maria Santos',
-        //     action: 'Created Report',
-        //     details: 'Created new crime report - Blotter No: BL-2025-008',
-        //     reportId: 'BL-2025-008',
-        //     offense: 'VAWC',
-        //     barangay: 'Pulang Lupa Uno'
-        // },
-        // {
-        //     id: 15,
-        //     timestamp: '2025-10-18 14:47:11',
-        //     admin: 'Juan Dela Cruz',
-        //     action: 'Viewed Report',
-        //     details: 'Viewed detailed information - Blotter No: BL-2025-008',
-        //     reportId: 'BL-2025-008',
-        //     offense: 'VAWC',
-        //     barangay: 'Pulang Lupa Uno'
-        // },
-    ];
 
     const getActionIcon = (action: any) => {
         switch (action) {
@@ -230,7 +97,27 @@ const AdminLogsPage = () => {
         }
     };
 
-    const filteredLogs = mockLogs.filter(log => {
+    // Transform API logs to match the display format
+    const transformedLogs = logs.map((log: any) => ({
+        id: log._id,
+        timestamp: new Date(log.createdAt).toLocaleString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        }),
+        admin: log.adminId?.username || 'Unknown Admin',
+        action: log.action,
+        details: `${log.action} - Blotter No: ${log.blotterNo}`,
+        reportId: log.blotterNo,
+        offense: log.offense,
+        barangay: log.barangay
+    }));
+
+    const filteredLogs = transformedLogs.filter(log => {
         const matchesSearch = filters.search === "" ||
             log.admin.toLowerCase().includes(filters.search.toLowerCase()) ||
             log.details.toLowerCase().includes(filters.search.toLowerCase()) ||
@@ -242,8 +129,8 @@ const AdminLogsPage = () => {
         return matchesSearch && matchesAction && matchesAdmin;
     });
 
-    const uniqueAdmins = [...new Set(mockLogs.map(log => log.admin))];
-    const uniqueActions = [...new Set(mockLogs.map(log => log.action))];
+    const uniqueAdmins = [...new Set(transformedLogs.map(log => log.admin))];
+    const uniqueActions = [...new Set(transformedLogs.map(log => log.action))];
 
     const totalLogs = filteredLogs.length;
     const createdCount = filteredLogs.filter(l => l.action === 'Created Report').length;
@@ -257,25 +144,24 @@ const AdminLogsPage = () => {
 
     const resetFilters = () => setFilters({ search: "", action: "", admin: "" });
 
-    const handleCreateAdmin = () => {
+    const handleCreateAdmin = async () => {
         if (!newAdmin.password || !newAdmin.username) {
             alert('Please fill in all fields');
             return;
         }
 
-        RegisterFunction({ username: newAdmin.username, password: newAdmin?.password, })
+        await RegisterFunction({ username: newAdmin.username, password: newAdmin?.password });
 
         setShowCreateModal(false);
+        setNewAdmin({ username: '', password: '' });
         alert('Admin created successfully!');
     };
 
-    const handleDeleteAdmin = (id: any) => {
-        // if (confirm('Are you sure you want to remove this admin?')) {
-        //     setAdminList(adminList.filter(admin => admin.id !== id));
-        //     alert('Admin removed successfully!');
-        // }
-
-        deleteAdmin(id)
+    const handleDeleteAdmin = async (id: any) => {
+        await deleteAdmin(id);
+        // Refresh admin list
+        const admins = await getAllAdmin();
+        setAdminList(admins);
     };
 
     return (
@@ -289,16 +175,11 @@ const AdminLogsPage = () => {
                         <p className="text-gray-400 text-sm font-light">Monitor all admin actions and report modifications</p>
                         <div className="flex gap-3">
                             <button
-                                onClick={() => {
-                                    const allFunctions = async () => {
-                                        const admins = await getAllAdmin()
-                                        setAdminList(admins)
-                                    }
-                                    allFunctions()
-                                    setShowAdminListModal(true)
-                                }
-                                }
-
+                                onClick={async () => {
+                                    const admins = await getAllAdmin();
+                                    setAdminList(admins);
+                                    setShowAdminListModal(true);
+                                }}
                                 className="bg-gradient-to-r from-blue-500/30 to-blue-600/30 hover:from-blue-500/40 hover:to-blue-600/40 border border-blue-400/50 hover:border-blue-300 text-blue-300 px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2"
                             >
                                 <Users className="w-4 h-4" />
@@ -386,7 +267,9 @@ const AdminLogsPage = () => {
 
                 {/* Logs List */}
                 <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl overflow-hidden shadow-xl">
-                    {filteredLogs.length === 0 ? (
+                    {logsLoading ? (
+                        <div className="p-8 text-center text-gray-400">Loading logs...</div>
+                    ) : filteredLogs.length === 0 ? (
                         <div className="p-8 text-center text-gray-400">No logs found.</div>
                     ) : (
                         <div className="space-y-2 p-4">

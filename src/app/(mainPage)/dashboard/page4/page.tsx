@@ -125,11 +125,11 @@ const CrimeReportForm = () => {
         location: { lat: 14.4445, lng: 120.9939 },
     });
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const {
             blotterNo, dateEncoded, barangay, street, typeOfPlace, dateReported,
             timeReported, dateCommitted, timeCommitted, modeOfReporting, stageOfFelony,
-            offense, narrative, location,
+            offense, narrative, location, victim, suspect
         } = form;
 
         // Validation with toast notifications
@@ -138,43 +138,58 @@ const CrimeReportForm = () => {
         if (!barangay.trim()) return toast.error("Please select a Barangay.");
         if (!street.trim()) return toast.error("Please enter the Street.");
         if (!typeOfPlace.trim()) return toast.error("Please specify the Type of Place.");
+        if (!offense.trim()) return toast.error("Please select an Offense.");
         if (!dateReported.trim()) return toast.error("Please enter the Date Reported.");
         if (!timeReported.trim()) return toast.error("Please enter the Time Reported.");
         if (!dateCommitted.trim()) return toast.error("Please enter the Date Committed.");
         if (!timeCommitted.trim()) return toast.error("Please enter the Time Committed.");
         if (!modeOfReporting.trim()) return toast.error("Please select a Mode of Reporting.");
         if (!stageOfFelony.trim()) return toast.error("Please select a Stage of Felony.");
-        if (!offense.trim()) return toast.error("Please select an Offense.");
         if (!location || !location.lat || !location.lng) return toast.error("Please select a location on the map.");
+
+
+        if (!victim.name.trim()) return toast.error("Please enter the victim's name.");
+        if (!victim.gender.trim()) return toast.error("Please select the victim's gender.");
+        if (!victim.harmed.trim()) return toast.error("Please select the victim's harmed status.");
+        if (!victim.age.trim()) return toast.error("Please enter the victim's age.");
+        if (!victim.nationality.trim()) return toast.error("Please enter the victim's nationality.");
+
+
+        if (!suspect.name.trim()) return toast.error("Please enter the suspect's name.");
+        if (!suspect.gender.trim()) return toast.error("Please select the suspect's gender.");
+        if (!suspect.age.trim()) return toast.error("Please enter the suspect's age.");
+        if (!suspect.status.trim()) return toast.error("Please enter the suspect's status.");
+        if (!suspect.nationality.trim()) return toast.error("Please enter the suspect's nationality.");
+
         if (!narrative.trim()) return toast.error("Please enter the Narrative or Case Details.");
 
         // Submit
-        addReports(form);
-        console.log(form);
-
-        toast.success("Crime report submitted successfully!");
-
-        // Clear form
-        setForm({
-            blotterNo: "",
-            dateEncoded: new Date().toLocaleString(),
-            barangay: "",
-            street: "",
-            typeOfPlace: "",
-            dateReported: "",
-            timeReported: "",
-            dateCommitted: "",
-            timeCommitted: "",
-            modeOfReporting: "",
-            stageOfFelony: "",
-            offense: "",
-            victim: { name: "", age: "", gender: "", harmed: "", nationality: "", occupation: "" },
-            suspect: { name: "", age: "", gender: "", status: "", nationality: "", occupation: "" },
-            suspectMotive: "",
-            narrative: "",
-            status: "Solved",
-            location: { lat: 14.4445, lng: 120.9939 },
-        });
+        const error = await addReports(form);
+        if (error?.error) {
+            toast.error(error?.error)
+        } else {
+            toast.success("Crime report submitted successfully!");
+            setForm({
+                blotterNo: "",
+                dateEncoded: new Date().toLocaleString(),
+                barangay: "",
+                street: "",
+                typeOfPlace: "",
+                dateReported: "",
+                timeReported: "",
+                dateCommitted: "",
+                timeCommitted: "",
+                modeOfReporting: "",
+                stageOfFelony: "",
+                offense: "",
+                victim: { name: "", age: "", gender: "", harmed: "", nationality: "", occupation: "" },
+                suspect: { name: "", age: "", gender: "", status: "", nationality: "", occupation: "" },
+                suspectMotive: "",
+                narrative: "",
+                status: "Solved",
+                location: { lat: 14.4445, lng: 120.9939 },
+            });
+        }
     };
 
     // Auto-generate blotter number
@@ -259,6 +274,13 @@ const CrimeReportForm = () => {
                         Crime Report Form
                     </h1>
                     <p className="text-gray-400 text-sm">File and manage barangay crime incidents</p>
+                    {authUser?.role === 'head-admin' && (
+                        <div className="mt-4 bg-red-500/10 border border-red-500/50 rounded-lg p-4 max-w-2xl mx-auto">
+                            <p className="text-red-400 font-semibold text-sm">
+                                ⚠️ Only admin can add reports. You are using Head-admin
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 <form className="space-y-8">
@@ -608,13 +630,16 @@ const CrimeReportForm = () => {
                         )}
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={() => handleSubmit()}
-                        className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all uppercase tracking-wider"
-                    >
-                        Submit Report
-                    </button>
+
+                    {authUser?.role !== 'head-admin' && (
+                        <button
+                            type="button"
+                            onClick={() => handleSubmit()}
+                            className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all uppercase tracking-wider"
+                        >
+                            Submit Report
+                        </button>
+                    )}
                 </form>
             </div>
         </div>

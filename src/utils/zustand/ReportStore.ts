@@ -45,7 +45,7 @@ const useReportStore = create<reportStore>((set, get) => ({
             const data = await res.json();
 
             if (!res.ok) {
-                return { error: true };
+                return data
             }
             return data;
         } catch (err) {
@@ -66,7 +66,7 @@ const useReportStore = create<reportStore>((set, get) => ({
             const data = await res.json();
 
             if (!res.ok) {
-                return { error: true };
+                return { data };
             }
             return data;
         } catch (err) {
