@@ -225,6 +225,8 @@ const CrimeReportForm = () => {
     const inputClass = "bg-slate-800/50 border border-slate-700/50 hover:border-slate-600/70 focus:border-cyan-400/50 focus:outline-none text-white px-4 py-2.5 rounded-lg w-full transition-all placeholder-gray-500";
     const labelClass = "font-semibold text-gray-300 mb-2 block text-sm uppercase tracking-wider";
 
+
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-8">
             <Toaster

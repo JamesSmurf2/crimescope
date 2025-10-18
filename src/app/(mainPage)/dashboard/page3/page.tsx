@@ -105,11 +105,10 @@ const AnalyticsPage: React.FC = () => {
 
     // -------------------- Helper Functions --------------------
     const barangays = [
-        "Almanza Dos", "Almanza Uno", "B.F. CAA International Village", "Aldana",
-        "Manuyo Dos", "Manuyo Uno", "Pamplona Dos", "Pamplona Tres",
-        "Pamplona Uno", "Pilar", "Pulang Lupa Dos", "Pulang Lupa Uno",
-        "Talon Dos", "Talon Kuatro", "Talon Singko", "Talon Tres",
-        "Talon Uno", "Zapote",
+        "Almanza Dos", "Almanza Uno", "B.F. CAA International Village", "Daniel Fajardo",
+        "Elias Aldana", "Ilaya", "Manuyo Uno", "Manuyo Dos", "Pamplona Uno", "Pamplona Dos",
+        "Pamplona Tres", "Pilar", "Pulang Lupa Uno", "Pulang Lupa Dos", "Talon Uno",
+        "Talon Dos", "Talon Tres", "Talon Cuatro", "Talon Singko", "Zapote",
     ];
 
     const countByField = (field: string | ((r: Report) => string)) => {
