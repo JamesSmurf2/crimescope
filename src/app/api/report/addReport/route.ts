@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Report from "@/utils/models/Reports.model";
 import { connectDb } from "@/utils/utility/ConnectDb";
+import { getAuthenticatedUser } from "@/utils/utility/verifyUser";
 
 // ✅ Validation helper functions
 const isValidString = (value: any, minLength: number = 1): boolean => {
@@ -61,6 +62,23 @@ const validCaseStatus = ["Solved", "Cleared", "Unsolved"];
 
 export const POST = async (req: NextRequest) => {
     try {
+        // ✅ Verify user authentication and authorization
+        const user = await getAuthenticatedUser();
+
+        if (!user) {
+            return NextResponse.json(
+                { error: "Authentication required" },
+                { status: 401 }
+            );
+        }
+
+        if (user.role !== 'admin') {
+            return NextResponse.json(
+                { error: "You are not authorized to update reports" },
+                { status: 403 }
+            );
+        }
+
         await connectDb();
 
         const body = await req.json();

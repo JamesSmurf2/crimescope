@@ -8,14 +8,14 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ["officer", "admin"],
-        default: "officer"
+        enum: ["head-admin", "admin"],
+        default: "admin"
     },
     password: {
         type: String,
         required: true
     }
-})
+}, { timestamps: true })
 
 const User = mongoose.models.User || mongoose.model('User', userSchema)
 export default User
