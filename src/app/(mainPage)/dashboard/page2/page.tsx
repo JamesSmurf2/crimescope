@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import useReportStore from "@/utils/zustand/ReportStore";
 import useAuthStore from "@/utils/zustand/useAuthStore";
 import { useRouter } from "next/navigation";
+import toast, { Toaster } from 'react-hot-toast';
+
 
 const ReportsPage = () => {
     const router = useRouter()
@@ -344,20 +346,59 @@ const ReportsPage = () => {
         win?.print();
     };
 
-    const handleChange = (selectedReport: any) => {
-        changeReportStatus(selectedReport);
-        alert("Selected Report Updated!")
+    const handleChange = async (selectedReport: any) => {
+
+        console.log(selectedReport)
+        const error = await changeReportStatus(selectedReport);
+        if (error?.data?.error) {
+            toast.error(error?.data?.error)
+        } else {
+            toast.success(`Report Successfully Updated.`);
+        }
+
     }
 
     return (
 
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-8">
+            <Toaster
+                position="top-right"
+                toastOptions={{
+                    duration: 4000,
+                    style: {
+                        background: '#1e293b',
+                        color: '#fff',
+                        border: '1px solid #334155',
+                    },
+                    success: {
+                        iconTheme: {
+                            primary: '#10b981',
+                            secondary: '#fff',
+                        },
+                    },
+                    error: {
+                        iconTheme: {
+                            primary: '#ef4444',
+                            secondary: '#fff',
+                        },
+                    },
+                }}
+            />
+
             <div className="max-w-7xl mx-auto space-y-8">
                 <div className="space-y-2">
                     <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">
                         Crime Reports Dashboard
                     </h1>
                     <p className="text-gray-400 text-sm font-light">Comprehensive view of all barangay crime incidents</p>
+
+                    {authUser?.role === 'head-admin' && (
+                        <div className="mt-4 bg-red-500/10 border border-red-500/50 rounded-lg p-4 max-w-2xl mx-auto">
+                            <p className="text-red-400 font-semibold text-sm">
+                                ⚠️ Only admin can edit reports. You are using Head-admin
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Filters */}
@@ -493,6 +534,7 @@ const ReportsPage = () => {
                                     Case Details
                                 </h2>
 
+
                                 {editMode && <button
                                     onClick={() => {
                                         handleChange(JSON.stringify(selectedReport, null, 2));
@@ -501,16 +543,18 @@ const ReportsPage = () => {
                                 >
                                     Save Changes
                                 </button>}
+                                {authUser && authUser.role !== 'head-admin' &&
+                                    <button
+                                        onClick={() => setEditMode((prev) => !prev)}
+                                        className={`px-5 py-2 rounded-lg font-semibold transition-all ${editMode
+                                            ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-lg"
+                                            : "bg-slate-700 hover:bg-slate-600 text-gray-200"
+                                            }`}
+                                    >
 
-                                <button
-                                    onClick={() => setEditMode((prev) => !prev)}
-                                    className={`px-5 py-2 rounded-lg font-semibold transition-all ${editMode
-                                        ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-lg"
-                                        : "bg-slate-700 hover:bg-slate-600 text-gray-200"
-                                        }`}
-                                >
-                                    {editMode ? "Cancel Edit" : "Edit"}
-                                </button>
+                                        {editMode ? "Cancel Edit" : "Edit"}
+                                    </button>
+                                }
                             </div>
 
                             <div className="h-[1px] w-full bg-gradient-to-r from-cyan-400/40 via-slate-600/20 to-transparent mb-8"></div>

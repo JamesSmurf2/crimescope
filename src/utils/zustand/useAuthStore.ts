@@ -4,6 +4,7 @@ import { create } from 'zustand'
 interface AuthStore {
     authUser: any,
     getAuthUserFunction: () => Promise<void>
+    RegisterFunction: ({ username, password }: { username: string, password: string }) => Promise<any>,
     LoginFunction: ({ username, password }: { username: string, password: string }) => Promise<any>,
     LogoutFunction: () => Promise<any>,
 }
@@ -19,6 +20,21 @@ const useAuthStore = create<AuthStore>((set, get) => ({
             //on for debugging
             // console.log(data)
             return data
+        } catch (error) {
+            console.log(error)
+        }
+    },
+    RegisterFunction: async ({ username, password }: { username: string, password: string }) => {
+        try {
+            let res = await fetch('/api/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({ username, password })
+            })
+            if (!res.ok) return { error: 'User already exist or error.' }
+            const data = await res.json()
+            return data
+
+
         } catch (error) {
             console.log(error)
         }

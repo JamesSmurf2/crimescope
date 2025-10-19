@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, MapPin, FileText, BarChart3, Plus, LogOut, User } from 'lucide-react';
+import { Menu, MapPin, FileText, BarChart3, Plus, LogOut, User, ShieldAlert } from 'lucide-react';
 import useAuthStore from '@/utils/zustand/useAuthStore';
 
 const Sidebar = () => {
@@ -25,7 +25,10 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     LogoutFunction();
-    router.push('/');
+
+    setTimeout(() => {
+        router.push('/');
+      },1000)
   };
 
   return (
@@ -117,14 +120,23 @@ const Sidebar = () => {
                   icon={<BarChart3 size={20} />}
                 />
               </Link>
-              {authUser?.role && (
-                <Link href="/dashboard/page4">
-                  <SidebarItem
-                    label="Make a Report"
-                    active={pathname === '/dashboard/page4'}
-                    icon={<Plus size={20} />}
-                  />
-                </Link>
+              <Link href="/dashboard/page4">
+                <SidebarItem
+                  label="Make a Report"
+                  active={pathname === '/dashboard/page4'}
+                  icon={<Plus size={20} />}
+                />
+              </Link>
+              {authUser?.role === 'head-admin' && (
+                <div>
+                  <Link href="/dashboard/page5">
+                    <SidebarItem
+                      label="Logs"
+                      active={pathname === '/dashboard/page5'}
+                      icon={<ShieldAlert size={20} />}
+                    />
+                  </Link>
+                </div>
               )}
             </nav>
           </div>
