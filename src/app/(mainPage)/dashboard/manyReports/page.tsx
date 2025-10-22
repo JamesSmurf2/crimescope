@@ -124,37 +124,51 @@ export default function CrimeReportViewer() {
         return { name: personStr, age: 'N/A', gender: 'N/A', status: 'N/A', nationality: 'N/A', occupation: 'N/A' };
     };
 
-    const transformToFormData = (rawData: RawCrimeReport[]): CrimeForm[] => {
-        return rawData.filter(row => row && typeof row === 'object').map((row, index) => {
-            const victimStr = row.victim || row.Victim || '';
-            const firstVictim = victimStr.split(',')[0];
+    const toCamelCase = (str: string): string => {
+        if (!str) return '';
+        if (str.toUpperCase().includes('CAA')) return 'B.F. CAA International Village'; // exception
 
-            const suspectStr = row.suspect || row.Suspect || '';
-            const firstSuspect = suspectStr.split(',')[0];
-
-            return {
-                barangay: row.barangay || row.Barangay || 'N/A',
-                street: row.street || row.Street || 'N/A',
-                typeOfPlace: row.typeofPlace || row.typeOfPlace || row.TypeofPlace || 'N/A',
-                dateReported: row.dateReported || row.datereported || new Date().toISOString().split('T')[0],
-                timeReported: row.timeReported || row.timereported || '00:00',
-                dateCommitted: row.dateCommitted || row.datecommitted || new Date().toISOString().split('T')[0],
-                timeCommitted: row.timeCommitted || row.timecommitted || '00:00',
-                modeOfReporting: row.mode_reporting || row.modeOfReporting || row.mode_Reporting || 'N/A',
-                stageOfFelony: row.stageoffelony || row.stageOfFelony || row.stageofFelony || 'N/A',
-                offense: row.offense || row.Offense || 'N/A',
-                victim: parseVictimDetails(firstVictim),
-                suspect: parseSuspectDetails(firstSuspect),
-                suspectMotive: row.suspectMotive || row.suspectmotive || 'N/A',
-                narrative: row.narrative || row.Narrative || 'N/A',
-                status: row.casestatus || row.caseStatus || row.status || 'Solved',
-                location: {
-                    lat: parseFloat(row.lat || row.Lat) || 14.4445,
-                    lng: parseFloat(row.lng || row.Lng) || 120.9939
-                }
-            };
-        });
+        return str
+            .toLowerCase()
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
     };
+
+    const transformToFormData = (rawData: RawCrimeReport[]): CrimeForm[] => {
+        return rawData
+            .filter(row => row && typeof row === 'object')
+            .map((row, index) => {
+                const victimStr = row.victim || row.Victim || '';
+                const firstVictim = victimStr.split(',')[0];
+
+                const suspectStr = row.suspect || row.Suspect || '';
+                const firstSuspect = suspectStr.split(',')[0];
+
+                return {
+                    barangay: toCamelCase(row.barangay || row.Barangay || 'N/A'),
+                    street: row.street || row.Street || 'N/A',
+                    typeOfPlace: row.typeofPlace || row.typeOfPlace || row.TypeofPlace || 'N/A',
+                    dateReported: row.dateReported || row.datereported || new Date().toISOString().split('T')[0],
+                    timeReported: row.timeReported || row.timereported || '00:00',
+                    dateCommitted: row.dateCommitted || row.datecommitted || new Date().toISOString().split('T')[0],
+                    timeCommitted: row.timeCommitted || row.timecommitted || '00:00',
+                    modeOfReporting: row.mode_reporting || row.modeOfReporting || row.mode_Reporting || 'N/A',
+                    stageOfFelony: row.stageoffelony || row.stageOfFelony || row.stageofFelony || 'N/A',
+                    offense: row.offense || row.Offense || 'N/A',
+                    victim: parseVictimDetails(firstVictim),
+                    suspect: parseSuspectDetails(firstSuspect),
+                    suspectMotive: row.suspectMotive || row.suspectmotive || 'N/A',
+                    narrative: row.narrative || row.Narrative || 'N/A',
+                    status: row.casestatus || row.caseStatus || row.status || 'Solved',
+                    location: {
+                        lat: parseFloat(row.lat || row.Lat) || 14.4445,
+                        lng: parseFloat(row.lng || row.Lng) || 120.9939,
+                    },
+                };
+            });
+    };
+    
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
