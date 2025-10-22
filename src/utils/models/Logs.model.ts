@@ -2,13 +2,6 @@ import mongoose from "mongoose";
 import '../models/User.model'
 import '../models/Reports.model'
 
-const barangays = [
-    "Almanza Dos", "Almanza Uno", "B.F. CAA International Village", "Daniel Fajardo",
-    "Elias Aldana", "Ilaya", "Manuyo Uno", "Manuyo Dos", "Pamplona Uno", "Pamplona Dos",
-    "Pamplona Tres", "Pilar", "Pulang Lupa Uno", "Pulang Lupa Dos", "Talon Uno",
-    "Talon Dos", "Talon Tres", "Talon Cuatro", "Talon Singko", "Zapote",
-];
-
 const offenseList = [
     // 🚨 Index Crimes
     "Murder", "Homicide", "Rape", "Physical Injury", "Robbery", "Theft", "Carnapping", "Cattle Rustling",
@@ -51,7 +44,6 @@ const logsSchema = new mongoose.Schema({
     },
     barangay: {
         type: String,
-        enum: barangays,
         required: true,
     },
 }, { timestamps: true });

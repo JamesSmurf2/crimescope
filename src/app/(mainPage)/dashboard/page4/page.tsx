@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import toast, { Toaster } from 'react-hot-toast';
-
+import toast, { Toaster } from "react-hot-toast";
+import Link from "next/link";
 
 const CrimeMap = dynamic(() => import("@/components/reusable/CrimeMap"), { ssr: false });
 
@@ -31,7 +31,6 @@ type SuspectInfo = {
 };
 
 type CrimeForm = {
-    blotterNo: string;
     dateEncoded: string;
     barangay: string;
     street: string;
@@ -88,7 +87,6 @@ const CrimeReportForm = () => {
     const { addReports } = useReportStore();
     const { getAuthUserFunction, authUser } = useAuthStore();
 
-    // Auth
     const [authLoading, setAuthLoading] = useState(true);
     useEffect(() => {
         const checkAuth = async () => {
@@ -100,12 +98,11 @@ const CrimeReportForm = () => {
 
     useEffect(() => {
         if (!authLoading && authUser === null) {
-            router.push('/');
+            router.push("/");
         }
     }, [authUser, authLoading, router]);
 
     const [form, setForm] = useState<CrimeForm>({
-        blotterNo: "",
         dateEncoded: new Date().toLocaleString(),
         barangay: "",
         street: "",
@@ -127,13 +124,12 @@ const CrimeReportForm = () => {
 
     const handleSubmit = async () => {
         const {
-            blotterNo, dateEncoded, barangay, street, typeOfPlace, dateReported,
+            dateEncoded, barangay, street, typeOfPlace, dateReported,
             timeReported, dateCommitted, timeCommitted, modeOfReporting, stageOfFelony,
             offense, narrative, location, victim, suspect
         } = form;
 
         // Validation with toast notifications
-        if (!blotterNo.trim()) return toast.error("Please enter the blotter number.");
         if (!dateEncoded.trim()) return toast.error("Date encoded is missing.");
         if (!barangay.trim()) return toast.error("Please select a Barangay.");
         if (!street.trim()) return toast.error("Please enter the Street.");
@@ -170,7 +166,6 @@ const CrimeReportForm = () => {
         } else {
             toast.success("Crime report submitted successfully!");
             setForm({
-                blotterNo: "",
                 dateEncoded: new Date().toLocaleString(),
                 barangay: "",
                 street: "",
@@ -191,31 +186,6 @@ const CrimeReportForm = () => {
             });
         }
     };
-
-    // Auto-generate blotter number
-    useEffect(() => {
-        const generateBlotterNumber = () => {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const reports = useReportStore.getState().reports || [];
-            const currentPeriodPrefix = `${year}-${month}`;
-            const currentPeriodReports = reports.filter((report: any) =>
-                report.blotterNo && report.blotterNo.startsWith(currentPeriodPrefix)
-            );
-            let maxNumber = 0;
-            currentPeriodReports.forEach((report: any) => {
-                const match = report.blotterNo.match(/-(\d{4})$/);
-                if (match) {
-                    const num = parseInt(match[1], 10);
-                    if (num > maxNumber) maxNumber = num;
-                }
-            });
-            const nextNumber = String(maxNumber + 1).padStart(4, '0');
-            return `${year}-${month}-${nextNumber}`;
-        };
-        setForm((prev) => ({ ...prev, blotterNo: generateBlotterNumber() }));
-    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -239,8 +209,6 @@ const CrimeReportForm = () => {
 
     const inputClass = "bg-slate-800/50 border border-slate-700/50 hover:border-slate-600/70 focus:border-cyan-400/50 focus:outline-none text-white px-4 py-2.5 rounded-lg w-full transition-all placeholder-gray-500";
     const labelClass = "font-semibold text-gray-300 mb-2 block text-sm uppercase tracking-wider";
-
-
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-8">
@@ -267,7 +235,6 @@ const CrimeReportForm = () => {
                     },
                 }}
             />
-
             <div className="w-full max-w-5xl mx-auto space-y-8">
                 <div className="space-y-2 text-center">
                     <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">
@@ -283,18 +250,20 @@ const CrimeReportForm = () => {
                     )}
                 </div>
 
-                <form className="space-y-8">
-                    {/* Basic Info */}
+                <Link href='/dashboard/manyReports'>
+                    <div className="mt-4 bg-blue-500/10 border border-blue-500/50 rounded-lg p-4 max-w-sm mx-auto ">
+                        <p className="text-blue-400 font-semibold text-sm text-center">
+                            Add Many Report
+                        </p>
+                    </div>
+                </Link>
+
+                <form className="space-y-8 mt-3">
                     <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 space-y-4">
                         <h2 className="text-lg font-bold text-gray-100 uppercase tracking-wider flex items-center gap-2">
                             📋 Basic Information
                         </h2>
                         <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className={labelClass}>Blotter Number</label>
-                                <input name="blotterNo" value={form.blotterNo} readOnly className={`${inputClass} bg-slate-800/70 cursor-not-allowed`} />
-                            </div>
-
                             <div>
                                 <label className={labelClass}>Barangay</label>
                                 <select name="barangay" value={form.barangay} onChange={handleChange} className={inputClass}>
@@ -641,8 +610,8 @@ const CrimeReportForm = () => {
                         </button>
                     )}
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 
