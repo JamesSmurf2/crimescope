@@ -168,7 +168,7 @@ export default function CrimeReportViewer() {
                 };
             });
     };
-    
+
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -279,6 +279,55 @@ export default function CrimeReportViewer() {
                     {error && (
                         <p className="mt-3 text-red-400">{error}</p>
                     )}
+
+                    <details className="mt-4">
+                        <summary className="cursor-pointer text-slate-300 hover:text-white font-semibold">
+                            📋 View Expected CSV Format
+                        </summary>
+                        <div className="mt-3 bg-slate-900 p-4 rounded border border-slate-600 overflow-x-auto">
+                            <p className="text-sm text-slate-400 mb-2">Your CSV file should contain these columns:</p>
+                            <div className="text-xs font-mono bg-slate-950 p-3 rounded mb-3 overflow-x-auto">
+                                <div className="text-green-400 mb-2">Required Columns:</div>
+                                <div className="text-slate-300 space-y-1">
+                                    <div>• <span className="text-blue-400">barangay</span> - Name of the barangay</div>
+                                    <div>• <span className="text-blue-400">street</span> - Street address</div>
+                                    <div>• <span className="text-blue-400">typeofPlace</span> - Type of location</div>
+                                    <div>• <span className="text-blue-400">dateReported</span> - Date reported (YYYY-MM-DD)</div>
+                                    <div>• <span className="text-blue-400">timeReported</span> - Time reported (HH:MM)</div>
+                                    <div>• <span className="text-blue-400">dateCommitted</span> - Date committed (YYYY-MM-DD)</div>
+                                    <div>• <span className="text-blue-400">timeCommitted</span> - Time committed (HH:MM)</div>
+                                    <div>• <span className="text-blue-400">mode_reporting</span> - How it was reported</div>
+                                    <div>• <span className="text-blue-400">stageoffelony</span> - Stage of felony</div>
+                                    <div>• <span className="text-blue-400">offense</span> - Type of offense</div>
+                                    <div>• <span className="text-blue-400">victim</span> - Format: Name (age/gender/harmed/nationality/occupation)</div>
+                                    <div>• <span className="text-blue-400">suspect</span> - Format: Name (age/gender/status/nationality/occupation)</div>
+                                    <div>• <span className="text-blue-400">suspectMotive</span> - Motive of suspect</div>
+                                    <div>• <span className="text-blue-400">narrative</span> - Incident description</div>
+                                    <div>• <span className="text-blue-400">casestatus</span> or <span className="text-blue-400">status</span> - Status of the case</div>
+                                    <div>• <span className="text-blue-400">lat</span> - Latitude coordinate</div>
+                                    <div>• <span className="text-blue-400">lng</span> - Longitude coordinate</div>
+                                </div>
+                            </div>
+
+                            <div className="text-xs font-mono bg-slate-950 p-3 rounded">
+                                <div className="text-amber-400 mb-2">Example Row:</div>
+                                <div className="text-slate-300 whitespace-pre overflow-x-auto">
+                                    {`barangay,street,typeofPlace,dateReported,timeReported,dateCommitted,timeCommitted,mode_reporting,stageoffelony,offense,victim,suspect,suspectMotive,narrative,casestatus,lat,lng
+Almanza Uno,Main St,Residential,2024-01-15,14:30,2024-01-15,13:00,Walk-in,Consummated,Theft,Juan Dela Cruz (35/Male/Minor/Filipino/Driver),Unknown (N/A/Male/At Large/Filipino/Unemployed),Robbery,Motorcycle theft incident,Under Investigation,14.4445,120.9939`}
+                                </div>
+                            </div>
+
+                            <div className="mt-3 text-xs text-slate-400">
+                                <p className="font-semibold text-yellow-400 mb-1">Notes:</p>
+                                <ul className="list-disc list-inside space-y-1">
+                                    <li>Column names are case-insensitive</li>
+                                    <li>Victim/Suspect format: Name (age/gender/harmed or status/nationality/occupation)</li>
+                                    <li>Dates should be in YYYY-MM-DD format</li>
+                                    <li>Times should be in HH:MM format (24-hour)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </details>
                 </div>
 
                 {loading && (
@@ -342,7 +391,6 @@ export default function CrimeReportViewer() {
                                         {/* Barangay Dropdown */}
                                         <div>
                                             <h3 className="text-xs font-semibold text-slate-400 uppercase mb-1">Barangay</h3>
-                                            {/* <div className="text-xs text-slate-500 mb-1">Original: {report.barangay}</div> */}
                                             <p className="text-slate-100">{report.barangay}</p>
                                         </div>
 
