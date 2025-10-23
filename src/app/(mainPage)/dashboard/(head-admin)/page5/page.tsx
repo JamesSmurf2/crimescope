@@ -186,7 +186,6 @@ const AdminLogsPage = () => {
             const data = await response.json();
 
             if (data.success) {
-                // Refresh admin list
                 const admins = await getAllAdmin();
                 setAdminList(admins);
                 toast.success(`2FA ${!currentStatus ? 'enabled' : 'disabled'} successfully`);
