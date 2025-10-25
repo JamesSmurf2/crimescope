@@ -68,21 +68,21 @@ const AdminManagementPage = () => {
 
             setShowCreateModal(false);
             setNewAdmin({ username: '', email: '', password: '' });
-            toast.success('Admin created successfully!');
+            toast.success('Official created successfully!');
 
             // Refresh admin list
             const admins = await getAllAdmin();
             setAdminList(admins);
         } catch (error) {
-            toast.error('Failed to create admin');
+            toast.error('Failed to create Official');
         }
     };
 
     const handleDeleteAdmin = async (id: any) => {
-        if (confirm('Are you sure you want to delete this admin?')) {
+        if (confirm('Are you sure you want to delete this Official?')) {
             try {
                 await deleteAdmin(id);
-                toast.success('Admin deleted successfully');
+                toast.success('Official deleted successfully');
                 // Refresh admin list
                 const admins = await getAllAdmin();
                 setAdminList(admins);
@@ -150,16 +150,16 @@ const AdminManagementPage = () => {
             <div className="max-w-7xl mx-auto space-y-8">
                 <div className="space-y-2">
                     <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">
-                        Admin Management
+                        Officials Management
                     </h1>
                     <div className="flex items-center justify-between">
-                        <p className="text-gray-400 text-sm font-light">Manage administrators and their permissions</p>
+                        <p className="text-gray-400 text-sm font-light">Manage officials and their permissions</p>
                         <button
                             onClick={() => setShowCreateModal(true)}
                             className="bg-gradient-to-r from-emerald-500/30 to-emerald-600/30 hover:from-emerald-500/40 hover:to-emerald-600/40 border border-emerald-400/50 hover:border-emerald-300 text-emerald-300 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 shadow-lg"
                         >
                             <UserPlus className="w-4 h-4" />
-                            Create Admin
+                            Create Official
                         </button>
                     </div>
                 </div>
@@ -170,7 +170,7 @@ const AdminManagementPage = () => {
                         <div className="flex items-center gap-3">
                             <Users className="w-8 h-8 text-blue-300" />
                             <div>
-                                <p className="text-xs font-semibold text-blue-300 uppercase tracking-wider">Total Admins</p>
+                                <p className="text-xs font-semibold text-blue-300 uppercase tracking-wider">Total officials</p>
                                 <p className="text-3xl font-black text-blue-300">{adminList.length}</p>
                             </div>
                         </div>
@@ -180,7 +180,8 @@ const AdminManagementPage = () => {
                             <Shield className="w-8 h-8 text-purple-300" />
                             <div>
                                 <p className="text-xs font-semibold text-purple-300 uppercase tracking-wider">Head Admins</p>
-                                <p className="text-3xl font-black text-purple-300">{headAdminsCount}</p>
+                                {/* <p className="text-3xl font-black text-purple-300">{headAdminsCount}</p> */}
+                                <p className="text-3xl font-black text-purple-300">1</p>
                             </div>
                         </div>
                     </div>
@@ -200,13 +201,13 @@ const AdminManagementPage = () => {
                     <div className="p-6 border-b border-slate-700/50">
                         <h2 className="text-xl font-bold text-gray-200 flex items-center gap-2">
                             <Users className="w-5 h-5 text-cyan-400" />
-                            Administrator List
+                            Officials List
                         </h2>
                     </div>
                     {adminsLoading ? (
-                        <div className="p-8 text-center text-gray-400">Loading administrators...</div>
+                        <div className="p-8 text-center text-gray-400">Loading officials...</div>
                     ) : adminList.length === 0 ? (
-                        <div className="p-8 text-center text-gray-400">No administrators found.</div>
+                        <div className="p-8 text-center text-gray-400">No officials found.</div>
                     ) : (
                         <div className="p-4 space-y-3">
                             {adminList.map((admin: any) => (
@@ -283,12 +284,12 @@ const AdminManagementPage = () => {
                 </div>
             </div>
 
-            {/* Create Admin Modal */}
+            {/* Create Officials Modal */}
             {showCreateModal && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-50 p-4">
                     <div className="relative bg-gradient-to-b from-slate-800/95 to-slate-900/95 border border-slate-700/50 rounded-3xl p-8 w-full max-w-md shadow-2xl">
                         <h3 className="font-bold text-2xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 mb-6">
-                            Create New Admin
+                            Create New Official
                         </h3>
 
                         <div className="space-y-4">

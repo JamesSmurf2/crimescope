@@ -16,8 +16,6 @@ import {
 } from "chart.js";
 import { Bar, Doughnut, Line } from "react-chartjs-2";
 import useReportStore from "@/utils/zustand/ReportStore";
-import useAuthStore from "@/utils/zustand/useAuthStore";
-import { useRouter } from "next/navigation";
 
 // Register Chart.js components
 ChartJS.register(
@@ -71,27 +69,17 @@ interface Report {
 }
 
 const AnalyticsPage: React.FC = () => {
-    const router = useRouter()
-
     const { getReports } = useReportStore();
     const [reports, setReports] = useState<Report[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedBarangay, setSelectedBarangay] = useState<string>("All Barangays");
 
-    const { getAuthUserFunction, authUser } = useAuthStore()
-    //For auth
-    const [authLoading, setAuthLoading] = useState(true);
-    useEffect(() => {
-        const checkAuth = async () => {
-            await getAuthUserFunction();
-            setAuthLoading(false);
-        };
-        checkAuth();
-    }, [getAuthUserFunction]);
-    useEffect(() => {
-        if (!authLoading && authUser === null) {
-            router.push('/');
-        }
-    }, [authUser, authLoading, router]);
+    const barangays = [
+        "Almanza Dos", "Almanza Uno", "B.F. CAA International Village", "Daniel Fajardo",
+        "Elias Aldana", "Ilaya", "Manuyo Uno", "Manuyo Dos", "Pamplona Uno", "Pamplona Dos",
+        "Pamplona Tres", "Pilar", "Pulang Lupa Uno", "Pulang Lupa Dos", "Talon Uno",
+        "Talon Dos", "Talon Tres", "Talon Cuatro", "Talon Singko", "Zapote",
+    ];
 
     useEffect(() => {
         async function fetchReports() {
@@ -103,16 +91,14 @@ const AnalyticsPage: React.FC = () => {
         fetchReports();
     }, [getReports]);
 
-    // -------------------- Helper Functions --------------------
-    const barangays = [
-        "Almanza Dos", "Almanza Uno", "B.F. CAA International Village", "Daniel Fajardo",
-        "Elias Aldana", "Ilaya", "Manuyo Uno", "Manuyo Dos", "Pamplona Uno", "Pamplona Dos",
-        "Pamplona Tres", "Pilar", "Pulang Lupa Uno", "Pulang Lupa Dos", "Talon Uno",
-        "Talon Dos", "Talon Tres", "Talon Cuatro", "Talon Singko", "Zapote",
-    ];
+    // Filter reports based on selected barangay
+    const filteredReports = selectedBarangay === "All Barangays"
+        ? reports
+        : reports.filter(r => r.barangay === selectedBarangay);
 
+    // -------------------- Helper Functions --------------------
     const countByField = (field: string | ((r: Report) => string)) => {
-        return reports.reduce((acc: Record<string, number>, r) => {
+        return filteredReports.reduce((acc: Record<string, number>, r) => {
             const key = typeof field === "string" ? (r as any)[field] || "Unspecified" : field(r) || "Unspecified";
             acc[key] = (acc[key] || 0) + 1;
             return acc;
@@ -121,7 +107,7 @@ const AnalyticsPage: React.FC = () => {
 
     const allBarangayCounts: Record<string, number> = {};
     barangays.forEach((b) => {
-        allBarangayCounts[b] = reports.filter((r) => r.barangay === b).length || 0;
+        allBarangayCounts[b] = filteredReports.filter((r) => r.barangay === b).length || 0;
     });
 
     // -------------------- Chart Data --------------------
@@ -237,8 +223,8 @@ const AnalyticsPage: React.FC = () => {
         return counts;
     };
 
-    const casesByDayCounts = getCasesByDayCounts(reports);
-    const casesByHourCounts = getCasesByHourCounts(reports);
+    const casesByDayCounts = getCasesByDayCounts(filteredReports);
+    const casesByHourCounts = getCasesByHourCounts(filteredReports);
 
     // -------------------- Render --------------------
     const getBarData = (counts: Record<string, number>) => ({
@@ -264,7 +250,7 @@ const AnalyticsPage: React.FC = () => {
     };
 
     const casesByMonthCounts: Record<string, number> = {};
-    reports.forEach(r => {
+    filteredReports.forEach(r => {
         const date = new Date(r.createdAt);
         const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
         casesByMonthCounts[month] = (casesByMonthCounts[month] || 0) + 1;
@@ -275,13 +261,13 @@ const AnalyticsPage: React.FC = () => {
     const casesByHourData = { labels: Object.keys(casesByHourCounts), datasets: [{ label: "Cases by Hour", data: Object.values(casesByHourCounts), backgroundColor: "#22c55e", borderColor: "#16a34a", borderWidth: 1 }] };
 
     // -------------------- Summary Calculations --------------------
-    const totalReports = reports.length;
-    const solvedCount = reports.filter(r => r.status === "Solved").length;
-    const clearedCount = reports.filter(r => r.status === "Cleared").length;
-    const unsolvedCount = reports.filter(r => r.status === "Unsolved").length;
+    const totalReports = filteredReports.length;
+    const solvedCount = filteredReports.filter(r => r.status === "Solved").length;
+    const clearedCount = filteredReports.filter(r => r.status === "Cleared").length;
+    const unsolvedCount = filteredReports.filter(r => r.status === "Unsolved").length;
 
     // Most common barangay
-    const barangayCountsSummary = reports.reduce((acc: Record<string, number>, r) => {
+    const barangayCountsSummary = filteredReports.reduce((acc: Record<string, number>, r) => {
         if (!r.barangay) return acc;
         acc[r.barangay] = (acc[r.barangay] || 0) + 1;
         return acc;
@@ -290,7 +276,7 @@ const AnalyticsPage: React.FC = () => {
         .sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
 
     // Most common offense
-    const offenseCountsSummary = reports.reduce((acc: Record<string, number>, r) => {
+    const offenseCountsSummary = filteredReports.reduce((acc: Record<string, number>, r) => {
         if (!r.offense) return acc;
         acc[r.offense] = (acc[r.offense] || 0) + 1;
         return acc;
@@ -299,7 +285,7 @@ const AnalyticsPage: React.FC = () => {
         .sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
 
     // Peak day of week
-    const dayCountsSummary = reports.reduce((acc: Record<string, number>, r) => {
+    const dayCountsSummary = filteredReports.reduce((acc: Record<string, number>, r) => {
         if (!r.createdAt) return acc;
         const day = new Date(r.createdAt).toLocaleDateString("en-US", { weekday: "long" });
         acc[day] = (acc[day] || 0) + 1;
@@ -309,7 +295,7 @@ const AnalyticsPage: React.FC = () => {
         .sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
 
     // Peak hour
-    const hourCountsSummary = reports.reduce((acc: Record<number, number>, r) => {
+    const hourCountsSummary = filteredReports.reduce((acc: Record<number, number>, r) => {
         if (!r.createdAt) return acc;
         const hour = new Date(r.createdAt).getHours();
         acc[hour] = (acc[hour] || 0) + 1;
@@ -342,7 +328,7 @@ const AnalyticsPage: React.FC = () => {
                     <p className="text-gray-400 text-sm">Real-time insights and predictive analytics for barangay crime data</p>
                 </div>
 
-                {!loading && reports.length > 0 && (
+                {!loading && filteredReports.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
                         <StatCard title="Total Reports" value={totalReports} icon="📊" color="from-blue-500/20 to-cyan-500/20 border-blue-500/30" />
@@ -366,6 +352,31 @@ const AnalyticsPage: React.FC = () => {
                     </div>
                 )}
 
+                {/* Barangay Filter Dropdown */}
+                <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                    <label htmlFor="barangay-filter" className="block text-sm font-semibold text-gray-300 mb-3">
+                        🏘️ Filter by Barangay
+                    </label>
+                    <select
+                        id="barangay-filter"
+                        value={selectedBarangay}
+                        onChange={(e) => setSelectedBarangay(e.target.value)}
+                        className="w-full md:w-auto px-6 py-3 bg-slate-800/80 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all cursor-pointer hover:bg-slate-700/80"
+                    >
+                        <option value="All Barangays">All Barangays</option>
+                        {barangays.map((barangay) => (
+                            <option key={barangay} value={barangay}>
+                                {barangay}
+                            </option>
+                        ))}
+                    </select>
+                    {selectedBarangay !== "All Barangays" && (
+                        <p className="text-sm text-cyan-400 mt-3">
+                            Showing analytics for: <span className="font-bold">{selectedBarangay}</span>
+                        </p>
+                    )}
+                </div>
+
                 {loading ? (
                     <div className="text-center py-12">
                         <div className="inline-block">
@@ -373,18 +384,24 @@ const AnalyticsPage: React.FC = () => {
                         </div>
                         <p className="text-gray-400 mt-4">Loading analytics...</p>
                     </div>
-                ) : reports.length === 0 ? (
+                ) : filteredReports.length === 0 ? (
                     <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-12 text-center">
-                        <p className="text-gray-400 text-lg">No reports available for analytics.</p>
+                        <p className="text-gray-400 text-lg">
+                            {selectedBarangay === "All Barangays"
+                                ? "No reports available for analytics."
+                                : `No reports available for ${selectedBarangay}.`}
+                        </p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                        {/* Overall Crimes by Barangay - Full Width */}
-                        <div className="lg:col-span-3 bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
-                            <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">📈 Overall Crimes by Barangay</h2>
-                            <Bar data={barangayBarChartData} options={{ ...options, scales: { y: { beginAtZero: true } } }} />
-                        </div>
+                        {/* Overall Crimes by Barangay - Full Width (Only show when "All Barangays" selected) */}
+                        {selectedBarangay === "All Barangays" && (
+                            <div className="lg:col-span-3 bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                                <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">📈 Overall Crimes by Barangay</h2>
+                                <Bar data={barangayBarChartData} options={{ ...options, scales: { y: { beginAtZero: true } } }} />
+                            </div>
+                        )}
 
                         {/* Cases by Hour */}
                         <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">

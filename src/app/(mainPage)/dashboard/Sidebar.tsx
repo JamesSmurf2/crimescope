@@ -75,21 +75,14 @@ const Sidebar = () => {
                   <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg flex-shrink-0">
                     <User size={22} className="text-white" />
                   </div>
-                  {authUser ? (
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-lg truncate">{authUser.username}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="px-2.5 py-0.5 bg-indigo-500/20 text-indigo-300 text-xs font-medium rounded-full capitalize border border-indigo-500/30">
-                          {authUser.role}
-                        </span>
-                      </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-lg truncate">{authUser?.username || 'Guest'}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="px-2.5 py-0.5 bg-indigo-500/20 text-indigo-300 text-xs font-medium rounded-full capitalize border border-indigo-500/30">
+                        {authUser?.role || 'guest'}
+                      </span>
                     </div>
-                  ) : (
-                    <div className="flex-1">
-                      <div className="h-5 w-32 bg-gray-700/50 rounded-lg animate-pulse" />
-                      <div className="h-4 w-20 bg-gray-700/50 rounded-lg animate-pulse mt-2" />
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -106,13 +99,17 @@ const Sidebar = () => {
                   icon={<MapPin size={20} />}
                 />
               </Link>
-              <Link href="/dashboard/page2">
-                <SidebarItem
-                  label="Reports"
-                  active={pathname === '/dashboard/page2'}
-                  icon={<FileText size={20} />}
-                />
-              </Link>
+
+              {authUser && (
+                <Link href="/dashboard/page2">
+                  <SidebarItem
+                    label="Reports"
+                    active={pathname === '/dashboard/page2'}
+                    icon={<FileText size={20} />}
+                  />
+                </Link>
+              )}
+
               <Link href="/dashboard/page3">
                 <SidebarItem
                   label="Analytics"
@@ -120,14 +117,18 @@ const Sidebar = () => {
                   icon={<BarChart3 size={20} />}
                 />
               </Link>
-              <Link href="/dashboard/page4">
-                <SidebarItem
-                  label="Make a Report"
-                  active={pathname === '/dashboard/page4'}
-                  icon={<Plus size={20} />}
-                />
-              </Link>
-              {authUser?.role === 'head-admin' && (
+
+              {authUser && authUser.role !== 'admin' && (
+                <Link href="/dashboard/page4">
+                  <SidebarItem
+                    label="Make a Report"
+                    active={pathname === '/dashboard/page4'}
+                    icon={<Plus size={20} />}
+                  />
+                </Link>
+              )}
+
+              {authUser?.role === 'admin' && (
                 <>
                   <div className="border-t border-gray-800/50 my-2" />
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">
@@ -154,14 +155,24 @@ const Sidebar = () => {
 
           {/* Logout Button */}
           <div className="p-6 pt-4">
-            <button
-              onClick={handleLogout}
-              className="group w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 transition-all duration-300 text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-xl cursor-pointer flex items-center justify-center gap-2 relative overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-              <LogOut size={18} />
-              <span>Logout</span>
-            </button>
+            {authUser ? (
+              <button
+                onClick={handleLogout}
+                className="group w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 transition-all duration-300 text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-xl cursor-pointer flex items-center justify-center gap-2 relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                <LogOut size={18} />
+                <span>Logout</span>
+              </button>
+            ) : (
+              <Link href="/login">
+                <button className="group w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-xl cursor-pointer flex items-center justify-center gap-2 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                  <User size={18} />
+                  <span>Login</span>
+                </button>
+              </Link>
+            )}
           </div>
         </aside>
       </div>

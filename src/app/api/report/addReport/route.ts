@@ -91,7 +91,7 @@ export const POST = async (req: NextRequest) => {
         if (!user) {
             return NextResponse.json({ error: "Authentication required" }, { status: 401 });
         }
-        if (user.role !== "admin") {
+        if (user.role !== "official") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
         }
 

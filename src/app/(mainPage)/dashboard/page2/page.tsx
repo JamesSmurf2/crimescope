@@ -392,10 +392,10 @@ const ReportsPage = () => {
                     </h1>
                     <p className="text-gray-400 text-sm font-light">Comprehensive view of all barangay crime incidents</p>
 
-                    {authUser?.role === 'head-admin' && (
+                    {authUser?.role === 'admin' && (
                         <div className="mt-4 bg-red-500/10 border border-red-500/50 rounded-lg p-4 max-w-2xl mx-auto">
                             <p className="text-red-400 font-semibold text-sm">
-                                ⚠️ Only admin can edit reports. You are using Head-admin
+                                ⚠️ Only official can edit reports. You are using admin
                             </p>
                         </div>
                     )}
@@ -543,7 +543,7 @@ const ReportsPage = () => {
                                 >
                                     Save Changes
                                 </button>}
-                                {authUser && authUser.role !== 'head-admin' &&
+                                {authUser && authUser.role !== 'admin' &&
                                     <button
                                         onClick={() => setEditMode((prev) => !prev)}
                                         className={`px-5 py-2 rounded-lg font-semibold transition-all ${editMode

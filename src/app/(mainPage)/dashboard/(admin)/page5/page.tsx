@@ -158,9 +158,9 @@ const AdminLogsPage = () => {
             <div className="max-w-7xl mx-auto space-y-8">
                 <div className="space-y-2">
                     <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">
-                        Admin Activity Logs
+                        Officials Activity Logs
                     </h1>
-                    <p className="text-gray-400 text-sm font-light">Monitor all admin actions and report modifications</p>
+                    <p className="text-gray-400 text-sm font-light">Monitor all official actions and report modifications</p>
                 </div>
 
                 {/* Filters */}
@@ -171,7 +171,7 @@ const AdminLogsPage = () => {
                             name="search"
                             value={filters.search}
                             onChange={handleFilterChange}
-                            placeholder="Search by admin, report ID, details..."
+                            placeholder="Search by officials, report ID, details..."
                             className="bg-slate-900/70 border border-slate-700/50 hover:border-slate-600/70 focus:border-cyan-400/50 focus:outline-none px-4 py-2 rounded-lg text-sm w-80 text-gray-200 placeholder-gray-500 transition-all"
                         />
 
@@ -195,7 +195,7 @@ const AdminLogsPage = () => {
                             onChange={handleFilterChange}
                             className="bg-slate-900/70 border border-slate-700/50 hover:border-slate-600/70 focus:border-cyan-400/50 focus:outline-none px-4 py-2 rounded-lg text-sm text-gray-200 transition-all cursor-pointer"
                         >
-                            <option value="">All Admins</option>
+                            <option value="">All Offici</option>
                             {uniqueAdmins.map((admin, i) => (
                                 <option key={i} value={admin} className="bg-slate-800">
                                     {admin}

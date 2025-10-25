@@ -6,10 +6,10 @@ export const GET = async () => {
     try {
         await connectDb();
 
-        const admins = await User.find({ role: "admin" })
+        const officials = await User.find({ role: "official" })
             .select('-password')
 
-        return NextResponse.json(admins, { status: 200 });
+        return NextResponse.json(officials, { status: 200 });
     } catch (error) {
         console.error("Error fetching admin users:", error);
         return NextResponse.json(

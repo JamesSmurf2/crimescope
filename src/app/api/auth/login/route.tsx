@@ -69,8 +69,8 @@ export const POST = async (request: Request) => {
         if (!isMatched)
             return NextResponse.json({ error: "Password does not match." }, { status: 400 });
 
-        // If user is head admin bypass
-        if (user.role === "head-admin") {
+        // If user is admin bypass
+        if (user.role === "admin") {
             const token = generateToken({ id: user._id });
 
             const response = NextResponse.json({ success: true, user: { _id: user._id, username: user.username, role: user.role } });

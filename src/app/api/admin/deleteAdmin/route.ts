@@ -25,7 +25,7 @@ export const POST = async (req: Request) => {
             );
         }
 
-        if (loggedInUser.role !== "head-admin") {
+        if (loggedInUser.role !== "admin") {
             return NextResponse.json(
                 { message: "Access denied. Insufficient privileges." },
                 { status: 403 }

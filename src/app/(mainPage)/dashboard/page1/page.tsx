@@ -26,7 +26,7 @@ type Barangay = {
 const barangays: Barangay[] = [
     {
         name: "Manuyo Uno",
-        filename: "Manuyo-uno.png",
+        filename: "Manuyo-Uno.png",
         style: "scale-[0.3] absolute left-[350px]",
     },
     {
@@ -132,26 +132,9 @@ const Page = () => {
     const handleMouseMove = (e: React.MouseEvent) => {
         setMousePos({ x: e.clientX, y: e.clientY });
     };
-    const router = useRouter();
-    const { getAuthUserFunction, authUser } = useAuthStore();
     const { getReports, reports } = useReportStore();
     const [hovered, setHovered] = useState<Barangay | null>(null);
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-    const [authLoading, setAuthLoading] = useState(true);
-
-    useEffect(() => {
-        const checkAuth = async () => {
-            await getAuthUserFunction();
-            setAuthLoading(false);
-        };
-        checkAuth();
-    }, [getAuthUserFunction]);
-
-    useEffect(() => {
-        if (!authLoading && authUser === null) {
-            router.push('/');
-        }
-    }, [authUser, authLoading, router]);
 
     useEffect(() => {
         getReports();

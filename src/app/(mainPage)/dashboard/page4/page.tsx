@@ -241,10 +241,10 @@ const CrimeReportForm = () => {
                         Crime Report Form
                     </h1>
                     <p className="text-gray-400 text-sm">File and manage barangay crime incidents</p>
-                    {authUser?.role === 'head-admin' && (
+                    {authUser?.role === 'admin' && (
                         <div className="mt-4 bg-red-500/10 border border-red-500/50 rounded-lg p-4 max-w-2xl mx-auto">
                             <p className="text-red-400 font-semibold text-sm">
-                                ⚠️ Only admin can add reports. You are using Head-admin
+                                ⚠️ Only official can add reports. You are using admin
                             </p>
                         </div>
                     )}
@@ -600,7 +600,7 @@ const CrimeReportForm = () => {
                     </div>
 
 
-                    {authUser?.role !== 'head-admin' && (
+                    {authUser?.role !== 'admin' && (
                         <button
                             type="button"
                             onClick={() => handleSubmit()}

@@ -126,7 +126,12 @@ export default function CrimeReportViewer() {
 
     const toCamelCase = (str: string): string => {
         if (!str) return '';
-        if (str.toUpperCase().includes('CAA')) return 'B.F. CAA International Village'; // exception
+
+        // Handle both "B. F. International Village" and "CAA" variations
+        const normalized = str.toUpperCase().replace(/\s+/g, ' ').trim();
+        if (normalized.includes('CAA') || normalized.includes('B. F. INTERNATIONAL') || normalized.includes('B.F. INTERNATIONAL')) {
+            return 'B.F. CAA International Village';
+        }
 
         return str
             .toLowerCase()

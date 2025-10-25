@@ -9,12 +9,12 @@ export const GET = async () => {
     try {
         await connectDb();
 
-        const admins = await Logs.find()
+        const officials = await Logs.find()
             .populate('adminId', 'username')
             .populate('reportId', 'blotterNo') 
             .sort({ createdAt: -1 })
 
-        return NextResponse.json(admins, { status: 200 });
+        return NextResponse.json(officials, { status: 200 });
     } catch (error) {
         console.error("Error fetching admin users:", error);
         return NextResponse.json(

@@ -81,7 +81,10 @@ export default function Home() {
           </div>
 
           {/* CTA Button */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4">
+          <div className="flex flex-col  items-center justify-center gap-4 px-4 ">
+            <Link href="/dashboard/page1" className="w-full sm:w-auto">
+              <Button text="Continue as Guest." />
+            </Link>
             <Link href="/login" className="w-full sm:w-auto">
               <Button text="Admin Login" />
             </Link>
