@@ -10,11 +10,13 @@ import {
     Legend,
 } from "chart.js";
 import { Pie } from 'react-chartjs-2';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
     ArcElement,
     Tooltip,
-    Legend
+    Legend,
+    ChartDataLabels
 );
 
 type Barangay = {
@@ -219,6 +221,20 @@ const Page = () => {
                 borderWidth: 1,
                 padding: 10,
                 displayColors: true,
+            },
+            datalabels: {
+                color: '#fff',
+                font: {
+                    weight: 'bold' as const,
+                    size: 14
+                },
+                formatter: (value: number, context: any) => {
+                    const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+                    const percentage = Math.round((value / total) * 100);
+                    return `${percentage}%`;
+                },
+                anchor: 'center' as const,
+                align: 'center' as const,
             }
         }
     };
@@ -285,9 +301,9 @@ const Page = () => {
                                                         <div className="h-0.5 w-12 bg-gradient-to-r from-red-500 to-red-600 rounded-full mt-2"></div>
                                                     </div>
                                                     <div className={`px-3 py-1 rounded-lg text-xs font-bold ${crimeLevel.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
-                                                            crimeLevel.color === 'amber' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
-                                                                crimeLevel.color === 'orange' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' :
-                                                                    'bg-red-500/20 text-red-300 border-red-500/30'
+                                                        crimeLevel.color === 'amber' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
+                                                            crimeLevel.color === 'orange' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' :
+                                                                'bg-red-500/20 text-red-300 border-red-500/30'
                                                         } border`}>
                                                         {crimeLevel.level}
                                                     </div>
