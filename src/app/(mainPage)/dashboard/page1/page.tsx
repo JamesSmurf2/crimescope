@@ -311,7 +311,7 @@ const Page = () => {
                                                     <div className="text-2xl font-bold text-red-400">{crimeCount}</div>
                                                 </div>
                                                 <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 p-4 rounded-xl border border-blue-500/20 hover:border-blue-500/40 transition-all">
-                                                    <div className="text-gray-400 text-xs font-semibold mb-2">🔎 Crime Type</div>
+                                                    <div className="text-gray-400 text-xs font-semibold mb-2">🔎 Common Crime</div>
                                                     <div className="text-sm font-bold text-blue-400 truncate">{getCommonoffense(b.name)}</div>
                                                 </div>
                                             </div>
