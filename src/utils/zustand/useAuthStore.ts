@@ -28,7 +28,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
         try {
             let res = await fetch('/api/auth/register', {
                 method: 'POST',
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password, email })
             })
             if (!res.ok) return { error: 'User already exist or error.' }
             const data = await res.json()

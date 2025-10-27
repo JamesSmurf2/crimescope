@@ -7,7 +7,7 @@ export const POST = async (request: Request) => {
     await connectDb()
 
     const body = await request.json()
-    const { username, password } = body
+    const { username, password, email } = body
 
     // if (username.length > 16) {
     //     return NextResponse.json("Username must be at most 16 characters long.", { status: 400 })
@@ -25,7 +25,7 @@ export const POST = async (request: Request) => {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
 
-    const newUser = new User({ username, password: hashedPassword })
+    const newUser = new User({ username, password: hashedPassword, email: email })
     await newUser.save()
 
     return NextResponse.json(newUser)
