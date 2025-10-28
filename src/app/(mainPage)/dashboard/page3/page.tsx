@@ -74,6 +74,213 @@ const AnalyticsPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [selectedBarangay, setSelectedBarangay] = useState<string>("All Barangays");
 
+    const [showPrintPreview, setShowPrintPreview] = useState(false); //
+
+    const handlePrint = () => {
+        setShowPrintPreview(true);
+    };
+
+    const handleActualPrint = () => {
+        window.print();
+    };
+
+    const handleClosePrint = () => {
+        setShowPrintPreview(false);
+    };
+
+    const printStyles = `
+  @media print {
+    @page {
+      size: A4;
+      margin: 1cm;
+    }
+    
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    
+    body * {
+      visibility: hidden;
+    }
+    
+    .print-preview-content {
+      visibility: visible !important;
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100% !important;
+      background: white !important;
+      color: black !important;
+      display: block !important;
+      overflow: visible !important;
+      height: auto !important;
+      max-height: none !important;
+    }
+    
+    .print-preview-content * {
+      visibility: visible !important;
+    }
+    
+    .no-print, .print-preview-modal > div:first-child, .sticky {
+      display: none !important;
+      visibility: hidden !important;
+    }
+    
+    .print-preview-modal {
+      position: static !important;
+      background: white !important;
+      overflow: visible !important;
+      height: auto !important;
+    }
+    
+    .print-section {
+      page-break-inside: avoid;
+      margin-bottom: 20px;
+      display: block !important;
+      visibility: visible !important;
+    }
+    
+    .print-page-break {
+      page-break-after: always;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      color: black !important;
+      page-break-after: avoid;
+    }
+    
+    p, span, td, th, div {
+      color: black !important;
+    }
+    
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      color: black !important;
+      page-break-inside: auto;
+    }
+    
+    tr {
+      page-break-inside: avoid;
+      page-break-after: auto;
+    }
+    
+    thead {
+      display: table-header-group;
+    }
+    
+    th, td {
+      border: 1px solid #ddd !important;
+      padding: 8px !important;
+      text-align: left;
+      color: black !important;
+    }
+    
+    th {
+      background-color: #f2f2f2 !important;
+      font-weight: bold !important;
+    }
+    
+    .border {
+      border: 1px solid #ddd !important;
+    }
+    
+    .border-b, .border-b-2 {
+      border-bottom: 2px solid #333 !important;
+    }
+    
+    .border-t, .border-t-2 {
+      border-top: 2px solid #333 !important;
+    }
+    
+    .border-gray-300, .border-gray-200 {
+      border-color: #ddd !important;
+    }
+    
+    .bg-gray-100 {
+      background-color: #f2f2f2 !important;
+    }
+    
+    .text-blue-600 {
+      color: #2563eb !important;
+    }
+    
+    .text-green-600 {
+      color: #16a34a !important;
+    }
+    
+    .text-yellow-600 {
+      color: #ca8a04 !important;
+    }
+    
+    .text-red-600 {
+      color: #dc2626 !important;
+    }
+    
+    .text-orange-600 {
+      color: #ea580c !important;
+    }
+    
+    .text-gray-600 {
+      color: #4b5563 !important;
+    }
+    
+    .text-gray-700 {
+      color: #374151 !important;
+    }
+    
+    .rounded, .rounded-xl, .rounded-2xl {
+      border-radius: 4px !important;
+    }
+    
+    .grid {
+      display: grid !important;
+    }
+    
+    .grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    
+    .grid-cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+    
+    .grid-cols-7 {
+      grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    }
+    
+    .gap-2 {
+      gap: 0.5rem !important;
+    }
+    
+    .gap-4 {
+      gap: 1rem !important;
+    }
+    
+    .gap-6 {
+      gap: 1.5rem !important;
+    }
+    
+    .mb-1, .mb-2, .mb-3, .mb-4, .mb-6, .mb-8 {
+      display: block !important;
+    }
+    
+    .p-2, .p-3, .p-4, .p-6, .p-8 {
+      display: block !important;
+    }
+  }
+  
+  .print-only {
+    display: none;
+  }
+`;
+
     const barangays = [
         "Almanza Dos", "Almanza Uno", "B.F. CAA International Village", "Daniel Fajardo",
         "Elias Aldana", "Ilaya", "Manuyo Uno", "Manuyo Dos", "Pamplona Uno", "Pamplona Dos",
@@ -351,16 +558,24 @@ const AnalyticsPage: React.FC = () => {
             <p className="text-3xl font-black text-white">{value}</p>
         </div>
     );
-
     // -------------------- Render --------------------
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-8">
             <div className="max-w-7xl mx-auto space-y-8">
-                <div className="space-y-2">
-                    <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">
-                        Crime Analytics Dashboard
-                    </h1>
-                    <p className="text-gray-400 text-sm">Real-time insights and predictive analytics for barangay crime data</p>
+                <div className="space-y-2 flex justify-between items-start">
+                    <div>
+                        <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">
+                            Crime Analytics Dashboard
+                        </h1>
+                        <p className="text-gray-400 text-sm">Real-time insights and predictive analytics for barangay crime data</p>
+                    </div>
+                    <button
+                        onClick={handlePrint}
+                        className="no-print px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold rounded-xl shadow-lg transition-all flex items-center gap-2"
+                    >
+                        <span>🖨️</span>
+                        Print Report
+                    </button>
                 </div>
 
                 {!loading && filteredReports.length > 0 && (
@@ -549,6 +764,328 @@ const AnalyticsPage: React.FC = () => {
                             <Bar data={getBarData(typeOfPlaceCounts)} options={options} />
                         </div>
 
+                    </div>
+                )}
+
+                {/* Print Preview Modal */}
+                {showPrintPreview && (
+                    <div className="print-preview-modal fixed inset-0 bg-black/80 z-50 overflow-y-auto">
+                        <div className="min-h-screen p-8">
+                            <div className="max-w-6xl mx-auto">
+                                {/* Modal Header */}
+                                <div className="no-print bg-slate-800 rounded-t-2xl p-6 flex justify-between items-center sticky top-0 z-10">
+                                    <h2 className="text-2xl font-bold text-white">Print Preview - Crime Analytics Report</h2>
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={handleActualPrint}
+                                            className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
+                                        >
+                                            <span>🖨️</span>
+                                            Print
+                                        </button>
+                                        <button
+                                            onClick={handleClosePrint}
+                                            className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-semibold rounded-xl transition-all"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Print Content */}
+                                <div className="print-preview-content bg-white text-black p-8">
+                                    {/* Header */}
+                                    <div className="text-center mb-8 pb-6 border-b-2 border-gray-300">
+                                        <h1 className="text-4xl font-black mb-2">Crime Analytics Report</h1>
+                                        <p className="text-xl font-semibold text-gray-700">Barangay: {selectedBarangay}</p>
+                                        <p className="text-sm text-gray-600 mt-2">
+                                            Generated on: {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
+                                        </p>
+                                    </div>
+
+                                    {/* Executive Summary */}
+                                    <div className="print-section mb-8">
+                                        <h2 className="text-2xl font-bold mb-4 border-b-2 border-gray-300 pb-2">📊 Executive Summary</h2>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                            <div className="border border-gray-300 rounded p-4">
+                                                <p className="text-sm text-gray-600 mb-1">Total Reports</p>
+                                                <p className="text-3xl font-bold text-blue-600">{totalReports}</p>
+                                            </div>
+                                            <div className="border border-gray-300 rounded p-4">
+                                                <p className="text-sm text-gray-600 mb-1">Solved Cases</p>
+                                                <p className="text-3xl font-bold text-green-600">{solvedCount}</p>
+                                            </div>
+                                            <div className="border border-gray-300 rounded p-4">
+                                                <p className="text-sm text-gray-600 mb-1">Cleared Cases</p>
+                                                <p className="text-3xl font-bold text-yellow-600">{clearedCount}</p>
+                                            </div>
+                                            <div className="border border-gray-300 rounded p-4">
+                                                <p className="text-sm text-gray-600 mb-1">Unsolved Cases</p>
+                                                <p className="text-3xl font-bold text-red-600">{unsolvedCount}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="border border-gray-300 rounded p-4">
+                                                <p className="text-sm text-gray-600 mb-1">Most Common Barangay</p>
+                                                <p className="text-lg font-semibold">{mostCommonBarangay}</p>
+                                            </div>
+                                            <div className="border border-gray-300 rounded p-4">
+                                                <p className="text-sm text-gray-600 mb-1">Most Common Offense</p>
+                                                <p className="text-lg font-semibold">{mostCommonOffense}</p>
+                                            </div>
+                                            <div className="border border-gray-300 rounded p-4">
+                                                <p className="text-sm text-gray-600 mb-1">Peak Day</p>
+                                                <p className="text-lg font-semibold">{peakDay}</p>
+                                            </div>
+                                            <div className="border border-gray-300 rounded p-4">
+                                                <p className="text-sm text-gray-600 mb-1">Peak Hour</p>
+                                                <p className="text-lg font-semibold">{peakHour}:00</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Predictive Analytics */}
+                                    <div className="print-section mb-8">
+                                        <h2 className="text-2xl font-bold mb-4 border-b-2 border-gray-300 pb-2">🔮 Predictive Analytics</h2>
+                                        <div className="border border-gray-300 rounded p-4 mb-4">
+                                            <p className="text-sm text-gray-600 mb-2">Predicted Cases (Next 7 Days)</p>
+                                            <p className="text-4xl font-bold text-orange-600 mb-4">{predictedNext7DaysTotal}</p>
+                                            <div className="grid grid-cols-7 gap-2">
+                                                {Object.entries(predictedNextWeek).map(([date, count]) => (
+                                                    <div key={date} className="text-center border border-gray-200 rounded p-2">
+                                                        <p className="text-xs text-gray-600">{date}</p>
+                                                        <p className="text-lg font-bold text-orange-600">{count}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Offense Breakdown Table */}
+                                    <div className="print-section mb-8 print-page-break">
+                                        <h2 className="text-2xl font-bold mb-4 border-b-2 border-gray-300 pb-2">⚖️ Offense Type Analysis</h2>
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr>
+                                                    <th className="text-left p-3">Offense Type</th>
+                                                    <th className="text-right p-3">Count</th>
+                                                    <th className="text-right p-3">Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {Object.entries(offenseCounts)
+                                                    .sort((a, b) => b[1] - a[1])
+                                                    .map(([offense, count]) => (
+                                                        <tr key={offense}>
+                                                            <td className="p-3">{offense}</td>
+                                                            <td className="p-3 text-right font-semibold">{count}</td>
+                                                            <td className="p-3 text-right">{((count / totalReports) * 100).toFixed(1)}%</td>
+                                                        </tr>
+                                                    ))}
+                                                <tr className="font-bold bg-gray-100">
+                                                    <td className="p-3">TOTAL</td>
+                                                    <td className="p-3 text-right">{totalReports}</td>
+                                                    <td className="p-3 text-right">100%</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Status Breakdown Table */}
+                                    <div className="print-section mb-8">
+                                        <h2 className="text-2xl font-bold mb-4 border-b-2 border-gray-300 pb-2">🎯 Case Status Analysis</h2>
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr>
+                                                    <th className="text-left p-3">Status</th>
+                                                    <th className="text-right p-3">Count</th>
+                                                    <th className="text-right p-3">Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {Object.entries(statusCounts)
+                                                    .sort((a, b) => b[1] - a[1])
+                                                    .map(([status, count]) => (
+                                                        <tr key={status}>
+                                                            <td className="p-3">{status}</td>
+                                                            <td className="p-3 text-right font-semibold">{count}</td>
+                                                            <td className="p-3 text-right">{((count / totalReports) * 100).toFixed(1)}%</td>
+                                                        </tr>
+                                                    ))}
+                                                <tr className="font-bold bg-gray-100">
+                                                    <td className="p-3">TOTAL</td>
+                                                    <td className="p-3 text-right">{totalReports}</td>
+                                                    <td className="p-3 text-right">100%</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Barangay Breakdown (if All Barangays) */}
+                                    {selectedBarangay === "All Barangays" && (
+                                        <div className="print-section mb-8 print-page-break">
+                                            <h2 className="text-2xl font-bold mb-4 border-b-2 border-gray-300 pb-2">📍 Barangay Distribution</h2>
+                                            <table className="w-full">
+                                                <thead>
+                                                    <tr>
+                                                        <th className="text-left p-3">Barangay</th>
+                                                        <th className="text-right p-3">Count</th>
+                                                        <th className="text-right p-3">Percentage</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {Object.entries(barangayCounts)
+                                                        .sort((a, b) => b[1] - a[1])
+                                                        .map(([barangay, count]) => (
+                                                            <tr key={barangay}>
+                                                                <td className="p-3">{barangay}</td>
+                                                                <td className="p-3 text-right font-semibold">{count}</td>
+                                                                <td className="p-3 text-right">{((count / totalReports) * 100).toFixed(1)}%</td>
+                                                            </tr>
+                                                        ))}
+                                                    <tr className="font-bold bg-gray-100">
+                                                        <td className="p-3">TOTAL</td>
+                                                        <td className="p-3 text-right">{totalReports}</td>
+                                                        <td className="p-3 text-right">100%</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+
+                                    {/* Time Analysis */}
+                                    <div className="print-section mb-8">
+                                        <h2 className="text-2xl font-bold mb-4 border-b-2 border-gray-300 pb-2">⏰ Temporal Analysis</h2>
+
+                                        <h3 className="text-xl font-semibold mb-3">Cases by Day of Week</h3>
+                                        <table className="w-full mb-6">
+                                            <thead>
+                                                <tr>
+                                                    <th className="text-left p-3">Day</th>
+                                                    <th className="text-right p-3">Count</th>
+                                                    <th className="text-right p-3">Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {Object.entries(casesByDayCounts)
+                                                    .sort((a, b) => b[1] - a[1])
+                                                    .map(([day, count]) => (
+                                                        <tr key={day}>
+                                                            <td className="p-3">{day}</td>
+                                                            <td className="p-3 text-right font-semibold">{count}</td>
+                                                            <td className="p-3 text-right">{totalReports > 0 ? ((count / totalReports) * 100).toFixed(1) : 0}%</td>
+                                                        </tr>
+                                                    ))}
+                                            </tbody>
+                                        </table>
+
+                                        <h3 className="text-xl font-semibold mb-3">Peak Hours</h3>
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr>
+                                                    <th className="text-left p-3">Hour</th>
+                                                    <th className="text-right p-3">Count</th>
+                                                    <th className="text-right p-3">Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {Object.entries(casesByHourCounts)
+                                                    .filter(([_, count]) => count > 0)
+                                                    .sort((a, b) => b[1] - a[1])
+                                                    .slice(0, 10)
+                                                    .map(([hour, count]) => (
+                                                        <tr key={hour}>
+                                                            <td className="p-3">{hour}:00 - {hour}:59</td>
+                                                            <td className="p-3 text-right font-semibold">{count}</td>
+                                                            <td className="p-3 text-right">{totalReports > 0 ? ((count / totalReports) * 100).toFixed(1) : 0}%</td>
+                                                        </tr>
+                                                    ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Additional Metrics */}
+                                    <div className="print-section mb-8 print-page-break">
+                                        <h2 className="text-2xl font-bold mb-4 border-b-2 border-gray-300 pb-2">📊 Additional Metrics</h2>
+
+                                        <div className="grid grid-cols-2 gap-6 mb-6">
+                                            <div>
+                                                <h3 className="text-xl font-semibold mb-3">Mode of Reporting</h3>
+                                                <table className="w-full">
+                                                    <tbody>
+                                                        {Object.entries(modeCounts)
+                                                            .sort((a, b) => b[1] - a[1])
+                                                            .map(([mode, count]) => (
+                                                                <tr key={mode} className="border-b">
+                                                                    <td className="p-2">{mode}</td>
+                                                                    <td className="p-2 text-right font-semibold">{count}</td>
+                                                                </tr>
+                                                            ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <div>
+                                                <h3 className="text-xl font-semibold mb-3">Stage of Felony</h3>
+                                                <table className="w-full">
+                                                    <tbody>
+                                                        {Object.entries(felonyStageCounts)
+                                                            .sort((a, b) => b[1] - a[1])
+                                                            .map(([stage, count]) => (
+                                                                <tr key={stage} className="border-b">
+                                                                    <td className="p-2">{stage}</td>
+                                                                    <td className="p-2 text-right font-semibold">{count}</td>
+                                                                </tr>
+                                                            ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div>
+                                                <h3 className="text-xl font-semibold mb-3">Suspect Status</h3>
+                                                <table className="w-full">
+                                                    <tbody>
+                                                        {Object.entries(suspectStatusCounts)
+                                                            .sort((a, b) => b[1] - a[1])
+                                                            .map(([status, count]) => (
+                                                                <tr key={status} className="border-b">
+                                                                    <td className="p-2">{status}</td>
+                                                                    <td className="p-2 text-right font-semibold">{count}</td>
+                                                                </tr>
+                                                            ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <div>
+                                                <h3 className="text-xl font-semibold mb-3">Type of Place</h3>
+                                                <table className="w-full">
+                                                    <tbody>
+                                                        {Object.entries(typeOfPlaceCounts)
+                                                            .sort((a, b) => b[1] - a[1])
+                                                            .map(([type, count]) => (
+                                                                <tr key={type} className="border-b">
+                                                                    <td className="p-2">{type}</td>
+                                                                    <td className="p-2 text-right font-semibold">{count}</td>
+                                                                </tr>
+                                                            ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="text-center mt-8 pt-6 border-t-2 border-gray-300 text-sm text-gray-600">
+                                        <p>This report was generated by the Crime Analytics Dashboard</p>
+                                        <p className="mt-1">For official use only - Confidential Information</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
