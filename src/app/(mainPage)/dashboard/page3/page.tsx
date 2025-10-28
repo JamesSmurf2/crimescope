@@ -226,6 +226,41 @@ const AnalyticsPage: React.FC = () => {
     const casesByDayCounts = getCasesByDayCounts(filteredReports);
     const casesByHourCounts = getCasesByHourCounts(filteredReports);
 
+    // Array of distinct colors for different offenses
+    const colorPalette = [
+        { bg: "#ef4444", border: "#dc2626" },  // Red
+        { bg: "#f97316", border: "#ea580c" },  // Orange
+        { bg: "#facc15", border: "#eab308" },  // Yellow
+        { bg: "#22c55e", border: "#16a34a" },  // Green
+        { bg: "#06b6d4", border: "#0891b2" },  // Cyan
+        { bg: "#3b82f6", border: "#2563eb" },  // Blue
+        { bg: "#6366f1", border: "#4f46e5" },  // Indigo
+        { bg: "#a855f7", border: "#9333ea" },  // Purple
+        { bg: "#ec4899", border: "#db2777" },  // Pink
+        { bg: "#f43f5e", border: "#e11d48" },  // Rose
+        { bg: "#14b8a6", border: "#0d9488" },  // Teal
+        { bg: "#84cc16", border: "#65a30d" },  // Lime
+        { bg: "#eab308", border: "#ca8a04" },  // Amber
+        { bg: "#f59e0b", border: "#d97706" },  // Orange variant
+        { bg: "#8b5cf6", border: "#7c3aed" },  // Violet
+    ];
+
+    // Assign a unique color to each offense type
+    const offenseColors = Object.keys(offenseCounts).map((_, index) =>
+        colorPalette[index % colorPalette.length]
+    );
+
+    const coloredOffenseData = {
+        labels: Object.keys(offenseCounts),
+        datasets: [{
+            label: "Cases by Offense Type",
+            data: Object.values(offenseCounts),
+            backgroundColor: offenseColors.map(c => c.bg),
+            borderColor: offenseColors.map(c => c.border),
+            borderWidth: 1
+        }]
+    };
+
     // -------------------- Render --------------------
     const getBarData = (counts: Record<string, number>) => ({
         labels: Object.keys(counts),
@@ -395,13 +430,58 @@ const AnalyticsPage: React.FC = () => {
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                        {/* Overall Crimes by Barangay - Full Width (Only show when "All Barangays" selected) */}
-                        {selectedBarangay === "All Barangays" && (
-                            <div className="lg:col-span-3 bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
-                                <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">📈 Overall Crimes by Barangay</h2>
-                                <Bar data={barangayBarChartData} options={{ ...options, scales: { y: { beginAtZero: true } } }} />
-                            </div>
-                        )}
+                        {/* Overall Crimes by Barangay - Full Width */}
+                        <div className="lg:col-span-3 bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                            <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">
+                                📈 {selectedBarangay === "All Barangays" ? "Overall Crimes by Barangay" : `Crime Distribution in ${selectedBarangay}`}
+                            </h2>
+                            {selectedBarangay === "All Barangays" ? (
+                                <>
+                                    <div className="mb-4 flex flex-wrap gap-3 text-xs">
+                                        <span className="flex items-center gap-2">
+                                            <span className="w-4 h-4 rounded" style={{ backgroundColor: "#ef4444" }}></span>
+                                            <span className="text-gray-300">Very High (80-100%)</span>
+                                        </span>
+                                        <span className="flex items-center gap-2">
+                                            <span className="w-4 h-4 rounded" style={{ backgroundColor: "#f97316" }}></span>
+                                            <span className="text-gray-300">High (60-79%)</span>
+                                        </span>
+                                        <span className="flex items-center gap-2">
+                                            <span className="w-4 h-4 rounded" style={{ backgroundColor: "#facc15" }}></span>
+                                            <span className="text-gray-300">Medium (40-59%)</span>
+                                        </span>
+                                        <span className="flex items-center gap-2">
+                                            <span className="w-4 h-4 rounded" style={{ backgroundColor: "#22c55e" }}></span>
+                                            <span className="text-gray-300">Low (20-39%)</span>
+                                        </span>
+                                        <span className="flex items-center gap-2">
+                                            <span className="w-4 h-4 rounded" style={{ backgroundColor: "#0ea5e9" }}></span>
+                                            <span className="text-gray-300">Very Low (0-19%)</span>
+                                        </span>
+                                    </div>
+                                    <Bar data={barangayBarChartData} options={{ ...options, scales: { y: { beginAtZero: true } } }} />
+                                </>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                            <h3 className="text-sm font-semibold text-gray-400 mb-2">Total Crimes</h3>
+                                            <p className="text-3xl font-bold text-cyan-400">{filteredReports.length}</p>
+                                        </div>
+                                        <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                            <h3 className="text-sm font-semibold text-gray-400 mb-2">Percentage of Total</h3>
+                                            <p className="text-3xl font-bold text-orange-400">
+                                                {reports.length > 0 ? ((filteredReports.length / reports.length) * 100).toFixed(1) : 0}%
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                        <h3 className="text-sm font-semibold text-gray-400 mb-3">Crime Breakdown by Type</h3>
+                                        <Bar data={coloredOffenseData} options={{ ...options, scales: { y: { beginAtZero: true } } }} />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
                         {/* Cases by Hour */}
                         <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
