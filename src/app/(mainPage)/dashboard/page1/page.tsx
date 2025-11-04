@@ -309,7 +309,6 @@ const Page = () => {
                                                     </div>
                                                 </div>
                                             </div>
-
                                             {/* Pie Chart */}
                                             {offenseChartData && (
                                                 <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-4">
@@ -322,13 +321,13 @@ const Page = () => {
 
                                             {/* Stats Grid */}
                                             <div className="grid grid-cols-2 gap-3">
-                                                <div className="bg-gradient-to-br from-red-500/10 to-red-600/5 p-4 rounded-xl border border-red-500/20 hover:border-red-500/40 transition-all group/stat">
+                                                <div className="bg-gradient-to-br from-slate-500/10 to-slate-600/5 p-4 rounded-xl border border-slate-500/20 hover:border-slate-500/40 transition-all group/stat">
                                                     <div className="text-gray-400 text-xs font-semibold mb-2">📊 Total Cases</div>
-                                                    <div className="text-2xl font-bold text-red-400">{crimeCount}</div>
+                                                    <div className="text-2xl font-bold text-slate-400">{crimeCount}</div>
                                                 </div>
-                                                <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 p-4 rounded-xl border border-blue-500/20 hover:border-blue-500/40 transition-all">
+                                                <div className="bg-gradient-to-br from-slate-500/10 to-slate-600/5 p-4 rounded-xl border border-slate-500/20 hover:border-slate-500/40 transition-all">
                                                     <div className="text-gray-400 text-xs font-semibold mb-2">🔎 Common Crime</div>
-                                                    <div className="text-sm font-bold text-blue-400 truncate">{getCommonoffense(b.name)}</div>
+                                                    <div className="text-sm font-bold text-slate-400 truncate">{getCommonoffense(b.name)}</div>
                                                 </div>
                                             </div>
 
