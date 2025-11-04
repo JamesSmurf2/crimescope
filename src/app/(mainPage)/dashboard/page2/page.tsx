@@ -392,6 +392,7 @@ const ReportsPage = () => {
                     </h1>
                     <p className="text-gray-400 text-sm font-light">Comprehensive view of all barangay crime incidents</p>
 
+
                     {authUser?.role === 'admin' && (
                         <div className="mt-4 bg-red-500/10 border border-red-500/50 rounded-lg p-4 max-w-2xl mx-auto">
                             <p className="text-red-400 font-semibold text-sm">
@@ -533,29 +534,14 @@ const ReportsPage = () => {
                                 <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
                                     Case Details
                                 </h2>
-
-
-                                {editMode && <button
-                                    onClick={() => {
-                                        handleChange(JSON.stringify(selectedReport, null, 2));
-                                    }}
-                                    className="px-5 py-2 rounded-lg font-semibold transition-all bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-lg"
+                                <button
+                                    onClick={() => setSelectedReport(null)}
+                                    className="px-6 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-gray-200 font-semibold transition-all"
                                 >
-                                    Save Changes
-                                </button>}
-                                {authUser && authUser.role !== 'admin' &&
-                                    <button
-                                        onClick={() => setEditMode((prev) => !prev)}
-                                        className={`px-5 py-2 rounded-lg font-semibold transition-all ${editMode
-                                            ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-lg"
-                                            : "bg-slate-700 hover:bg-slate-600 text-gray-200"
-                                            }`}
-                                    >
-
-                                        {editMode ? "Cancel Edit" : "Edit"}
-                                    </button>
-                                }
+                                    Close
+                                </button>
                             </div>
+
 
                             <div className="h-[1px] w-full bg-gradient-to-r from-cyan-400/40 via-slate-600/20 to-transparent mb-8"></div>
 
@@ -916,12 +902,29 @@ const ReportsPage = () => {
 
                             {/* Footer */}
                             <div className="flex justify-end gap-3 pt-6 border-t border-slate-700/50">
-                                <button
-                                    onClick={() => setSelectedReport(null)}
-                                    className="px-6 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-gray-200 font-semibold transition-all"
+
+                                {authUser && authUser.role !== 'admin' &&
+                                    <button
+                                        onClick={() => setEditMode((prev) => !prev)}
+                                        className={`px-5 py-2 rounded-lg font-semibold transition-all ${editMode
+                                            ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-lg"
+                                            : "bg-slate-700 hover:bg-slate-600 text-gray-200"
+                                            }`}
+                                    >
+
+                                        {editMode ? "Cancel Edit" : "Edit"}
+                                    </button>
+                                }
+
+                                {editMode && <button
+                                    onClick={() => {
+                                        handleChange(JSON.stringify(selectedReport, null, 2));
+                                    }}
+                                    className="px-5 py-2 rounded-lg font-semibold transition-all bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-lg"
                                 >
-                                    Close
-                                </button>
+                                    Save Changes
+                                </button>}
+
                                 {!editMode && (
                                     <button
                                         onClick={handlePrint}
