@@ -6,7 +6,9 @@ interface reportStore {
     addReports: (report: any) => Promise<any>;
 
     //Change Report status
-    changeReportStatus: (selectedReport: any) => Promise<any>;
+    changeReportStatus: (
+        oldReportData: any, 
+        selectedReport: any) => Promise<any>;
 
 }
 
@@ -54,14 +56,17 @@ const useReportStore = create<reportStore>((set, get) => ({
     },
 
     //Change Report status
-    changeReportStatus: async (selectedReport) => {
+    changeReportStatus: async (oldReportData, selectedReport) => {
         try {
             const res = await fetch(`/api/report/changeStatus`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ selectedReport })
+                body: JSON.stringify({
+                    oldReportData,      // ✅ Add oldReportData
+                    selectedReport      // ✅ Keep selectedReport
+                })
             });
             const data = await res.json();
 

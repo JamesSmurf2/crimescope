@@ -44,6 +44,40 @@ const validSuspectStatus = ["N/A", "Arrested", "Detained", "At Large"];
 const validCaseStatus = ["Solved", "Cleared", "Unsolved"];
 
 // ✅ Main Handler
+
+// ✅ Add this helper function to detect changes
+const detectChanges = (oldData: any, newData: any) => {
+    const changes: Array<{ field: string; oldValue: string; newValue: string }> = [];
+
+    const compareFields = (old: any, updated: any, prefix = '') => {
+        for (const key in updated) {
+            if (key === '_id' || key === '__v' || key === 'createdAt' || key === 'updatedAt') continue;
+
+            const fieldPath = prefix ? `${prefix}.${key}` : key;
+
+            if (typeof updated[key] === 'object' && updated[key] !== null && !Array.isArray(updated[key])) {
+                // Nested object (like victim, suspect)
+                compareFields(old[key] || {}, updated[key], fieldPath);
+            } else {
+                // Direct comparison
+                const oldValue = old[key];
+                const newValue = updated[key];
+
+                if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+                    changes.push({
+                        field: fieldPath,
+                        oldValue: String(oldValue || 'N/A'),
+                        newValue: String(newValue || 'N/A')
+                    });
+                }
+            }
+        }
+    };
+
+    compareFields(oldData, newData);
+    return changes;
+};
+
 export const POST = async (req: NextRequest) => {
     try {
         const user = await getAuthenticatedUser();
@@ -54,7 +88,9 @@ export const POST = async (req: NextRequest) => {
 
         await connectDb();
         const body = await req.json();
-        const { selectedReport } = body;
+        const { oldReportData, selectedReport } = body;
+
+        console.log(oldReportData, selectedReport)
 
         if (!selectedReport)
             return NextResponse.json({ error: "Report data missing" }, { status: 400 });
@@ -148,6 +184,18 @@ export const POST = async (req: NextRequest) => {
         if (!updatedReport)
             return NextResponse.json({ error: "Report not found" }, { status: 404 });
 
+        // await Logs.create({
+        //     adminId: user._id,
+        //     blotterNo: updatedReport.blotterNo,
+        //     action: "Updated Report",
+        //     reportId: updatedReport._id,
+        //     offense: updatedReport.offense,
+        //     barangay: updatedReport.barangay,
+        // });
+
+        // ✅ New code with change tracking
+        const changes = detectChanges(oldReportData, selectedReport);
+
         await Logs.create({
             adminId: user._id,
             blotterNo: updatedReport.blotterNo,
@@ -155,6 +203,8 @@ export const POST = async (req: NextRequest) => {
             reportId: updatedReport._id,
             offense: updatedReport.offense,
             barangay: updatedReport.barangay,
+            changes: changes,                    // ✅ Add detected changes
+            changeCount: changes.length          // ✅ Add count of changes
         });
 
         return NextResponse.json(

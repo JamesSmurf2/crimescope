@@ -89,6 +89,7 @@ const ReportsPage = () => {
     const [editMode, setEditMode] = useState(false);
 
     const [selectedReport, setSelectedReport] = useState<any | null>(null);
+    const [originalReport, setOriginalReport] = useState<any | null>(null); // 
 
     const { getAuthUserFunction, authUser } = useAuthStore()
     //For auth
@@ -346,17 +347,29 @@ const ReportsPage = () => {
         win?.print();
     };
 
-    const handleChange = async (selectedReport: any) => {
+    const handleChange = async () => {  // Remove selectedReport parameter
+        console.log("Original:", originalReport);
+        console.log("Edited:", selectedReport);
 
-        console.log(selectedReport)
-        const error = await changeReportStatus(selectedReport);
+        // Pass both original and edited data
+        const error = await changeReportStatus(originalReport, selectedReport);  // ✅ Pass as two separate arguments
+
         if (error?.data?.error) {
-            toast.error(error?.data?.error)
+            toast.error(error?.data?.error);
         } else {
             toast.success(`Report Successfully Updated.`);
-        }
 
-    }
+            setReports((prevReports) =>
+                prevReports.map((report) =>
+                    report._id === selectedReport._id ? selectedReport : report
+                )
+            );
+
+            setEditMode(false);
+            setOriginalReport(null); // Reset original
+            setSelectedReport(selectedReport)
+        }
+    };
 
     return (
 
@@ -510,7 +523,10 @@ const ReportsPage = () => {
                                             </td>
                                             <td className="p-4">
                                                 <button
-                                                    onClick={() => setSelectedReport(r)}
+                                                    onClick={() => {
+                                                        setSelectedReport(r);
+                                                        setOriginalReport(JSON.parse(JSON.stringify(r))); // Deep copy original data
+                                                    }}
                                                     className="bg-gradient-to-r from-cyan-500/30 to-blue-500/30 hover:from-cyan-500/40 hover:to-blue-500/40 border border-cyan-400/50 hover:border-cyan-300 text-cyan-300 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
                                                 >
                                                     View Details
@@ -534,12 +550,7 @@ const ReportsPage = () => {
                                 <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
                                     Case Details
                                 </h2>
-                                <button
-                                    onClick={() => setSelectedReport(null)}
-                                    className="px-6 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-gray-200 font-semibold transition-all"
-                                >
-                                    Close
-                                </button>
+
                             </div>
 
 
@@ -918,7 +929,7 @@ const ReportsPage = () => {
 
                                 {editMode && <button
                                     onClick={() => {
-                                        handleChange(JSON.stringify(selectedReport, null, 2));
+                                        handleChange();
                                     }}
                                     className="px-5 py-2 rounded-lg font-semibold transition-all bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-lg"
                                 >
@@ -933,6 +944,16 @@ const ReportsPage = () => {
                                         Print Report
                                     </button>
                                 )}
+
+                                <button
+                                    onClick={() => {
+                                        setSelectedReport(null)
+                                        setEditMode(false)
+                                    }}
+                                    className="px-6 py-2 rounded-lg bg-red-700 hover:bg-red-600 text-gray-200 font-semibold transition-all"
+                                >
+                                    Close
+                                </button>
                             </div>
                         </div>
                     </div>

@@ -32,6 +32,17 @@ const logsSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    // Remove
+    // ✅ Add these new fields to track changes
+    changes: [{
+        field: String,           // e.g., "status", "victim.name", "suspect.age"
+        oldValue: String,         // Previous value
+        newValue: String,         // New value
+    }],
+    changeCount: {               // Total number of fields changed
+        type: Number,
+        default: 0
+    }
 }, { timestamps: true });
 
 const Logs = mongoose.models.Logs || mongoose.model("Logs", logsSchema);

@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { FileText, Edit, Trash2, Eye, UserCircle, Calendar } from 'lucide-react';
+import { FileText, Edit, Trash2, Eye, UserCircle, Calendar, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import useAuthStore from '@/utils/zustand/useAuthStore';
 import useAdminStore from '@/utils/zustand/useAdminStore';
 import { useRouter } from "next/navigation";
@@ -13,6 +13,7 @@ const AdminLogsPage = () => {
     const [authLoading, setAuthLoading] = useState(true);
     const [logs, setLogs] = useState([]);
     const [logsLoading, setLogsLoading] = useState(true);
+    const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set()); // ✅ Track expanded logs
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -100,7 +101,9 @@ const AdminLogsPage = () => {
         details: `${log.action} - Blotter No: ${log.blotterNo}`,
         reportId: log.blotterNo,
         offense: log.offense,
-        barangay: log.barangay
+        barangay: log.barangay,
+        changes: log.changes || [],
+        changeCount: log.changeCount || 0
     }));
 
     const filteredLogs = transformedLogs.filter(log => {
@@ -129,6 +132,27 @@ const AdminLogsPage = () => {
     };
 
     const resetFilters = () => setFilters({ search: "", action: "", admin: "" });
+
+    // ✅ Helper function to format field names nicely
+    const formatFieldName = (field: string) => {
+        return field
+            .split('.')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' → ');
+    };
+
+    // ✅ Toggle expand/collapse for a specific log
+    const toggleExpand = (logId: string) => {
+        setExpandedLogs(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(logId)) {
+                newSet.delete(logId);
+            } else {
+                newSet.add(logId);
+            }
+            return newSet;
+        });
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-8">
@@ -195,7 +219,7 @@ const AdminLogsPage = () => {
                             onChange={handleFilterChange}
                             className="bg-slate-900/70 border border-slate-700/50 hover:border-slate-600/70 focus:border-cyan-400/50 focus:outline-none px-4 py-2 rounded-lg text-sm text-gray-200 transition-all cursor-pointer"
                         >
-                            <option value="">All Offici</option>
+                            <option value="">All Officials</option>
                             {uniqueAdmins.map((admin, i) => (
                                 <option key={i} value={admin} className="bg-slate-800">
                                     {admin}
@@ -262,7 +286,46 @@ const AdminLogsPage = () => {
                                                 </span>
                                             </div>
                                             <p className="text-gray-200 font-medium text-sm">{log.details}</p>
-                                            <div className="flex gap-3 text-xs text-gray-400">
+
+                                            {/* ✅ Display Changes with Expand/Collapse */}
+                                            {log.changes && log.changes.length > 0 && (
+                                                <div className="mt-3 space-y-2">
+                                                    <button
+                                                        onClick={() => toggleExpand(log.id)}
+                                                        className="text-xs text-gray-400 font-semibold uppercase flex items-center gap-2 hover:text-cyan-400 transition-colors cursor-pointer"
+                                                    >
+                                                        <Edit className="w-3 h-3" />
+                                                        Changes Made ({log.changeCount})
+                                                        {expandedLogs.has(log.id) ? (
+                                                            <ChevronUp className="w-4 h-4" />
+                                                        ) : (
+                                                            <ChevronDown className="w-4 h-4" />
+                                                        )}
+                                                    </button>
+
+                                                    {/* ✅ Collapsible Changes List */}
+                                                    {expandedLogs.has(log.id) && (
+                                                        <div className="space-y-1.5 animate-in slide-in-from-top-2 duration-200">
+                                                            {log.changes.map((change: any, idx: number) => (
+                                                                <div key={idx} className="text-xs bg-slate-900/70 px-3 py-2 rounded-lg border border-slate-700/50 flex items-center gap-2 flex-wrap">
+                                                                    <span className="text-cyan-400 font-semibold">
+                                                                        {formatFieldName(change.field)}:
+                                                                    </span>
+                                                                    <span className="text-red-400 line-through">
+                                                                        {change.oldValue}
+                                                                    </span>
+                                                                    <ArrowRight className="w-3 h-3 text-gray-500" />
+                                                                    <span className="text-emerald-400 font-medium">
+                                                                        {change.newValue}
+                                                                    </span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            <div className="flex gap-3 text-xs text-gray-400 flex-wrap">
                                                 <span className="font-mono bg-slate-900/50 px-2 py-1 rounded border border-slate-700/50">
                                                     {log.reportId}
                                                 </span>
