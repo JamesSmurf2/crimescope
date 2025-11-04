@@ -40,7 +40,7 @@ const useReportStore = create<reportStore>((set, get) => ({
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(report)
+                body: JSON.stringify({ report })
             });
             const data = await res.json();
 
@@ -61,7 +61,7 @@ const useReportStore = create<reportStore>((set, get) => ({
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({selectedReport})
+                body: JSON.stringify({ selectedReport })
             });
             const data = await res.json();
 

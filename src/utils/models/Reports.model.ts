@@ -51,7 +51,7 @@ const ReportSchema = new mongoose.Schema(
         suspect: { type: suspectSchema, required: true },
         suspectMotive: { type: String },
         narrative: { type: String },
-        status: { type: String, enum: ["Solved", "Cleared", "Unsolved"], default: "Solved" },
+        status: { type: String, default: "Solved" },
         location: { type: locationSchema, required: true },
     },
     { timestamps: true }

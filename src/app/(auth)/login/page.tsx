@@ -114,9 +114,11 @@ const Page = () => {
 
     const handleBack2FA = () => {
         setShow2FA(false);
+        setIsLoading(false);
         setTwoFACode('');
         setUserId('');
         setError('');
+        window.location.reload();
     };
 
     return (
@@ -303,7 +305,10 @@ const Page = () => {
                             {/* Back Button */}
                             <button
                                 type="button"
-                                onClick={handleBack2FA}
+                                onClick={() => {
+                                    console.log("I got clicked")
+                                    handleBack2FA()
+                                }}
                                 disabled={isLoading}
                                 className="w-full bg-white/5 border border-white/10 text-gray-300 font-semibold py-3 rounded-xl hover:bg-white/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                             >

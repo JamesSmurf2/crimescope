@@ -481,7 +481,7 @@ const CrimeReportForm = () => {
                                                         <option className="bg-slate-800" value="N/A">N/A</option>
                                                         <option className="bg-slate-800" value="Arrested">Arrested</option>
                                                         <option className="bg-slate-800" value="Detained">Detained</option>
-                                                        <option className="bg-slate-800" value="At Large">At Large</option>
+                                                        <option className="bg-slate-800" value="At Large">At-Large</option>
                                                     </>
                                                 )}
                                             </select>

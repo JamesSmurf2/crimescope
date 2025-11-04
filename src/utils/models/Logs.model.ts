@@ -2,19 +2,6 @@ import mongoose from "mongoose";
 import '../models/User.model'
 import '../models/Reports.model'
 
-const offenseList = [
-    // 🚨 Index Crimes
-    "Murder", "Homicide", "Rape", "Physical Injury", "Robbery", "Theft", "Carnapping", "Cattle Rustling",
-    // ⚖️ Non-Index Crimes
-    "Drug Offense", "Illegal Firearms", "Child Abuse", "Cybercrime", "Estafa", "Direct Assault", "Grave Threats",
-    "Other Forms of Trespass", "Violence Against Women & Children (VAWC)", "Illegal Logging",
-    // 🚗 Traffic Violations
-    "Reckless Driving", "Illegal Parking", "Overspeeding", "Driving Without License", "Road Accident",
-    // 📜 Ordinance Violations
-    "Curfew Violation", "Public Disturbance", "Littering", "Noise Complaint", "Illegal Vending", "Drinking in Public",
-    "Alarms and Scandals", "Unjust Vexations", "Light Threats", "Malicious Mischief",
-];
-
 const actions = ["Created Report", "Updated Report", "View Report"];
 
 const logsSchema = new mongoose.Schema({
@@ -39,7 +26,6 @@ const logsSchema = new mongoose.Schema({
     },
     offense: {
         type: String,
-        enum: offenseList,
         required: true,
     },
     barangay: {
