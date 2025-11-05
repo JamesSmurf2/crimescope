@@ -593,14 +593,23 @@ const ReportsPage = () => {
                                                     );
 
                                                 case "offense":
+                                                    const isCustomOffense = !offenseCategories.some(cat =>
+                                                        cat.offenses.includes(String(value))
+                                                    );
+
                                                     return (
-                                                        <div key={key}>
+                                                        <div key={key} className="col-span-2">
                                                             <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">{label}</label>
                                                             <select
-                                                                value={value ? String(value) : ""}
-                                                                onChange={(e) =>
-                                                                    setSelectedReport({ ...selectedReport, [key]: e.target.value })
-                                                                }
+                                                                value={isCustomOffense ? "CUSTOM_INPUT" : (value ? String(value) : "")}
+                                                                onChange={(e) => {
+                                                                    const selectedValue = e.target.value;
+                                                                    if (selectedValue === "CUSTOM_INPUT") {
+                                                                        setSelectedReport({ ...selectedReport, [key]: "" });
+                                                                    } else {
+                                                                        setSelectedReport({ ...selectedReport, [key]: selectedValue });
+                                                                    }
+                                                                }}
                                                                 className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
                                                             >
                                                                 <option value="">Select Offense</option>
@@ -613,7 +622,27 @@ const ReportsPage = () => {
                                                                         ))}
                                                                     </optgroup>
                                                                 ))}
+                                                                <option value="CUSTOM_INPUT" className="bg-slate-800 text-yellow-400 font-semibold">
+                                                                    ✏️ Enter Custom Offense
+                                                                </option>
                                                             </select>
+
+                                                            {(isCustomOffense || selectedReport[key] === "") && (
+                                                                <div className="mt-3">
+                                                                    <input
+                                                                        type="text"
+                                                                        value={value ? String(value) : ""}
+                                                                        onChange={(e) =>
+                                                                            setSelectedReport({ ...selectedReport, [key]: e.target.value })
+                                                                        }
+                                                                        placeholder="Type custom offense name..."
+                                                                        className="bg-slate-800/50 border border-yellow-500/50 focus:border-yellow-400/70 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
+                                                                    />
+                                                                    <p className="text-xs text-yellow-400 mt-2">
+                                                                        💡 Custom offense entry
+                                                                    </p>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     );
 

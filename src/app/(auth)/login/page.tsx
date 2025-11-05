@@ -147,7 +147,7 @@ const Page = () => {
                             {show2FA ? <Mail className="w-8 h-8 text-white" /> : <Shield className="w-8 h-8 text-white" />}
                         </div>
                         <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-2">
-                            {show2FA ? 'Verify Code' : 'Admin Login'}
+                            {show2FA ? 'Verify Code' : 'Login'}
                         </h1>
                         <p className="text-gray-400 text-sm">
                             {show2FA ? 'Enter the 6-digit code sent to your email' : 'Access your crime analytics dashboard'}

@@ -298,7 +298,20 @@ const CrimeReportForm = () => {
                         </h2>
                         <div>
                             <label className={labelClass}>Offense</label>
-                            <select name="offense" value={form.offense} onChange={handleChange} className={inputClass}>
+                            <select
+                                name="offense"
+                                value={form.offense}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (value === "CUSTOM_INPUT") {
+                                        // Don't set anything, just trigger the custom input
+                                        setForm((prev) => ({ ...prev, offense: "" }));
+                                    } else {
+                                        handleChange(e);
+                                    }
+                                }}
+                                className={inputClass}
+                            >
                                 <option value="">Select an offense</option>
                                 {offenseCategories.map((group) => (
                                     <optgroup key={group.label} label={group.label} className={group.color}>
@@ -307,8 +320,29 @@ const CrimeReportForm = () => {
                                         ))}
                                     </optgroup>
                                 ))}
+                                <option value="CUSTOM_INPUT" className="bg-slate-800 text-yellow-400 font-semibold">
+                                    ✏️ Enter Custom Offense
+                                </option>
                             </select>
                         </div>
+
+                        {/* Custom Input Field - Shows when "Enter Custom Offense" is selected or when typing */}
+                        {(form.offense === "" || !offenseCategories.some(cat => cat.offenses.includes(form.offense))) && (
+                            <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <label className={labelClass}>Custom Offense Name</label>
+                                <input
+                                    type="text"
+                                    name="offense"
+                                    value={form.offense}
+                                    onChange={handleChange}
+                                    placeholder="Type the offense name here..."
+                                    className={`${inputClass} border-yellow-500/50 focus:border-yellow-400/70`}
+                                />
+                                <p className="text-xs text-yellow-400 mt-2">
+                                    💡 Typing a custom offense that's not in the dropdown list above
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Report & Incident Dates */}

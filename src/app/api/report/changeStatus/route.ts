@@ -24,16 +24,16 @@ const validBarangays = [
     "Talon Dos", "Talon Tres", "Talon Cuatro", "Talon Singko", "Zapote",
 ];
 
-const validOffenses = [
-    "Murder", "Homicide", "Rape", "Physical Injury", "Robbery", "Theft",
-    "Carnapping", "Cattle Rustling", "Drug Offense", "Illegal Firearms",
-    "Child Abuse", "Cybercrime", "Estafa", "Direct Assault", "Grave Threats",
-    "Other Forms of Trespass", "Violence Against Women & Children (VAWC)",
-    "Illegal Logging", "Reckless Driving", "Illegal Parking", "Overspeeding",
-    "Driving Without License", "Road Accident", "Curfew Violation", "Public Disturbance",
-    "Littering", "Noise Complaint", "Illegal Vending", "Drinking in Public",
-    "Alarms and Scandals", "Unjust Vexations", "Light Threats", "Malicious Mischief",
-];
+// const validOffenses = [
+//     "Murder", "Homicide", "Rape", "Physical Injury", "Robbery", "Theft",
+//     "Carnapping", "Cattle Rustling", "Drug Offense", "Illegal Firearms",
+//     "Child Abuse", "Cybercrime", "Estafa", "Direct Assault", "Grave Threats",
+//     "Other Forms of Trespass", "Violence Against Women & Children (VAWC)",
+//     "Illegal Logging", "Reckless Driving", "Illegal Parking", "Overspeeding",
+//     "Driving Without License", "Road Accident", "Curfew Violation", "Public Disturbance",
+//     "Littering", "Noise Complaint", "Illegal Vending", "Drinking in Public",
+//     "Alarms and Scandals", "Unjust Vexations", "Light Threats", "Malicious Mischief",
+// ];
 
 const validTypesOfPlace = ["Along the Street", "Residential", "Commercial"];
 const validModesOfReporting = ["N/A", "In Person", "Phone Call", "Walk In"];
@@ -118,9 +118,6 @@ export const POST = async (req: NextRequest) => {
         )
             return NextResponse.json({ error: "Invalid stage of felony" }, { status: 400 });
 
-        if (data.offense && !validOffenses.includes(data.offense))
-            return NextResponse.json({ error: "Invalid offense" }, { status: 400 });
-
         // ✅ Normalize dateCommitted if using M/D/YYYY
         if (data.dateCommitted && data.dateCommitted.includes("/")) {
             const [month, day, year] = data.dateCommitted.split("/");
@@ -145,9 +142,6 @@ export const POST = async (req: NextRequest) => {
 
         if (data.status && !validCaseStatus.includes(data.status))
             return NextResponse.json({ error: "Invalid case status" }, { status: 400 });
-
-        if (data.narrative && !isValidString(data.narrative, 10))
-            return NextResponse.json({ error: "Narrative too short" }, { status: 400 });
 
         // ✅ Build dynamic update object
         const updateFields: any = {};

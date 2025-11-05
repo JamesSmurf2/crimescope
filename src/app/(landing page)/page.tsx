@@ -86,7 +86,7 @@ export default function Home() {
               <Button text="Continue as Guest." />
             </Link>
             <Link href="/login" className="w-full sm:w-auto">
-              <Button text="Admin Login" />
+              <Button text="Login" />
             </Link>
           </div>
 
