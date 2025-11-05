@@ -1,10 +1,4 @@
 "use client";
-import { GoogleGenAI } from "@google/genai";
-
-const genAi = new GoogleGenAI({
-    apiKey: process.env.NEXT_GEMINI_API_KEY, 
-});
-
 
 import React, { useEffect, useState } from "react";
 import { Sparkles, Send } from "lucide-react";
@@ -314,70 +308,43 @@ const AnalyticsPage: React.FC = () => {
         fetchReports();
     }, [getReports]);
 
+
+
     const aiAnalyze = async (userQuestion?: string) => {
         setIsAnalyzing(true);
         setAiError("");
-        setAiResponse(""); // Clear previous response
-
-        const simplifiedReports = reports.map((r) => ({
-            barangay: r.barangay,
-            offense: r.offense,
-            dateCommitted: r.dateCommitted,
-            timeCommitted: r.timeCommitted,
-            status: r.status,
-            suspectGender: r?.suspect?.gender,
-            victimGender: r?.victim?.gender,
-            typeOfPlace: r.typeOfPlace,
-            suspectMotive: r.suspectMotive,
-        }));
-
-        const formattedData = JSON.stringify(simplifiedReports, null, 2);
-
-        // ✅ Use userQuestion if provided, otherwise use default prompt
-        const prompt = userQuestion
-            ? `
-            You are an AI crime analyst.
-            Based on the following ${reports.length} barangay crime reports, answer this specific question: "${userQuestion}"
-          
-            Data:
-            ${formattedData}
-            `
-            : `
-            You are an AI crime analyst.
-            Analyze the following ${reports.length} barangay crime reports and summarize:
-            1. Most common offenses
-            2. Barangays with the highest number of crimes
-            3. Common motives and types of places
-            4. Solved vs unsolved ratio
-            5. Any patterns or insights.
-          
-            Data:
-            ${formattedData}
-            `;
+        setAiResponse("");
 
         try {
-            const response = await genAi.models.generateContent({
-                model: "gemini-2.0-flash-exp",
-                contents: prompt,  // ✅ This now uses the conditional prompt
+            const response = await fetch("/api/ai/analyze", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    reports: reports,
+                    question: userQuestion || null,
+                }),
             });
 
-            const text = response.text;
-            console.log("AI Analysis:", text);
+            const data = await response.json();
 
-            // ✅ Set the response to state so it displays in UI
-            setAiResponse(text as string);
-            setQuestion(""); // Clear input after successful analysis
-
-            return text;
+            if (data.success) {
+                setAiResponse(data.analysis);
+                setQuestion("");
+            } else {
+                setAiError(data.error || "An error occurred while analyzing reports.");
+            }
         } catch (error) {
-            console.error("Gemini Error:", error);
-            const errorMessage = "An error occurred while analyzing reports. Please try again.";
-            setAiError(errorMessage);
-            return errorMessage;
+            console.error("Analysis Error:", error);
+            setAiError("An error occurred while analyzing reports. Please try again.");
         } finally {
-            setIsAnalyzing(false);  // ✅ Move this to finally block
+            setIsAnalyzing(false);
         }
     };
+
+
+
 
     const handleSendQuestion = () => {
         if (question.trim()) {
@@ -858,7 +825,7 @@ const AnalyticsPage: React.FC = () => {
                                     placeholder='Ask something like "Show crime trends in Talon Tres"'
                                     value={question}
                                     onChange={(e) => setQuestion(e.target.value)}
-                                    onKeyDown={handleKeyPress} 
+                                    onKeyDown={handleKeyPress}
                                     disabled={isAnalyzing}
                                     className="flex-1 bg-transparent text-sm text-gray-300 placeholder-gray-500 focus:outline-none disabled:opacity-50 py-1"
                                 />
