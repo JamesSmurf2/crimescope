@@ -1,6 +1,15 @@
 "use client";
+import { GoogleGenAI } from "@google/genai";
+
+const genAi = new GoogleGenAI({
+    apiKey: process.env.NEXT_GEMINI_API_KEY, 
+});
+
 
 import React, { useEffect, useState } from "react";
+import { Sparkles, Send } from "lucide-react";
+
+
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -75,6 +84,12 @@ const AnalyticsPage: React.FC = () => {
     const [selectedBarangay, setSelectedBarangay] = useState<string>("All Barangays");
 
     const [showPrintPreview, setShowPrintPreview] = useState(false); //
+
+    const [question, setQuestion] = useState("");//
+    const [aiResponse, setAiResponse] = useState<string>(""); //
+    const [isAnalyzing, setIsAnalyzing] = useState(false); //
+    const [aiError, setAiError] = useState<string>(""); //
+
 
     const handlePrint = () => {
         setShowPrintPreview(true);
@@ -292,11 +307,91 @@ const AnalyticsPage: React.FC = () => {
         async function fetchReports() {
             setLoading(true);
             const data = await getReports();
+
             if (data?.reports) setReports(data.reports);
             setLoading(false);
         }
         fetchReports();
     }, [getReports]);
+
+    const aiAnalyze = async (userQuestion?: string) => {
+        setIsAnalyzing(true);
+        setAiError("");
+        setAiResponse(""); // Clear previous response
+
+        const simplifiedReports = reports.map((r) => ({
+            barangay: r.barangay,
+            offense: r.offense,
+            dateCommitted: r.dateCommitted,
+            timeCommitted: r.timeCommitted,
+            status: r.status,
+            suspectGender: r?.suspect?.gender,
+            victimGender: r?.victim?.gender,
+            typeOfPlace: r.typeOfPlace,
+            suspectMotive: r.suspectMotive,
+        }));
+
+        const formattedData = JSON.stringify(simplifiedReports, null, 2);
+
+        // ✅ Use userQuestion if provided, otherwise use default prompt
+        const prompt = userQuestion
+            ? `
+            You are an AI crime analyst.
+            Based on the following ${reports.length} barangay crime reports, answer this specific question: "${userQuestion}"
+          
+            Data:
+            ${formattedData}
+            `
+            : `
+            You are an AI crime analyst.
+            Analyze the following ${reports.length} barangay crime reports and summarize:
+            1. Most common offenses
+            2. Barangays with the highest number of crimes
+            3. Common motives and types of places
+            4. Solved vs unsolved ratio
+            5. Any patterns or insights.
+          
+            Data:
+            ${formattedData}
+            `;
+
+        try {
+            const response = await genAi.models.generateContent({
+                model: "gemini-2.0-flash-exp",
+                contents: prompt,  // ✅ This now uses the conditional prompt
+            });
+
+            const text = response.text;
+            console.log("AI Analysis:", text);
+
+            // ✅ Set the response to state so it displays in UI
+            setAiResponse(text as string);
+            setQuestion(""); // Clear input after successful analysis
+
+            return text;
+        } catch (error) {
+            console.error("Gemini Error:", error);
+            const errorMessage = "An error occurred while analyzing reports. Please try again.";
+            setAiError(errorMessage);
+            return errorMessage;
+        } finally {
+            setIsAnalyzing(false);  // ✅ Move this to finally block
+        }
+    };
+
+    const handleSendQuestion = () => {
+        if (question.trim()) {
+            aiAnalyze(question.trim());
+        }
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendQuestion();
+        }
+    };
+
 
     // Filter reports based on selected barangay
     const filteredReports = selectedBarangay === "All Barangays"
@@ -625,6 +720,164 @@ const AnalyticsPage: React.FC = () => {
                             Showing analytics for: <span className="font-bold">{selectedBarangay}</span>
                         </p>
                     )}
+                </div>
+
+                {/* Ai Analyze */}
+                <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                    {/* Header */}
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl">
+                            <Sparkles className="w-6 h-6 text-purple-400" />
+                        </div>
+                        <div className="flex-1">
+                            <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                                AI Crime Analyzer
+                            </h2>
+                            <p className="text-sm text-gray-400">
+                                Ask questions about crime patterns and get intelligent insights
+                            </p>
+                        </div>
+                        {aiResponse && (
+                            <button
+                                onClick={() => {
+                                    setAiResponse("");
+                                    setQuestion("");
+                                    setAiError("");
+                                }}
+                                className="px-4 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg text-sm text-gray-300 transition-all"
+                            >
+                                Clear Response
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Intro Card - Only show if no response */}
+                    {!aiResponse && !isAnalyzing && (
+                        <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-4 mb-4">
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 bg-blue-500/20 rounded-lg">
+                                    <Sparkles className="w-4 h-4 text-blue-400" />
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-sm text-gray-300">
+                                        Hello! I'm your AI Crime Analyzer. I can help you understand
+                                        crime patterns, identify trends, and provide actionable insights.
+                                        Try asking me questions like:
+                                    </p>
+                                    <ul className="mt-3 space-y-2 text-sm text-gray-400">
+                                        <li className="flex items-center gap-2">
+                                            <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full"></span>
+                                            "What are the crime trends this month?"
+                                        </li>
+                                        <li className="flex items-center gap-2">
+                                            <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full"></span>
+                                            "Which areas need more police presence?"
+                                        </li>
+                                        <li className="flex items-center gap-2">
+                                            <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full"></span>
+                                            "What time of day has the most incidents?"
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* AI Response Display */}
+                    {aiResponse && (
+                        <div className="mb-4 p-5 bg-gradient-to-br from-slate-900/60 to-slate-800/40 border border-slate-700/50 rounded-xl">
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 bg-purple-500/20 rounded-lg flex-shrink-0">
+                                    <Sparkles className="w-5 h-5 text-purple-400" />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="text-sm font-semibold text-purple-400 mb-3 flex items-center gap-2">
+                                        Analysis Results
+                                        <span className="text-xs text-gray-500 font-normal">
+                                            ({reports.length} reports analyzed)
+                                        </span>
+                                    </h3>
+                                    <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                                        {aiResponse}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Error Message */}
+                    {aiError && (
+                        <div className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3">
+                            <span className="text-red-400 text-xl">⚠️</span>
+                            <div className="flex-1">
+                                <p className="text-sm font-semibold text-red-400 mb-1">Error</p>
+                                <p className="text-sm text-red-300">{aiError}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Loading State */}
+                    {isAnalyzing && (
+                        <div className="mb-4 p-5 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-xl">
+                            <div className="flex items-center gap-4">
+                                <div className="relative">
+                                    <div className="w-10 h-10 border-4 border-purple-400/30 border-t-purple-400 rounded-full animate-spin"></div>
+                                    <div className="absolute inset-0 w-10 h-10 border-4 border-transparent border-b-pink-400 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1s' }}></div>
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-sm font-semibold text-purple-400 mb-1">Analyzing crime data...</p>
+                                    <p className="text-xs text-gray-400">This may take a few seconds</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Input and Button Area */}
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => aiAnalyze()}
+                            disabled={isAnalyzing || reports.length === 0}
+                            className="w-full py-3 bg-gradient-to-r from-purple-500/30 to-pink-500/30 hover:from-purple-500/40 hover:to-pink-500/40 border border-purple-500/30 rounded-lg text-gray-200 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                            {isAnalyzing ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-gray-200/30 border-t-gray-200 rounded-full animate-spin"></div>
+                                    Analyzing...
+                                </>
+                            ) : (
+                                <>
+                                    <span>🚀</span>
+                                    Start General Analysis
+                                </>
+                            )}
+                        </button>
+
+                        <div className="relative">
+                            <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 rounded-lg p-2 focus-within:border-cyan-500/50 transition-all">
+                                <input
+                                    type="text"
+                                    placeholder='Ask something like "Show crime trends in Talon Tres"'
+                                    value={question}
+                                    onChange={(e) => setQuestion(e.target.value)}
+                                    onKeyDown={handleKeyPress} 
+                                    disabled={isAnalyzing}
+                                    className="flex-1 bg-transparent text-sm text-gray-300 placeholder-gray-500 focus:outline-none disabled:opacity-50 py-1"
+                                />
+                                <button
+                                    onClick={handleSendQuestion}
+                                    disabled={isAnalyzing || !question.trim()}
+                                    className="p-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                    {isAnalyzing ? (
+                                        <div className="w-4 h-4 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin"></div>
+                                    ) : (
+                                        <Send className="w-4 h-4 text-cyan-400" />
+                                    )}
+                                </button>
+                            </div>
+                            {question.trim() && !isAnalyzing && (
+                                <p className="text-xs text-gray-500 mt-1 ml-2">Press Enter to send</p>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 {loading ? (
