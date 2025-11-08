@@ -57,6 +57,7 @@ export const POST = async (req: NextRequest) => {
             narrative,
             status,
             location,
+            cctvAvailable
         } = report;
 
         // Auto-generate blotterNo
@@ -121,6 +122,7 @@ export const POST = async (req: NextRequest) => {
             narrative: narrative || "",
             status: status || "Unsolved",
             location: geoLocation,
+            cctvAvailable: cctvAvailable || "Unknown", // ADD THIS LINE
         });
 
         await Logs.create({

@@ -41,6 +41,7 @@ const validStagesOfFelony = ["N/A", "Attempted", "Frustrated", "Consummated"];
 const validGenders = ["N/A", "Male", "Female"];
 const validHarmedStatus = ["N/A", "Harmed", "Unharmed"];
 const validSuspectStatus = ["N/A", "Arrested", "Detained", "At Large"];
+const validCCTVStatus = ["Yes", "No", "Unknown"]; // ADD THIS LINE
 const validCaseStatus = ["Solved", "Cleared", "Unsolved"];
 
 // ✅ Main Handler
@@ -140,6 +141,9 @@ export const POST = async (req: NextRequest) => {
         if (data.modeOfReporting && !validModesOfReporting.includes(data.modeOfReporting))
             return NextResponse.json({ error: "Invalid mode of reporting" }, { status: 400 });
 
+        if (data.cctvAvailable && !validCCTVStatus.includes(data.cctvAvailable))
+            return NextResponse.json({ error: "Invalid CCTV status" }, { status: 400 });
+
         if (data.status && !validCaseStatus.includes(data.status))
             return NextResponse.json({ error: "Invalid case status" }, { status: 400 });
 
@@ -148,7 +152,7 @@ export const POST = async (req: NextRequest) => {
         const generalFields = [
             "barangay", "street", "typeOfPlace", "dateReported", "timeReported",
             "dateCommitted", "timeCommitted", "modeOfReporting", "stageOfFelony",
-            "offense", "status", "suspectMotive", "narrative"
+            "offense", "status", "suspectMotive", "narrative", "cctvAvailable" // ADD cctvAvailable HERE
         ];
         generalFields.forEach((f) => {
             if (data[f] !== undefined) updateFields[f] = data[f];

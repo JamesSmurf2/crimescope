@@ -53,6 +53,7 @@ const ReportSchema = new mongoose.Schema(
         narrative: { type: String },
         status: { type: String, default: "Solved" },
         location: { type: locationSchema, required: true },
+        cctvAvailable: { type: String, default: "Unknown" }, // ADD THIS LINE
     },
     { timestamps: true }
 );

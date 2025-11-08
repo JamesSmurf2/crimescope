@@ -30,6 +30,7 @@ type SuspectInfo = {
     occupation: string;
 };
 
+// Add this to the CrimeForm type (around line 44)
 type CrimeForm = {
     dateEncoded: string;
     barangay: string;
@@ -48,6 +49,7 @@ type CrimeForm = {
     narrative: string;
     status: string;
     location: { lat: number; lng: number } | null;
+    cctvAvailable: string; // ADD THIS LINE
 };
 
 // -------------------- Data Lists --------------------
@@ -120,6 +122,7 @@ const CrimeReportForm = () => {
         narrative: "",
         status: "Solved",
         location: { lat: 14.4445, lng: 120.9939 },
+        cctvAvailable: "",
     });
 
     const handleSubmit = async () => {
@@ -183,6 +186,7 @@ const CrimeReportForm = () => {
                 narrative: "",
                 status: "Solved",
                 location: { lat: 14.4445, lng: 120.9939 },
+                cctvAvailable: "", // ADD THIS LINE
             });
         }
     };
@@ -205,6 +209,34 @@ const CrimeReportForm = () => {
 
     const handleSetCoords = (coords: [number, number]) => {
         setForm((prev) => ({ ...prev, location: { lat: coords[0], lng: coords[1] } }));
+    };
+
+    const fillVictimWithNA = () => {
+        setForm((prev) => ({
+            ...prev,
+            victim: {
+                name: "N/A",
+                age: "N/A",
+                gender: "N/A",
+                harmed: "N/A",
+                nationality: "N/A",
+                occupation: "N/A",
+            },
+        }));
+    };
+
+    const fillSuspectWithNA = () => {
+        setForm((prev) => ({
+            ...prev,
+            suspect: {
+                name: "N/A",
+                age: "N/A",
+                gender: "N/A",
+                status: "N/A",
+                nationality: "N/A",
+                occupation: "N/A",
+            },
+        }));
     };
 
     const inputClass = "bg-slate-800/50 border border-slate-700/50 hover:border-slate-600/70 focus:border-cyan-400/50 focus:outline-none text-white px-4 py-2.5 rounded-lg w-full transition-all placeholder-gray-500";
@@ -277,6 +309,16 @@ const CrimeReportForm = () => {
                             <div>
                                 <label className={labelClass}>Street</label>
                                 <input name="street" value={form.street} onChange={handleChange} placeholder="Enter street name" className={inputClass} />
+                            </div>
+
+                            <div>
+                                <label className={labelClass}>CCTV Available</label>
+                                <select name="cctvAvailable" value={form.cctvAvailable} onChange={handleChange} className={inputClass}>
+                                    <option value="">Select Option</option>
+                                    <option className="bg-slate-800" value="Yes">Yes</option>
+                                    <option className="bg-slate-800" value="No">No</option>
+                                    <option className="bg-slate-800" value="Unknown">Unknown</option>
+                                </select>
                             </div>
 
                             <div>
@@ -435,9 +477,18 @@ const CrimeReportForm = () => {
 
                     {/* Victim Info */}
                     <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 space-y-4">
-                        <h2 className="text-lg font-bold text-gray-100 uppercase tracking-wider flex items-center gap-2">
-                            🙍 Victim Information
-                        </h2>
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-lg font-bold text-gray-100 uppercase tracking-wider flex items-center gap-2">
+                                🙍 Victim Information
+                            </h2>
+                            <button
+                                type="button"
+                                onClick={fillVictimWithNA}
+                                className="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-gray-300 text-xs font-semibold transition-all border border-slate-600/50 hover:border-slate-500"
+                            >
+                                Fill with N/A
+                            </button>
+                        </div>
                         <div className="grid md:grid-cols-3 gap-3">
                             {Object.keys(form.victim).map((key) => {
                                 if (key === "gender" || key === "harmed") {
@@ -487,9 +538,18 @@ const CrimeReportForm = () => {
 
                     {/* Suspect Info */}
                     <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 space-y-4">
-                        <h2 className="text-lg font-bold text-gray-100 uppercase tracking-wider flex items-center gap-2">
-                            🕵️ Suspect Information
-                        </h2>
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-lg font-bold text-gray-100 uppercase tracking-wider flex items-center gap-2">
+                                🕵️ Suspect Information
+                            </h2>
+                            <button
+                                type="button"
+                                onClick={fillSuspectWithNA}
+                                className="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-gray-300 text-xs font-semibold transition-all border border-slate-600/50 hover:border-slate-500"
+                            >
+                                Fill with N/A
+                            </button>
+                        </div>
                         <div className="grid md:grid-cols-3 gap-3">
                             {Object.keys(form.suspect).map((key) => {
                                 if (key === "gender" || key === "status") {

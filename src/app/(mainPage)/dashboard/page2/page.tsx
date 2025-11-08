@@ -286,6 +286,9 @@ const ReportsPage = () => {
                   <tr><td class="label">Status:</td><td>${selectedReport.status}</td></tr>
                   <tr><td class="label">Stage of Felony:</td><td>${selectedReport.stageOfFelony}</td></tr>
                   <tr><td class="label">Mode of Reporting:</td><td>${selectedReport.modeOfReporting}</td></tr>
+                  <tr><td class="label">Mode of Reporting:</td><td>${selectedReport.modeOfReporting}</td></tr>
+                  <tr><td class="label">CCTV Available:</td><td>${selectedReport.cctvAvailable || 'Unknown'}</td></tr>  // ADD THIS LINE
+                  <tr><td class="label">Date Reported:</td><td>${selectedReport.dateReported}</td></tr>
                   <tr><td class="label">Date Reported:</td><td>${selectedReport.dateReported}</td></tr>
                   <tr><td class="label">Date Committed:</td><td>${selectedReport.dateCommitted}</td></tr>
                   <tr><td class="label">Type of Place:</td><td>${selectedReport.typeOfPlace}</td></tr>
@@ -573,6 +576,7 @@ const ReportsPage = () => {
                                         ["Time Committed", "timeCommitted"],
                                         ["Stage of Felony", "stageOfFelony"],
                                         ["Mode of Reporting", "modeOfReporting"],
+                                        ["CCTV Available", "cctvAvailable"],  // ADD THIS LINE
                                         ["Suspect Motive", "suspectMotive"],
                                     ].map(([label, key]) => {
                                         const value = selectedReport[key as keyof typeof selectedReport];
@@ -741,6 +745,26 @@ const ReportsPage = () => {
                                                                 <option value="Attempted" className="bg-slate-800">Attempted</option>
                                                                 <option value="Frustrated" className="bg-slate-800">Frustrated</option>
                                                                 <option value="Consummated" className="bg-slate-800">Consummated</option>
+                                                            </select>
+                                                        </div>
+                                                    );
+
+                                                // ADD THIS NEW CASE
+                                                case "cctvAvailable":
+                                                    return (
+                                                        <div key={key}>
+                                                            <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">{label}</label>
+                                                            <select
+                                                                value={value ? String(value) : ""}
+                                                                onChange={(e) =>
+                                                                    setSelectedReport({ ...selectedReport, [key]: e.target.value })
+                                                                }
+                                                                className="bg-slate-800/50 border border-slate-600/50 focus:border-cyan-400/50 outline-none px-3 py-2 w-full rounded-lg text-gray-200 text-sm transition-all"
+                                                            >
+                                                                <option value="" className="bg-slate-800">Select Option</option>
+                                                                <option value="Yes" className="bg-slate-800">Yes</option>
+                                                                <option value="No" className="bg-slate-800">No</option>
+                                                                <option value="Unknown" className="bg-slate-800">Unknown</option>
                                                             </select>
                                                         </div>
                                                     );
