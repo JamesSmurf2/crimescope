@@ -68,8 +68,8 @@ ${formattedData}
 
         const response = await genAi.models.generateContent({
             model: "gemini-2.0-flash-exp",
-            // contents: prompt,
-            contents: "Hello what is 1+1",
+            contents: prompt,
+            // contents: "Hello what is 1+1",
         });
 
         const text = response.text;
