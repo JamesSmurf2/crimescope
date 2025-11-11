@@ -5,6 +5,9 @@ interface reportStore {
     deleteAdmin: (id: string) => Promise<any>
     getLogsAdmin: () => Promise<any>
     changeAdminEnableTwoFa: (adminId: string, currentStatus: boolean) => Promise<any>
+
+    activateAi: () => Promise<any>
+    getTheActivateAiValue: () => Promise<any>
 }
 
 const useAdminStore = create<reportStore>((set, get) => ({
@@ -45,8 +48,6 @@ const useAdminStore = create<reportStore>((set, get) => ({
         }
     },
     changeAdminEnableTwoFa: async (adminId: string, currentStatus: boolean) => {
-
-        console.log("Nakakarating ba dito")
         try {
             let res = await fetch('/api/admin/changeAdminEnableTwoFa', {
                 method: 'POST',
@@ -54,6 +55,40 @@ const useAdminStore = create<reportStore>((set, get) => ({
                     'content-type': 'application/json'
                 },
                 body: JSON.stringify({ adminId, currentStatus })
+            })
+            if (!res.ok) return { error: 'User already exist or error.' }
+            const data = await res.json()
+            return data
+        } catch (error) {
+            console.log(error)
+        }
+    },
+
+    // About the AI
+    activateAi: async () => {
+        try {
+            let res = await fetch('/api/ai/enableAi', {
+                method: 'GET',
+                headers: {
+                    'content-type': 'application/json'
+                }
+            })
+            if (!res.ok) return { error: 'User already exist or error.' }
+            const data = await res.json()
+            return data
+        } catch (error) {
+            console.log(error)
+        }
+    },
+
+    //For all
+    getTheActivateAiValue: async () => {
+        try {
+            let res = await fetch('/api/ai/enableAi/get', {
+                method: 'GET',
+                headers: {
+                    'content-type': 'application/json'
+                }
             })
             if (!res.ok) return { error: 'User already exist or error.' }
             const data = await res.json()

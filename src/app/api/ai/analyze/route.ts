@@ -1,6 +1,8 @@
 // app/api/analyze/route.ts
 import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
+import Settings from "@/utils/models/Settings";
+import { connectDb } from "@/utils/utility/ConnectDb"; // assuming you have a DB connection util
 
 const genAi = new GoogleGenAI({
     apiKey: process.env.NEXT_GEMINI_API_KEY,
@@ -8,6 +10,17 @@ const genAi = new GoogleGenAI({
 
 export async function POST(request: Request) {
     try {
+        await connectDb(); // make sure DB is connected
+
+        // Check AI settings
+        const settings = await Settings.findOne({});
+        if (!settings?.enableAi) {
+            return NextResponse.json(
+                { success: false, error: "AI functionality is disabled in settings." },
+                { status: 403 }
+            );
+        }
+
         const { reports, question } = await request.json();
 
         const simplifiedReports = reports.map((r: any) => ({
@@ -24,26 +37,6 @@ export async function POST(request: Request) {
 
         const formattedData = JSON.stringify(simplifiedReports, null, 2);
 
-        // const prompt = question
-        //     ? `
-        //     You are an AI crime analyst.
-        //     Based on the following ${reports.length} barangay crime reports, answer this specific question: "${question}"
-
-        //     Data:
-        //     ${formattedData}
-        //     `
-        //     : `
-        //     You are an AI crime analyst.
-        //     Analyze the following ${reports.length} barangay crime reports and summarize:
-        //     1. Most common offenses
-        //     2. Barangays with the highest number of crimes
-        //     3. Common motives and types of places
-        //     4. Solved vs unsolved ratio
-        //     5. Any patterns or insights.
-
-        //     Data:
-        //     ${formattedData}
-        //     `;
         const prompt = question
             ? `
 You are an AI crime analyst.
@@ -75,7 +68,8 @@ ${formattedData}
 
         const response = await genAi.models.generateContent({
             model: "gemini-2.0-flash-exp",
-            contents: prompt,
+            // contents: prompt,
+            contents: "Hello what is 1+1",
         });
 
         const text = response.text;

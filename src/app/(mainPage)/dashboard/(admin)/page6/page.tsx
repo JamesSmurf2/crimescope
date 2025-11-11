@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { UserCircle, Mail, Trash2, Shield, ShieldOff, UserPlus, Users } from 'lucide-react';
+import { UserCircle, Mail, Trash2, Shield, ShieldOff, UserPlus, Users, Brain } from 'lucide-react';
 import useAuthStore from '@/utils/zustand/useAuthStore';
 import useAdminStore from '@/utils/zustand/useAdminStore';
 import { useRouter } from "next/navigation";
@@ -9,11 +9,12 @@ import toast, { Toaster } from "react-hot-toast";
 const AdminManagementPage = () => {
     const router = useRouter();
     const { RegisterFunction, getAuthUserFunction, authUser } = useAuthStore();
-    const { getAllAdmin, deleteAdmin } = useAdminStore();
+    const { getAllAdmin, deleteAdmin, activateAi, getTheActivateAiValue } = useAdminStore();
     const [authLoading, setAuthLoading] = useState(true);
     const [adminList, setAdminList] = useState([]);
     const [adminsLoading, setAdminsLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [activatedAi, setActivatedAi] = useState(true)
 
     const [newAdmin, setNewAdmin] = useState({
         username: '',
@@ -41,6 +42,10 @@ const AdminManagementPage = () => {
                 setAdminsLoading(true);
                 const admins = await getAllAdmin();
                 setAdminList(admins);
+
+                //Get the value of activate ai
+                const data = await getTheActivateAiValue()
+                setActivatedAi(data)
             } catch (error) {
                 console.error('Error fetching admins:', error);
             } finally {
@@ -51,6 +56,8 @@ const AdminManagementPage = () => {
         if (authUser) {
             fetchAdmins();
         }
+
+
     }, [authUser, getAllAdmin]);
 
     const handleCreateAdmin = async () => {
@@ -118,6 +125,18 @@ const AdminManagementPage = () => {
         }
     };
 
+    const handleActivateAi = () => {
+
+        activateAi();
+        setActivatedAi(!activatedAi);
+        if (!activatedAi) {
+            toast.success('AI Analyzer Activated!');
+        } else {
+            toast.error('AI Analyzer Deactivated!');
+        }
+
+    }
+
     const activeAdminsCount = adminList.filter((admin: any) => admin.role !== 'head-admin').length;
     const headAdminsCount = adminList.filter((admin: any) => admin.role === 'head-admin').length;
     const twoFAEnabledCount = adminList.filter((admin: any) => admin.enableTwoFA).length;
@@ -154,13 +173,27 @@ const AdminManagementPage = () => {
                     </h1>
                     <div className="flex items-center justify-between">
                         <p className="text-gray-400 text-sm font-light">Manage officials and their permissions</p>
-                        <button
-                            onClick={() => setShowCreateModal(true)}
-                            className="bg-gradient-to-r from-emerald-500/30 to-emerald-600/30 hover:from-emerald-500/40 hover:to-emerald-600/40 border border-emerald-400/50 hover:border-emerald-300 text-emerald-300 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 shadow-lg"
-                        >
-                            <UserPlus className="w-4 h-4" />
-                            Create Official
-                        </button>
+                        <div className='flex gap-[15px]'>
+                            <button
+                                onClick={() => setShowCreateModal(true)}
+                                className="cursor-pointer bg-gradient-to-r from-emerald-500/30 to-emerald-600/30 hover:from-emerald-500/40 hover:to-emerald-600/40 border border-emerald-400/50 hover:border-emerald-300 text-emerald-300 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 shadow-lg"
+                            >
+                                <UserPlus className="w-4 h-4" />
+                                Create Official
+                            </button>
+                            <div>
+                                <button
+                                    onClick={() => handleActivateAi()}
+                                    className={`cursor-pointer px-5 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 shadow-lg${activatedAi
+                                        ? 'bg-gradient-to-r from-blue-500/30 to-blue-600/30 hover:from-blue-500/40 hover:to-blue-600/40 border border-blue-400/50 text-blue-300 hover:border-blue-300'
+                                        : 'bg-gradient-to-r from-red-500/30 to-red-600/30 hover:from-red-500/40 hover:to-red-600/40 border border-red-400/50 text-red-300 hover:border-red-300'
+                                        }`}
+                                >
+                                    <Brain className="w-4 h-4" />
+                                    {activatedAi ? 'Activate AI Analyzer' : 'Deactivate AI Analyzer'}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
