@@ -185,12 +185,12 @@ const AdminManagementPage = () => {
                                 <button
                                     onClick={() => handleActivateAi()}
                                     className={`cursor-pointer px-5 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 shadow-lg${activatedAi
-                                        ? 'bg-gradient-to-r from-blue-500/30 to-blue-600/30 hover:from-blue-500/40 hover:to-blue-600/40 border border-blue-400/50 text-blue-300 hover:border-blue-300'
-                                        : 'bg-gradient-to-r from-red-500/30 to-red-600/30 hover:from-red-500/40 hover:to-red-600/40 border border-red-400/50 text-red-300 hover:border-red-300'
+                                        ? 'bg-gradient-to-r from-red-500/30 to-red-600/30 hover:from-red-500/40 hover:to-red-600/40 border border-red-400/50 text-red-300 hover:border-red-300' 
+                                        : 'bg-gradient-to-r from-blue-500/30 to-blue-600/30 hover:from-blue-500/40 hover:to-blue-600/40 border border-blue-400/50 text-blue-300 hover:border-blue-300'
                                         }`}
                                 >
                                     <Brain className="w-4 h-4" />
-                                    {activatedAi ? 'Activate AI Analyzer' : 'Deactivate AI Analyzer'}
+                                    {!activatedAi ? 'Activate AI Analyzer' : 'Deactivate AI Analyzer'}
                                 </button>
                             </div>
                         </div>

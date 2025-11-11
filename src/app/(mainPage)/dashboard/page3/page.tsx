@@ -86,7 +86,7 @@ const AnalyticsPage: React.FC = () => {
     const [isAnalyzing, setIsAnalyzing] = useState(false); //
     const [aiError, setAiError] = useState<string>(""); //
 
-    const [activatedAi, setActivatedAi] = useState(true)
+    const [activatedAi, setActivatedAi] = useState(false)
 
 
 
@@ -102,198 +102,6 @@ const AnalyticsPage: React.FC = () => {
         setShowPrintPreview(false);
     };
 
-    const printStyles = `
-  @media print {
-    @page {
-      size: A4;
-      margin: 1cm;
-    }
-    
-    * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    
-    body {
-      margin: 0;
-      padding: 0;
-    }
-    
-    body * {
-      visibility: hidden;
-    }
-    
-    .print-preview-content {
-      visibility: visible !important;
-      position: absolute !important;
-      left: 0 !important;
-      top: 0 !important;
-      width: 100% !important;
-      background: white !important;
-      color: black !important;
-      display: block !important;
-      overflow: visible !important;
-      height: auto !important;
-      max-height: none !important;
-    }
-    
-    .print-preview-content * {
-      visibility: visible !important;
-    }
-    
-    .no-print, .print-preview-modal > div:first-child, .sticky {
-      display: none !important;
-      visibility: hidden !important;
-    }
-    
-    .print-preview-modal {
-      position: static !important;
-      background: white !important;
-      overflow: visible !important;
-      height: auto !important;
-    }
-    
-    .print-section {
-      page-break-inside: avoid;
-      margin-bottom: 20px;
-      display: block !important;
-      visibility: visible !important;
-    }
-    
-    .print-page-break {
-      page-break-after: always;
-    }
-    
-    h1, h2, h3, h4, h5, h6 {
-      color: black !important;
-      page-break-after: avoid;
-    }
-    
-    p, span, td, th, div {
-      color: black !important;
-    }
-    
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      color: black !important;
-      page-break-inside: auto;
-    }
-    
-    tr {
-      page-break-inside: avoid;
-      page-break-after: auto;
-    }
-    
-    thead {
-      display: table-header-group;
-    }
-    
-    th, td {
-      border: 1px solid #ddd !important;
-      padding: 8px !important;
-      text-align: left;
-      color: black !important;
-    }
-    
-    th {
-      background-color: #f2f2f2 !important;
-      font-weight: bold !important;
-    }
-    
-    .border {
-      border: 1px solid #ddd !important;
-    }
-    
-    .border-b, .border-b-2 {
-      border-bottom: 2px solid #333 !important;
-    }
-    
-    .border-t, .border-t-2 {
-      border-top: 2px solid #333 !important;
-    }
-    
-    .border-gray-300, .border-gray-200 {
-      border-color: #ddd !important;
-    }
-    
-    .bg-gray-100 {
-      background-color: #f2f2f2 !important;
-    }
-    
-    .text-blue-600 {
-      color: #2563eb !important;
-    }
-    
-    .text-green-600 {
-      color: #16a34a !important;
-    }
-    
-    .text-yellow-600 {
-      color: #ca8a04 !important;
-    }
-    
-    .text-red-600 {
-      color: #dc2626 !important;
-    }
-    
-    .text-orange-600 {
-      color: #ea580c !important;
-    }
-    
-    .text-gray-600 {
-      color: #4b5563 !important;
-    }
-    
-    .text-gray-700 {
-      color: #374151 !important;
-    }
-    
-    .rounded, .rounded-xl, .rounded-2xl {
-      border-radius: 4px !important;
-    }
-    
-    .grid {
-      display: grid !important;
-    }
-    
-    .grid-cols-2 {
-      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
-    
-    .grid-cols-4 {
-      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    }
-    
-    .grid-cols-7 {
-      grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-    }
-    
-    .gap-2 {
-      gap: 0.5rem !important;
-    }
-    
-    .gap-4 {
-      gap: 1rem !important;
-    }
-    
-    .gap-6 {
-      gap: 1.5rem !important;
-    }
-    
-    .mb-1, .mb-2, .mb-3, .mb-4, .mb-6, .mb-8 {
-      display: block !important;
-    }
-    
-    .p-2, .p-3, .p-4, .p-6, .p-8 {
-      display: block !important;
-    }
-  }
-  
-  .print-only {
-    display: none;
-  }
-`;
 
     const barangays = [
         "Almanza Dos", "Almanza Uno", "B.F. CAA International Village", "Daniel Fajardo",
@@ -350,9 +158,6 @@ const AnalyticsPage: React.FC = () => {
             setIsAnalyzing(false);
         }
     };
-
-
-
 
     const handleSendQuestion = () => {
         if (question.trim()) {
@@ -651,15 +456,15 @@ const AnalyticsPage: React.FC = () => {
                 {!loading && filteredReports.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
-                        <StatCard title="Total Reports" value={totalReports} icon="📊" color="from-blue-500/20 to-cyan-500/20 border-blue-500/30" />
-                        <StatCard title="Solved Cases" value={solvedCount} icon="✅" color="from-emerald-500/20 to-green-500/20 border-emerald-500/30" />
-                        <StatCard title="Cleared Cases" value={clearedCount} icon="⭐" color="from-amber-500/20 to-yellow-500/20 border-amber-500/30" />
-                        <StatCard title="Unsolved Cases" value={unsolvedCount} icon="🔍" color="from-red-500/20 to-pink-500/20 border-red-500/30" />
+                        <StatCard title="Total Reports" value={totalReports} icon="📊" color="from-blue-500/20 to-blue-500/20 border-blue-500/30" />
+                        <StatCard title="Solved Cases" value={solvedCount} icon="✅" color="from-blue-500/20 to-blue-500/20 border-blue-500/30" />
+                        <StatCard title="Cleared Cases" value={clearedCount} icon="⭐" color="from-blue-500/20 to-blue-500/20 border-blue-500/30" />
+                        <StatCard title="Unsolved Cases" value={unsolvedCount} icon="🔍" color="from-blue-500/20 to-blue-500/20 border-blue-500/30" />
 
-                        <StatCard title="Most Common Barangay" value={mostCommonBarangay} icon="📍" color="from-purple-500/20 to-pink-500/20 border-purple-500/30" />
-                        <StatCard title="Most Common Offense" value={mostCommonOffense} icon="⚖️" color="from-orange-500/20 to-red-500/20 border-orange-500/30" />
-                        <StatCard title="Peak Day of Week" value={peakDay} icon="📅" color="from-indigo-500/20 to-blue-500/20 border-indigo-500/30" />
-                        <StatCard title="Peak Hour" value={`${peakHour}:00`} icon="⏰" color="from-violet-500/20 to-purple-500/20 border-violet-500/30" />
+                        <StatCard title="Most Common Barangay" value={mostCommonBarangay} icon="📍" color="from-blue-500/20 to-blue-500/20 border-blue-500/30" />
+                        <StatCard title="Most Common Offense" value={mostCommonOffense} icon="⚖️" color="from-blue-500/20 to-blue-500/20 border-blue-500/30" />
+                        <StatCard title="Peak Day of Week" value={peakDay} icon="📅" color="from-blue-500/20 to-blue-500/20 border-blue-500/30" />
+                        <StatCard title="Peak Hour" value={`${peakHour}:00`} icon="⏰" color="from-blue-500/20 to-blue-500/20 border-blue-500/30" />
 
                         <div className="lg:col-span-4 bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
                             <h3 className="text-lg font-bold text-gray-100 mb-2 flex items-center gap-2">
