@@ -39,12 +39,6 @@ export async function POST(request: Request) {
 
         const prompt = question
             ? `
-You are an AI crime analyst.
-
-Your task is to answer the following question *only* using the data provided in the simplified barangay crime reports below. 
-Do not use external knowledge, assumptions, or create information not explicitly found in the reports. 
-If the answer cannot be determined from the data, respond with "Insufficient data."
-
 Question: "${question}"
 
 Simplified Crime Reports:
@@ -54,7 +48,7 @@ ${formattedData}
 You are an AI crime analyst.
 
 Analyze the following ${reports.length} simplified barangay crime reports strictly based on the data provided. 
-Do not infer or assume details beyond what is given. Summarize:
+Summarize:
 
 1. Most common offenses
 2. Barangays with the highest number of crimes
@@ -67,8 +61,9 @@ ${formattedData}
 `;
 
         const response = await genAi.models.generateContent({
-            // model: "gemini-2.0-flash",
-            model: "gemini‑2.5‑pro",
+            model: "gemini-2.0-flash",
+            // model: "gemini-2.5-pro",
+            // model: "gemini-2.0",
             contents: prompt,
             // contents: "Hello what is 1+1",
         });
