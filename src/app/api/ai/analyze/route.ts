@@ -67,7 +67,8 @@ ${formattedData}
 `;
 
         const response = await genAi.models.generateContent({
-            model: "gemini-2.0-flash",
+            // model: "gemini-2.0-flash",
+            model: "gemini‑2.5‑pro",
             contents: prompt,
             // contents: "Hello what is 1+1",
         });
