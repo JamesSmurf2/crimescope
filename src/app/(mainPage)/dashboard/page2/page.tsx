@@ -115,6 +115,8 @@ const ReportsPage = () => {
         offense: "",
         barangay: "",
         status: "",
+        startDate: "",  // ADD THIS
+        endDate: "",    // ADD THIS
     });
 
 
@@ -163,6 +165,24 @@ const ReportsPage = () => {
             );
         }
 
+        // Add this AFTER the status filter and BEFORE the search filter:
+        if (filters.startDate) {
+            filtered = filtered.filter((r) => {
+                const reportDate = new Date(r.dateCommitted);
+                const start = new Date(filters.startDate);
+                return reportDate >= start;
+            });
+        }
+
+        if (filters.endDate) {
+            filtered = filtered.filter((r) => {
+                const reportDate = new Date(r.dateCommitted);
+                const end = new Date(filters.endDate);
+                end.setHours(23, 59, 59, 999); // Include the entire end date
+                return reportDate <= end;
+            });
+        }
+
         setFilteredReports(filtered);
     }, [filters, reports]);
 
@@ -183,7 +203,7 @@ const ReportsPage = () => {
     };
 
     const resetFilters = () =>
-        setFilters({ search: "", offense: "", barangay: "", status: "" });
+        setFilters({ search: "", offense: "", barangay: "", status: "", startDate: "", endDate: "" });
 
 
     const handlePrint = () => {
@@ -461,6 +481,24 @@ const ReportsPage = () => {
                             <option value="Unsolved" className="bg-slate-800">Unsolved</option>
                             <option value="Cleared" className="bg-slate-800">Cleared</option>
                         </select>
+                        
+                        <input
+                            type="date"
+                            name="startDate"
+                            value={filters.startDate}
+                            onChange={handleFilterChange}
+                            className="bg-slate-900/70 border border-slate-700/50 hover:border-slate-600/70 focus:border-cyan-400/50 focus:outline-none px-4 py-2 rounded-lg text-sm text-gray-200 transition-all"
+                            placeholder="Start Date"
+                        />
+
+                        <input
+                            type="date"
+                            name="endDate"
+                            value={filters.endDate}
+                            onChange={handleFilterChange}
+                            className="bg-slate-900/70 border border-slate-700/50 hover:border-slate-600/70 focus:border-cyan-400/50 focus:outline-none px-4 py-2 rounded-lg text-sm text-gray-200 transition-all"
+                            placeholder="End Date"
+                        />
 
                         <button
                             onClick={resetFilters}
