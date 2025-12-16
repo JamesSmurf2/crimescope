@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Shield, Lock, User, ArrowLeft, Eye, EyeOff, Mail } from 'lucide-react';
+import { Shield, Lock, User, ArrowLeft, Eye, EyeOff, Mail, AlertTriangle } from 'lucide-react';
 
 import useAuthStore from '@/utils/zustand/useAuthStore';
 
@@ -15,6 +15,12 @@ const Page = () => {
     const [error, setError] = useState<string>('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
+    // Attempt tracking
+    const [loginAttempts, setLoginAttempts] = useState(0);
+    const [twoFAAttempts, setTwoFAAttempts] = useState(0);
+    const [isLocked, setIsLocked] = useState(false);
+    const MAX_ATTEMPTS = 3;
 
     // 2FA State
     const [show2FA, setShow2FA] = useState(false);
@@ -44,6 +50,12 @@ const Page = () => {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isLocked) {
+            setError('Too many failed attempts. Please refresh the page to try again.');
+            return;
+        }
+
         setError('');
         setIsLoading(true);
 
@@ -57,7 +69,16 @@ const Page = () => {
             const data = await response.json();
 
             if (data?.error) {
-                setError(data.error);
+                const newAttempts = loginAttempts + 1;
+                setLoginAttempts(newAttempts);
+
+                if (newAttempts >= MAX_ATTEMPTS) {
+                    setIsLocked(true);
+                    setError(`Too many failed attempts. Please refresh the page to try again.`);
+                } else {
+                    setError(`${data.error} (${newAttempts}/${MAX_ATTEMPTS} attempts)`);
+                }
+
                 setIsLoading(false);
                 return;
             }
@@ -67,6 +88,8 @@ const Page = () => {
                 setUserId(data.userId);
                 setShow2FA(true);
                 setIsLoading(false);
+                // Reset login attempts on successful credentials
+                setLoginAttempts(0);
                 return;
             }
 
@@ -76,13 +99,28 @@ const Page = () => {
                 router.push('/dashboard/page1');
             }
         } catch (err) {
-            setError('An error occurred. Please try again.');
+            const newAttempts = loginAttempts + 1;
+            setLoginAttempts(newAttempts);
+
+            if (newAttempts >= MAX_ATTEMPTS) {
+                setIsLocked(true);
+                setError('Too many failed attempts. Please refresh the page to try again.');
+            } else {
+                setError(`An error occurred. Please try again. (${newAttempts}/${MAX_ATTEMPTS} attempts)`);
+            }
+
             setIsLoading(false);
         }
     };
 
     const handleVerify2FA = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isLocked) {
+            setError('Too many failed attempts. Please refresh the page to try again.');
+            return;
+        }
+
         setError('');
         setIsLoading(true);
 
@@ -96,7 +134,16 @@ const Page = () => {
             const data = await response.json();
 
             if (data?.error) {
-                setError(data.error);
+                const newAttempts = twoFAAttempts + 1;
+                setTwoFAAttempts(newAttempts);
+
+                if (newAttempts >= MAX_ATTEMPTS) {
+                    setIsLocked(true);
+                    setError('Too many failed verification attempts. Please refresh the page to try again.');
+                } else {
+                    setError(`${data.error} (${newAttempts}/${MAX_ATTEMPTS} attempts)`);
+                }
+
                 setIsLoading(false);
                 return;
             }
@@ -107,7 +154,16 @@ const Page = () => {
                 router.push('/dashboard/page1');
             }
         } catch (err) {
-            setError('An error occurred. Please try again.');
+            const newAttempts = twoFAAttempts + 1;
+            setTwoFAAttempts(newAttempts);
+
+            if (newAttempts >= MAX_ATTEMPTS) {
+                setIsLocked(true);
+                setError('Too many failed verification attempts. Please refresh the page to try again.');
+            } else {
+                setError(`An error occurred. Please try again. (${newAttempts}/${MAX_ATTEMPTS} attempts)`);
+            }
+
             setIsLoading(false);
         }
     };
@@ -118,7 +174,13 @@ const Page = () => {
         setTwoFACode('');
         setUserId('');
         setError('');
+        setTwoFAAttempts(0);
         window.location.reload();
+    };
+
+    const getRemainingAttempts = () => {
+        const attempts = show2FA ? twoFAAttempts : loginAttempts;
+        return MAX_ATTEMPTS - attempts;
     };
 
     return (
@@ -154,6 +216,18 @@ const Page = () => {
                         </p>
                     </div>
 
+                    {/* Attempts Warning */}
+                    {!isLocked && (loginAttempts > 0 || twoFAAttempts > 0) && (
+                        <div className="mb-5 bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3">
+                            <div className="flex items-center gap-2 text-yellow-400">
+                                <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                                <p className="text-sm font-medium">
+                                    {getRemainingAttempts()} {getRemainingAttempts() === 1 ? 'attempt' : 'attempts'} remaining
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Login Form */}
                     {!show2FA ? (
                         <form onSubmit={handleLogin} className="space-y-5">
@@ -174,7 +248,7 @@ const Page = () => {
                                         className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                                         placeholder="Enter your username"
                                         required
-                                        disabled={isLoading}
+                                        disabled={isLoading || isLocked}
                                     />
                                 </div>
                             </div>
@@ -196,13 +270,13 @@ const Page = () => {
                                         className="w-full pl-12 pr-12 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
                                         placeholder="Enter your password"
                                         required
-                                        disabled={isLoading}
+                                        disabled={isLoading || isLocked}
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
                                         className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 hover:text-gray-300 transition-colors"
-                                        disabled={isLoading}
+                                        disabled={isLoading || isLocked}
                                     >
                                         {showPassword ? (
                                             <EyeOff className="w-5 h-5" />
@@ -215,7 +289,7 @@ const Page = () => {
 
                             {/* Error Message */}
                             {error && (
-                                <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-3 animate-shake">
+                                <div className={`${isLocked ? 'bg-red-600/20 border-red-600/60' : 'bg-red-500/10 border-red-500/50'} border rounded-xl p-3 animate-shake`}>
                                     <p className="text-red-400 text-sm text-center font-medium">
                                         {error}
                                     </p>
@@ -225,7 +299,7 @@ const Page = () => {
                             {/* Submit Button */}
                             <button
                                 type="submit"
-                                disabled={isLoading}
+                                disabled={isLoading || isLocked}
                                 className="w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-semibold py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                             >
                                 {isLoading ? (
@@ -236,6 +310,8 @@ const Page = () => {
                                         </svg>
                                         Logging in...
                                     </span>
+                                ) : isLocked ? (
+                                    'Locked - Refresh Page'
                                 ) : (
                                     'Login'
                                 )}
@@ -265,18 +341,18 @@ const Page = () => {
                                         placeholder="000000"
                                         maxLength={6}
                                         required
-                                        disabled={isLoading}
+                                        disabled={isLoading || isLocked}
                                         autoFocus
                                     />
                                 </div>
                                 <p className="text-xs text-gray-500 mt-2 text-center">
-                                    Code expires in 5 minutes
+                                    Code expires in 1 minute
                                 </p>
                             </div>
 
                             {/* Error Message */}
                             {error && (
-                                <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-3 animate-shake">
+                                <div className={`${isLocked ? 'bg-red-600/20 border-red-600/60' : 'bg-red-500/10 border-red-500/50'} border rounded-xl p-3 animate-shake`}>
                                     <p className="text-red-400 text-sm text-center font-medium">
                                         {error}
                                     </p>
@@ -286,7 +362,7 @@ const Page = () => {
                             {/* Submit Button */}
                             <button
                                 type="submit"
-                                disabled={isLoading || twoFACode.length !== 6}
+                                disabled={isLoading || twoFACode.length !== 6 || isLocked}
                                 className="w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-semibold py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                             >
                                 {isLoading ? (
@@ -297,6 +373,8 @@ const Page = () => {
                                         </svg>
                                         Verifying...
                                     </span>
+                                ) : isLocked ? (
+                                    'Locked - Refresh Page'
                                 ) : (
                                     'Verify Code'
                                 )}
@@ -309,7 +387,7 @@ const Page = () => {
                                     console.log("I got clicked")
                                     handleBack2FA()
                                 }}
-                                disabled={isLoading}
+                                disabled={isLoading || isLocked}
                                 className="w-full bg-white/5 border border-white/10 text-gray-300 font-semibold py-3 rounded-xl hover:bg-white/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Back to Login

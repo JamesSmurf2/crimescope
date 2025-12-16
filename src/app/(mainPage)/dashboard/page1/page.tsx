@@ -250,13 +250,30 @@ const Page = () => {
         <div className="min-h-screen w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-x-hidden">
             {/* Header */}
             <header className="w-full pt-12 pb-8 px-4 text-center border-b border-red-500/20 bg-gradient-to-b from-red-500/10 to-transparent backdrop-blur-sm">
-                <div className="max-w-5xl mx-auto space-y-3">
+                <div className="max-w-5xl mx-auto space-y-3 flex items-center justify-center flex-col">
                     <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-red-500 to-red-600">
                         Las Piñas Crime Map
                     </h1>
                     <p className="text-gray-300 text-sm md:text-base font-light tracking-wide">
                         Interactive crime statistics dashboard • Hover to explore barangay details
                     </p>
+                    <div className="p-3 rounded-box w-[200px] text-sm flex justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full bg-gray-400"></span>
+                            <span>Low</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full bg-yellow-400"></span>
+                            <span>Moderate</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                            <span>High</span>
+                        </div>
+                    </div>
+
                 </div>
             </header>
 
